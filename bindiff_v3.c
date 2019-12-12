@@ -4,9 +4,10 @@
 
 //pipe into less -R for correct color handling
 
-#define VERSION 3
+#define VERSION 4
 
 #define min(a,b) ((a<b)?a:b)
+#define max(a,b) ((a>b)?a:b)
 
 #define COLOR(color, text) "\e["color"m"text"\e[0m"
 #define RED "31"
@@ -46,13 +47,13 @@ char mask_unprintable(const char c)
 int main(int argc, char **argv)
 {
 	printf("This is bindiff version %u (c) 2019 by kitten_nb_five.\n", VERSION);
-	printf("This programm comes without any warranty.\n");
+	printf("This programm comes without any warranty.\n\n");
 	if(argc<3)
 	{
 		print_usage();
 		return 0;
 	}
-
+	
 	unsigned int argv_offset=1;
 	
 	unsigned int bytes_per_line=BYTES_PER_LINE_DEF;
@@ -75,6 +76,8 @@ int main(int argc, char **argv)
 		else
 			error("invalid argument");
 	}
+
+	printf("comparing \"%s\" (left) and \"%s\" (right)\n", argv[argv_offset], argv[argv_offset+1]);
 	
 	FILE *file1=fopen(argv[argv_offset], "rb");
 	if(!file1)
@@ -106,25 +109,33 @@ int main(int argc, char **argv)
 	
 	if(size1!=size2)
 	{
-		size=min(size1, size2);
-		printf("info: size missmatch, will stop after %u bytes\n", size);
+		size=max(size1, size2);
+		printf("info: size missmatch: %u vs %u bytes\n", size1, size2);
 	}
 	
 	unsigned int index=0;
 	unsigned int bytes_in_line=0;
+	unsigned int equal_line_removed=0;
 	
 	for(index=0; index<size; )
 	{
 		if(is_equal(data1, data2, index, bytes_per_line) && remove_equal)
 		{
 			index+=bytes_per_line;
+			if(!equal_line_removed)
+			{
+				equal_line_removed=1;
+				printf("...\n");
+			}
 			continue;
 		}
+		
+		equal_line_removed=0;
 		
 		printf("0x%08x: ", index);
 		for(bytes_in_line=0; bytes_in_line<bytes_per_line; bytes_in_line++)
 		{
-			if(index+bytes_in_line>=size)
+			if(index+bytes_in_line>=size1)
 				printf("   ");
 			else if(data1[index+bytes_in_line]!=data2[index+bytes_in_line])
 				printf(COLOR(RED,"%02x "), data1[index+bytes_in_line]);
@@ -135,7 +146,7 @@ int main(int argc, char **argv)
 		printf("| ");
 		for(bytes_in_line=0; bytes_in_line<bytes_per_line; bytes_in_line++)
 		{
-			if(index+bytes_in_line>=size)
+			if(index+bytes_in_line>=size2)
 				printf("   ");
 			else if(data1[index+bytes_in_line]!=data2[index+bytes_in_line])
 				printf(COLOR(RED,"%02x "), data2[index+bytes_in_line]);
@@ -147,7 +158,7 @@ int main(int argc, char **argv)
 		
 		for(bytes_in_line=0; bytes_in_line<bytes_per_line; bytes_in_line++)
 		{
-			if(index+bytes_in_line>=size)
+			if(index+bytes_in_line>=size1)
 				printf(" ");
 			else if(data1[index+bytes_in_line]!=data2[index+bytes_in_line])
 				printf(COLOR(RED,"%c"), mask_unprintable(data1[index+bytes_in_line]));
@@ -157,7 +168,7 @@ int main(int argc, char **argv)
 		printf(" | ");
 		for(bytes_in_line=0; bytes_in_line<bytes_per_line; bytes_in_line++)
 		{
-			if(index+bytes_in_line>=size)
+			if(index+bytes_in_line>=size2)
 				printf(" ");
 			else if(data1[index+bytes_in_line]!=data2[index+bytes_in_line])
 				printf(COLOR(RED,"%c"), mask_unprintable(data2[index+bytes_in_line]));
@@ -174,4 +185,3 @@ int main(int argc, char **argv)
 	
 	return 0;
 }
-
