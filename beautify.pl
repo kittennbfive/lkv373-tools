@@ -28,8 +28,7 @@ close $strf;
 
 ####
 
-open my $inp, '<', 'disassm_komplett.txt'; #change this to match your file
-#open my $inp, '<', 'test.txt'; #change this to match your file
+open my $inp, '<', 'disassm.txt';
 
 my $data;
 
