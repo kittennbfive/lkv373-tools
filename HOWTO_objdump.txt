@@ -1,0 +1,8 @@
+download and unpack GNU binutils, then `./configure --target=nds32le-unknown-linux-gnu && make`.
+
+disassemble with `./objdump_nds32le -b binary -m nds32 -D firmware.bin > dissassembly.txt`.
+
+lkv373.bin contains lots of 0xff that make objdump spit out lots of nonsense and make a HUGE output file, you can remove that with `cat disassembly.txt | grep -v 'ff ff\s*or33' > disassembly_stripped.txt`
+
+Be aware that lkv373.bin contains TWO PARTS and that some adresses for calls are hardcoded (SETHI, ORI, JR/JRAL) and only valid if you split the firmware in 2 parts and disassemble each of them separately. This is also needed for callgraphs/. Use your favourite hex-editor.
+

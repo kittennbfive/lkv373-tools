@@ -1,0 +1,28 @@
+This code (C and Perl) makes callgraphs of a function using graphviz. It was written to help understand the firmware of the LKV373 but might be modified for other stuff. This work was tested on Linux only. This work comes WITHOUT ANY WARRANTY and is released under AGPL version 3 or later. THIS CODE IS EXPERIMENTAL! It probably has lots of bugs. Expect false, possibly huge callgraphs, error messages and maybe segfaults.
+
+This code relies on my disassembler that can be found in the disassm-folder. Please read the README of the disassembler too.
+
+Compile: ./make (yes thats not the right way to do it but it works!)
+
+Runtime-dependencies: You must have graphviz installed and "dot" in your PATH. Perl is needed to (preinstalled on Linux). You may need to install the Perl-module "File::Slurp".
+
+Use: ./make_callgraph [-pd] [-pc] file address_in_hex 
+-pd print disassembly (warning: lots of text)
+-pc print calls
+
+file must be "block1.bin" or "block2.bin". This is needed for the beautify-part to check for known functions. Feel free to modify the code if this does not suit your needs.
+
+calls.txt contains the raw (text)data for the callgraph and is created by callg (the C code).
+calls_beautified.txt is created by the Perlcode and might contain function names too if some are known.
+
+Final result is callgraph.svg (created by "dot" from graphviz using calls_beautified.txt)
+
+Known functions must be added to the Perlcode. Just look at the existing stuff there.
+
+known limitation:
+If a register-value for a call is written to and then read from memory it will not be catched because memory-IO is not emulated.
+To fix this we would need to implement all the memory-IO with is a lot of work.
+Also calls/jumps to adresses computed at runtime (like jumptables) will not be seen. We would need a complete simulator for this.
+
+
+written by kitten_nb_five (c) 2019-2020

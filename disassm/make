@@ -1,0 +1,2 @@
+#! /bin/sh
+gcc -Wall -Wextra -Werror -O3 -std=c99 -lm -o disassm main.c decode_disassm.c decode_disassm32.c decode_disassm16.c opc32.c opc16.c sign_extend.c

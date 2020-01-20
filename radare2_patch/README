@@ -1,0 +1,10 @@
+This is some code i wrote trying to implement NDS32-support inside radare2/Cutter.
+
+This code is experimental, incomplete, probably full of bugs and provided AS IS. NO WARRANTY.
+
+plugins.def.cfg comes from radare2 and was modified by me. It keeps it's original licence.
+
+All the other stuff was written by me (kitten_nb_five) and is licenced under AGPL version 3 or later.
+
+The documentation on how to implement stuff inside r2 is sadly limited, my work is mainly based on https://radareorg.github.io/blog/posts/extending-r2-with-new-plugins/.
+

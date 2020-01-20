@@ -1,0 +1,53 @@
+First: This disassembler is not complete, some (quite a few probably) instructions are missing. Also there are probably bugs.
+
+Second: This work comes WITHOUT ANY WARRANTY and is released under AGPL version 3 or later.
+
+This work is based on the "Andes Instruction Set Architecture Specification" V1.3(!) that has been downloaded from http://twins.ee.nctu.edu.tw/courses/embedlab_09/lecture/AndeStar_ISA_v1.3.pdf. The current version available from Andestech is 1.6 but does no longer contain details about the instruction format types.
+
+The V1.3 has some errors. What follows are the types as i defined them in my code. SUB means that there is a sub-opcode, like for ADD where the main-opc is ALU_1. THIS INFORMATION MIGHT STILL CONTAIN ERRORS. If you only need to disassemble code you should use objdump which has official support for NDS32. Sadly the objdump-code is mainly based on preprocessor-stuff and almost impossible to understand (for me).
+
+There are 6 format types for 32 bit instructions:
+
+For 32 bit instructions Bit 31 is always 0.
+
+MSB of byte 3 ... LSB of byte 0
+
+TYPE 0 (always has SUB):
+0 | opc_6 | sub_1 | imm_24
+
+TYPE 1 (might have SUB):
+0 | opc_6 | rt_5| imm_20
+or
+0 | opc_6 | rt_5 | sub_4 | imm_16
+
+TYPE 2 (might have SUB):
+0 | opc_6 | rt_5 | ra_5 | imm_15
+or
+0 | opc_6 | rt_5 | ra_5 | sub_1 | imm_14
+
+TYPE 3 (always has SUB):
+0 | opc_6 | rt_5 | ra_5 | rb_5 | imm_2 | sub_8 (this is wrong in the pdf imho)
+or
+0 | opc_6 | rt_5 | ra_5 | rb_5 | sub_10
+
+TYPE 4 (always has SUB):
+0 | opc_6 | rt_5 | ra_5 | rb_5 | rd_5 | sub_5
+or
+0 | opc_6 | rt_5 | ra_5 | imm1_5 | imm2_5 | sub_5
+
+
+Some instructions don't fit these so i defined another type:
+
+TYPE 5 (always has SUB):
+0 | opc_6 | rt_5 | ra_5 | rb_5 | 0000 | sub_6
+or
+0 | opc_6 | rt_5 | ra_5 | rb_5 | re_4 | sub_6
+or
+0 | opc_6 | 000| Dt_1 | 0 | ra_5 | rb_5 | 0000 | sub_6
+
+The meaning of all these things is explained in the pdf, i won't copy it here. The most important fields are opc for opcode and sub for sub-opcode.
+
+
+Inside decode_disassm16.c there is a function translate_to_32() that will translate a 16 bit instruction to its equivalent in 32 bits. This was intended for a simulator and is not usefull for a pure disassembler.
+
+written by kitten_nb_five (c) 2019-2020
