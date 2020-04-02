@@ -18,6 +18,8 @@ disassm/ is an (incomplete) disassembler for this NDS32-architecture. written fr
 
 callgraphs/ makes visual representations of function calls starting at the function you want. based on disassm/, written in C and Perl. see README there.
 
+call_lists/ lists all calls in the right order starting at some address. quickly hacked together, based on callgraphs. mostly untested.
+
 everything is under AGPL v3 or later, WITHOUT ANY WARRANTY and tested on Linux only.
 
 
