@@ -1,2 +1,2 @@
 #! /bin/sh
-./callg $* && perl beautify_callgraph.pl && dot calls_beautified.txt -Tsvg -o callgraph.svg && echo done!
+./callg $* && perl -I .. beautify_callgraph.pl && dot calls_beautified.txt -Tsvg -o callgraph.svg && echo done!
