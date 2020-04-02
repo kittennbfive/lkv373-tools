@@ -18,8 +18,18 @@ THIS WORK COMES WITHOUT ANY WARRANTY and is released under the AGPL version 3 or
 #include "opcodes16.h"
 #include "opcodes32.h"
 
+#include "../simulate/my_err.h"
+
 extern opcode16_t opc16_list[];
 extern const sub_opc16_t opc16_sub_list[];
+
+static uint8_t reg_4T5(const uint8_t reg_4)
+{
+	if(reg_4<=11)
+		return reg_4;
+	else
+		return reg_4+4;
+}
 
 static void fill_args_instr_type16(const uint32_t instr, const uint16_t opc, const opc16_type_t type, instr_t * const instr_struct)
 {
@@ -61,6 +71,7 @@ static void fill_args_instr_type16(const uint32_t instr, const uint16_t opc, con
 		
 		case TYPE16_45:
 			instr_struct->ra=(instr&0x01E0)>>5;
+			instr_struct->rt=(instr&0x01E0)>>5; //for ADD45
 			instr_struct->rb=(instr&0x001F);
 			instr_struct->imm1_5=(instr&0x001F);
 			break;
@@ -142,10 +153,10 @@ static void disassm16(instr_t * const instr_struct, const uint32_t PC __attribut
 					sprintf(instr_struct->disassm, "%s r%u, [r%u + %u]", instr_struct->mnemonic, instr_struct->rt, instr_struct->ra, instr_struct->imm1_3<<2);
 					break;
 				
-				//%s rt, [ra], imm_u
+				//%s rt, [ra], imm_u<<2
 				case OPC16_LWI333_bi:
 				case OPC16_SWI333_bi:
-					sprintf(instr_struct->disassm, "%s r%u, [r%u], %u", instr_struct->mnemonic, instr_struct->rt, instr_struct->ra, instr_struct->imm1_3);
+					sprintf(instr_struct->disassm, "%s r%u, [r%u], %u", instr_struct->mnemonic, instr_struct->rt, instr_struct->ra, instr_struct->imm1_3<<2);
 					break;
 				
 			}
@@ -162,6 +173,7 @@ static void disassm16(instr_t * const instr_struct, const uint32_t PC __attribut
 						case SUB_BMFI333_SEH33:
 						case SUB_BMFI333_ZEB33:
 						case SUB_BMFI333_ZEH33:
+						case SUB_BMFI333_XLSB33:
 							sprintf(instr_struct->disassm, "%s r%u, r%u", instr_struct->mnemonic, instr_struct->rt, instr_struct->ra);
 							break;
 					}
@@ -198,7 +210,7 @@ static void disassm16(instr_t * const instr_struct, const uint32_t PC __attribut
 				case OPC16_BEQZ38:
 				case OPC16_BNES38:
 				case OPC16_BNEZ38:
-					sprintf(instr_struct->disassm, "%s r%u, %d", instr_struct->mnemonic, instr_struct->rt, nds32_sign_extend(instr_struct->imm1_8, 8, 32));
+					sprintf(instr_struct->disassm, "%s r%u, %x", instr_struct->mnemonic, instr_struct->rt, nds32_sign_extend(instr_struct->imm1_8<<1, 9, 32)+PC);
 					break;
 			}
 			break;
@@ -209,24 +221,26 @@ static void disassm16(instr_t * const instr_struct, const uint32_t PC __attribut
 				//%s rt, rb
 				case OPC16_ADD45:
 				case OPC16_SUB45:
-					sprintf(instr_struct->disassm, "%s r%u, r%u", instr_struct->mnemonic, instr_struct->rt, instr_struct->rb);
+					sprintf(instr_struct->disassm, "%s r%u, r%u", instr_struct->mnemonic, reg_4T5(instr_struct->rt), instr_struct->rb);
 					break;
 				
 				//%s ra, rb
 				case OPC16_SLT45:
 				case OPC16_SLTS45:
-					sprintf(instr_struct->disassm, "%s r%u, r%u", instr_struct->mnemonic, instr_struct->ra, instr_struct->rb);
+					sprintf(instr_struct->disassm, "%s r%u, r%u", instr_struct->mnemonic, reg_4T5(instr_struct->ra), instr_struct->rb);
 					break;
 				
 				//%s rt, imm_u
 				case OPC16_ADDI45:
-				case OPC16_SLTI45:
-				case OPC16_SLTSI45:
 				case OPC16_SRAI45:
 				case OPC16_SRLI45:
 				case OPC16_SUBI45:
-					sprintf(instr_struct->disassm, "%s r%u, %u", instr_struct->mnemonic, instr_struct->ra, instr_struct->imm1_5);
+					sprintf(instr_struct->disassm, "%s r%u, %u", instr_struct->mnemonic, reg_4T5(instr_struct->rt), instr_struct->imm1_5);
 					break;
+				
+				case OPC16_SLTI45:
+				case OPC16_SLTSI45:
+					sprintf(instr_struct->disassm, "%s r%u, %u", instr_struct->mnemonic, reg_4T5(instr_struct->ra), instr_struct->imm1_5);
 			}
 			break;
 		
@@ -274,19 +288,19 @@ static void disassm16(instr_t * const instr_struct, const uint32_t PC __attribut
 				//%s imm_s
 				case OPC16_BEQZS8:
 				case OPC16_BNEZS8:
-					sprintf(instr_struct->disassm, "%s %d", instr_struct->mnemonic, nds32_sign_extend(instr_struct->imm1_8, 8, 32));
+					sprintf(instr_struct->disassm, "%s 0x%x", instr_struct->mnemonic, nds32_sign_extend(instr_struct->imm1_8<<1, 9, 32)+PC);
 					break;
 				
 				//%s imm_s<<1
 				case OPC16_J8:
-					sprintf(instr_struct->disassm, "%s %d", instr_struct->mnemonic, nds32_sign_extend(instr_struct->imm1_8<<1, 8, 32));
+					sprintf(instr_struct->disassm, "%s 0x%x", instr_struct->mnemonic, nds32_sign_extend(instr_struct->imm1_8<<1, 9, 32)+PC);
 					break;
 			}
 			break;
 	}
 }
 
-__attribute__((__unused__)) static uint8_t translate_to_32(instr_t * const instr_struct) 
+__attribute__((__unused__)) uint8_t translate_to_32(instr_t * const instr_struct) 
 {
 	if(instr_struct->width==WIDTH32)
 		return 0;
@@ -301,14 +315,14 @@ __attribute__((__unused__)) static uint8_t translate_to_32(instr_t * const instr
 				case OPC16_BEQS38:
 					instr_struct->opc=OPC_BR1;
 					instr_struct->sub=SUB_BR1_BEQ;
-					instr_struct->ra=5;
+					instr_struct->ra=5; //reg5 implied (not 15)
 					instr_struct->imm1_14=nds32_sign_extend(instr_struct->imm1_8, 8, 14);
 					break;
 				
 				case OPC16_BNES38:
 					instr_struct->opc=OPC_BR1;
 					instr_struct->sub=SUB_BR1_BNE;
-					instr_struct->ra=5;
+					instr_struct->ra=5; //reg5 implied (not 15)
 					instr_struct->imm1_14=nds32_sign_extend(instr_struct->imm1_8, 8, 14);
 					break;
 				
@@ -331,11 +345,17 @@ __attribute__((__unused__)) static uint8_t translate_to_32(instr_t * const instr
 					case SUB_XWI37_LWI37:
 						instr_struct->opc=OPC_LWI;
 						instr_struct->ra=28; //fp
+						instr_struct->imm1_15=instr_struct->imm1_7;
 						break;
 					
 					case SUB_XWI37_SWI37:
 						instr_struct->opc=OPC_SWI;
 						instr_struct->ra=28; //fp
+						instr_struct->imm1_15=instr_struct->imm1_7;
+						break;
+					
+					default:
+						ERRX(1, "unknown in translate16->32");
 						break;
 				}
 				break;
@@ -348,14 +368,24 @@ __attribute__((__unused__)) static uint8_t translate_to_32(instr_t * const instr
 					case SUB_XWI37SP_LWI37SP:
 						instr_struct->opc=OPC_LWI;
 						instr_struct->ra=31; //sp
+						instr_struct->imm1_15=instr_struct->imm1_7; //no shift here!
 						break;
 					
 					case SUB_XWI37SP_SWI37SP:
 						instr_struct->opc=OPC_SWI;
 						instr_struct->ra=31; //sp
+						instr_struct->imm1_15=instr_struct->imm1_7; //no shift here!
+						break;
+					
+					default:
+						ERRX(1, "unknown in translate16->32");
 						break;
 				}
 				break;
+				
+				default:
+						ERRX(1, "unknown in translate16->32");
+						break;
 			}
 			break;
 		
@@ -378,6 +408,9 @@ __attribute__((__unused__)) static uint8_t translate_to_32(instr_t * const instr
 					instr_struct->ra=31; //sp
 					instr_struct->imm1_15=nds32_sign_extend(instr_struct->imm1_10, 10, 15);
 					break;
+				default:
+					ERRX(1, "unknown in translate16->32");
+					break;
 			}
 			break;
 		
@@ -386,28 +419,32 @@ __attribute__((__unused__)) static uint8_t translate_to_32(instr_t * const instr
 			{
 				case OPC16_ADDI45:
 					instr_struct->opc=OPC_ADDI;
+					instr_struct->rt=reg_4T5(instr_struct->rt);
 					instr_struct->ra=instr_struct->rt;
+					instr_struct->imm1_15=instr_struct->imm1_5;
 					break;
 				
 				case OPC16_ADDI333:
 					instr_struct->opc=OPC_ADDI;
+					instr_struct->imm1_15=instr_struct->imm1_3;
 					break;
 				
 				case OPC16_SUBI45:
 					instr_struct->opc=OPC_ADDI;
+					instr_struct->rt=reg_4T5(instr_struct->rt);
 					instr_struct->ra=instr_struct->rt;
 					instr_struct->imm1_15=NEG(instr_struct->imm1_5);
 					break;
 						
 				case OPC16_SUBI333:
 					instr_struct->opc=OPC_ADDI;
-					instr_struct->imm1_15=NEG(instr_struct->imm1_5);
+					instr_struct->imm1_15=NEG(instr_struct->imm1_3);
 					break;
-				
 				
 				case OPC16_ADD45:
 					instr_struct->opc=OPC_ALU_1;
 					instr_struct->sub=SUB_ALU_1_ADD;
+					instr_struct->rt=reg_4T5(instr_struct->rt);
 					instr_struct->ra=instr_struct->rt;
 					break;
 				
@@ -419,6 +456,7 @@ __attribute__((__unused__)) static uint8_t translate_to_32(instr_t * const instr
 				case OPC16_SUB45:
 					instr_struct->opc=OPC_ALU_1;
 					instr_struct->sub=SUB_ALU_1_SUB;
+					instr_struct->rt=reg_4T5(instr_struct->rt);
 					instr_struct->ra=instr_struct->rt;
 					break;
 						
@@ -430,18 +468,22 @@ __attribute__((__unused__)) static uint8_t translate_to_32(instr_t * const instr
 				case OPC16_SRAI45:
 					instr_struct->opc=OPC_ALU_1;
 					instr_struct->sub=SUB_ALU_1_SRAI;
+					instr_struct->rt=reg_4T5(instr_struct->rt);
 					instr_struct->ra=instr_struct->rt;
+					//imm_5 -> imm_5
 					break;
 				
 				case OPC16_SRLI45:
 					instr_struct->opc=OPC_ALU_1;
 					instr_struct->sub=SUB_ALU_1_SRLI;
+					instr_struct->rt=reg_4T5(instr_struct->rt);
 					instr_struct->ra=instr_struct->rt;
 					break;
 				
 				case OPC16_SLLI333:
 					instr_struct->opc=OPC_ALU_1;
 					instr_struct->sub=SUB_ALU_1_SLLI;
+					//imm_3 -> imm_3
 					break;
 				
 				case OPC16_BFMI333:
@@ -467,29 +509,44 @@ __attribute__((__unused__)) static uint8_t translate_to_32(instr_t * const instr
 							instr_struct->opc=OPC_ALU_1;
 							instr_struct->sub=SUB_ALU_1_SEH;
 							break;
+						
+						case SUB_BMFI333_XLSB33:
+							instr_struct->opc=OPC_ANDI;
+							instr_struct->imm1_15=1;
+							break;
+						
+						default:
+							ERRX(1, "unknown in translate16->32");
+						break;
 					}
 					break;
 				
 				case OPC16_SLTI45:
 					instr_struct->opc=OPC_SLTI;
+					instr_struct->ra=reg_4T5(instr_struct->ra);
 					instr_struct->rt=15;
+					instr_struct->imm1_15=instr_struct->imm1_5;
 					break;
 				
 				case OPC16_SLTSI45:
 					instr_struct->opc=OPC_SLTSI;
+					instr_struct->ra=reg_4T5(instr_struct->ra);
 					instr_struct->rt=15;
+					instr_struct->imm1_15=instr_struct->imm1_5;
 					break;
 				
 				case OPC16_SLT45:
 					instr_struct->opc=OPC_ALU_1;
 					instr_struct->sub=SUB_ALU_1_SLT;
 					instr_struct->rt=15;
+					instr_struct->ra=reg_4T5(instr_struct->ra);
 					break;
 				
 				case OPC16_SLTS45:
 					instr_struct->opc=OPC_ALU_1;
 					instr_struct->sub=SUB_ALU_1_SLTS;
 					instr_struct->rt=15;
+					instr_struct->ra=reg_4T5(instr_struct->ra);
 					break;
 					
 				case OPC16_LWI450:
@@ -499,10 +556,12 @@ __attribute__((__unused__)) static uint8_t translate_to_32(instr_t * const instr
 				
 				case OPC16_LWI333:
 					instr_struct->opc=OPC_LWI;
+					instr_struct->imm1_15=instr_struct->imm1_3;
 					break;
 				
 				case OPC16_LWI333_bi:
 					instr_struct->opc=OPC_LWI_bi;
+					instr_struct->imm1_15=instr_struct->imm1_3;
 					break;
 				
 				case OPC16_LHI333:
@@ -520,10 +579,12 @@ __attribute__((__unused__)) static uint8_t translate_to_32(instr_t * const instr
 				
 				case OPC16_SWI333:
 					instr_struct->opc=OPC_SWI;
+					instr_struct->imm1_15=instr_struct->imm1_3;
 					break;
 				
 				case OPC16_SWI333_bi:
 					instr_struct->opc=OPC_SWI_bi;
+					instr_struct->imm1_15=instr_struct->imm1_3;
 					break;
 				
 				case OPC16_SHI333:
@@ -534,19 +595,13 @@ __attribute__((__unused__)) static uint8_t translate_to_32(instr_t * const instr
 					instr_struct->opc=OPC_SBI;
 					break;
 				
-				/*
-				case OPC16_NOP16: //SRLI r0, r0, 0 (p. 33)
-					instr_struct->opc=OPC_ALU_1;
-					instr_struct->sub=SUB_ALU_1_SRLI;
-					instr_struct->rt=0;
-					instr_struct->ra=0;
-					instr_struct->imm1=0;
-					break;
-				*/
+				default:
+					ERRX(1, "unknown in translate16->32");
+						break;
 				
 			}
 			break;
-		
+			
 		case 7:
 			switch(instr_struct->opc)
 			{
@@ -568,9 +623,13 @@ __attribute__((__unused__)) static uint8_t translate_to_32(instr_t * const instr
 					instr_struct->opc=OPC_J;
 					instr_struct->imm1_24=nds32_sign_extend(instr_struct->imm1_8, 8, 24);
 					break;
+				
+				default:
+					ERRX(1, "unknown in translate16->32");
+						break;
 			}
 			break;
-		
+					
 		case 10:
 			switch(instr_struct->opc)
 			{
@@ -587,9 +646,18 @@ __attribute__((__unused__)) static uint8_t translate_to_32(instr_t * const instr
 				case OPC16_JRAL5:
 					instr_struct->opc=OPC_JREG;
 					instr_struct->sub=SUB_JREG_JRAL;
+					instr_struct->rt=30;
 					break;
+				
+				default:
+					ERRX(1, "unknown in translate16->32");
+						break;
 			}
 			break;
+			
+			default:
+				ERRX(1, "unknown in translate16->32");
+				break;
 	}
 	
 	instr_struct->width=WIDTH32;
@@ -628,7 +696,9 @@ uint8_t decode_16(const uint16_t instr, instr_t * const instr_struct, const uint
 	}
 	if(!found)
 	{
-		//printf("decode_16: unknown opc 0x%x @0x%x\n", opc, PC);
+#ifdef DISASSM_WARN_UNKNOWN
+		printf("decode_16: unknown opc 0x%x @0x%x\n", opc, PC);
+#endif
 		return 1;
 	}
 	
@@ -653,7 +723,9 @@ uint8_t decode_16(const uint16_t instr, instr_t * const instr_struct, const uint
 		}
 		if(!found)
 		{
-			//printf("decode_16: unknown sub 0x%02x for opc 0x%x @0x%x\n", instr_struct->sub, instr_struct->opc, PC);
+#ifdef DISASSM_WARN_UNKNOWN
+			printf("decode_16: unknown sub 0x%02x for opc 0x%x @0x%x\n", instr_struct->sub, instr_struct->opc, PC);
+#endif
 			return 1;
 		}
 		
@@ -663,8 +735,9 @@ uint8_t decode_16(const uint16_t instr, instr_t * const instr_struct, const uint
 	disassm16(instr_struct, PC);
 	
 	//turn this on or off depending on what you want to do
-	//translate_to_32(instr_struct);
-	
+#ifdef DISASSM_TRANSLATE_TO_32
+	translate_to_32(instr_struct);
+#endif
 	return 0;
 }
 

@@ -20,7 +20,7 @@ This file is just a quick example of how to use all this code. Some stuff has be
 
 uint8_t *buffer;
 
-uint32_t memory_get_word(const uint32_t addr)
+uint32_t decode_disassm_memory_get_word(const uint32_t addr)
 {
 #ifdef INVERT_ENDIAN
 	return (buffer[addr]<<24)|(buffer[addr+1]<<16)|(buffer[addr+2]<<8)|buffer[addr+3];
@@ -28,6 +28,8 @@ uint32_t memory_get_word(const uint32_t addr)
 	return (buffer[addr+3]<<24)|(buffer[addr+2]<<16)|(buffer[addr+1]<<8)|buffer[addr];
 #endif
 }
+
+#define SIZE 500*1024*1024
 
 int main(int argc, char **argv)
 {
@@ -40,7 +42,7 @@ int main(int argc, char **argv)
 		return 1;
 	}
 	
-	buffer=malloc(100*sizeof(uint8_t));
+	buffer=malloc(SIZE*sizeof(uint8_t));
 	
 	FILE *f=fopen(argv[1], "rb");
 	if(!f)
@@ -49,11 +51,11 @@ int main(int argc, char **argv)
 		return 1;
 	}
 	
-	fread(buffer, 100*sizeof(uint8_t), 1, f);
+	fread(buffer, SIZE*sizeof(uint8_t), 1, f);
 	
 	fclose(f);
 	
-	while(PC<100)
+	while(PC<SIZE)
 	{
 		if(decode_instr(&instr, PC))
 		{
@@ -61,7 +63,7 @@ int main(int argc, char **argv)
 			break;
 		}
 		
-		printf("%s\n", instr.disassm);
+		printf("%x: %s\n", PC, instr.disassm);
 		
 		if(instr.width==WIDTH16)
 			PC+=2;

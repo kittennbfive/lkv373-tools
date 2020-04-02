@@ -60,7 +60,7 @@ const sub_opc32_t opc32_sub_list[]=
 	{"AND", 	0b100000,	0b00010}, //and
 	{"CMOVN",	0b100000,	0b11011}, //conditional move on not zero
 	{"CMOVZ",	0b100000,	0b11010}, //conditional move on zero
-	{"NOP",		0b100000,	0b01001}, //nop
+//	{"NOP",		0b100000,	0b01001}, //nop
 	{"NOR",		0b100000,	0b00101}, //nor
 	{"OR",		0b100000,	0b00100}, //or
 	{"ROTR",	0b100000,	0b01111}, //rotate right
@@ -83,20 +83,20 @@ const sub_opc32_t opc32_sub_list[]=
 	{"ZEH",		0b100000,	0b10011}, //zero extend halfword
 
 	//ALU_2
-	{"DIV",		0b100001,	0b101111}, //unsigned integer div
-	{"DIVS",	0b100001,	0b101110}, //signed integer div
-	{"MADD32",	0b100001,	0b110011}, //multiply and add to data low
-	{"MADD64",	0b100001,	0b101011}, //multiply and add unsigned
-	{"MADDS64",	0b100001,	0b101010}, //multiply and add signed
-	{"MFUSR",	0b100001,	0b100000}, //move from user special register
-	{"MSUB32",	0b100001,	0b110101}, //multiply and substract to data low
-	{"MSUB64",	0b100001,	0b101101}, //multiply and substract unsigned
-	{"MSUBS64",	0b100001,	0b101100}, //multiply and substract signed
-	{"MTUSR",	0b100001,	0b100001}, //move to user special register
-	{"MUL",		0b100001,	0b100100}, //multiply word to register
-	{"MULT32",	0b100001,	0b110001}, //multiply word to data low
-	{"MULT64",	0b100001,	0b101001}, //multiply word unsigned
-	{"MULTS64",	0b100001,	0b101000}, //multiply word signed
+	{"DIV",		0b100001,	0b0000101111}, //unsigned integer div
+	{"DIVS",	0b100001,	0b0000101110}, //signed integer div
+	{"MADD32",	0b100001,	0b0000110011}, //multiply and add to data low
+	{"MADD64",	0b100001,	0b0000101011}, //multiply and add unsigned
+	{"MADDS64",	0b100001,	0b0000101010}, //multiply and add signed
+	{"MFUSR",	0b100001,	0b0000100000}, //move from user special register
+	{"MSUB32",	0b100001,	0b0000110101}, //multiply and substract to data low
+	{"MSUB64",	0b100001,	0b0000101101}, //multiply and substract unsigned
+	{"MSUBS64",	0b100001,	0b0000101100}, //multiply and substract signed
+	{"MTUSR",	0b100001,	0b0000100001}, //move to user special register
+	{"MUL",		0b100001,	0b0000100100}, //multiply word to register
+	{"MULT32",	0b100001,	0b0000110001}, //multiply word to data low
+	{"MULT64",	0b100001,	0b0000101001}, //multiply word unsigned
+	{"MULTS64",	0b100001,	0b0000101000}, //multiply word signed
 	
 	//BR1
 	{"BEQ",	0b100110,	0b0}, //branch on equal
@@ -107,7 +107,7 @@ const sub_opc32_t opc32_sub_list[]=
 	{"BGEZ",	0b100111,	0b0100}, //branch on greater than or equal to zero
 	{"BGEZAL",	0b100111,	0b1100}, //branch on greater than or equal to zero and link
 	{"BGTZ",	0b100111,	0b0110}, //branch on greater than zero
-	{"BLEZ",	0b100111,	0b01110}, //branch on less than or equal to zero
+	{"BLEZ",	0b100111,	0b0111}, //branch on less than or equal to zero
 	{"BLTZ",	0b100111,	0b0101}, //branch on less than zero
 	{"BLTZAL",	0b100111,	0b1101}, //branch on less than zero and link
 	{"BNEZ",	0b100111,	0b0011}, //branch on not equal zero	
@@ -186,6 +186,32 @@ const sub_opc32_t opc32_sub_list[]=
 	//SMWA store multiple words with alignment check
 	//baseline ver 2 - page 331
 	{"SMWA.adm", 	0b011101, 0b111101},
+	{"SMWA.bdm", 	0b011101, 0b101101},
+	
+	{"LMWA.bim", 	0b011101, 0b000101},
+	
+	//sub from ALU_2 - SUB-OPCODE HACKED TO 10 BITS
+	//32 bit performance extension
+	{"BSET",		0b100001,	0b0000001000},
+	{"BTST",		0b100001,	0b0000001011},
+	{"MIN",			0b100001,	0b0000000001},
+	{"BSP",			0b100001,	0b0000001101}, //bit stream packing
+	{"ABS",			0b100001,	0b0000000011},
+	{"MAX",			0b100001,	0b0000000000},
+	//uses general-purpose regs, GPR is 0b0001
+	{"MADDR32",		0b100001,	0b0001110011},
+	{"MSUBR32",		0b100001,	0b0001110101},
+	{"MULR64",		0b100001,	0b0001101001},
+	{"MULSR64",		0b100001,	0b0001101000},
+	
+	
+	//sub from ALU_1
+	//32 bit baseline ver 2
+	{"DIVR",		0b100000,	0b10111},
+	
+	//sub from ALU_1
+	//32 bit baseline optional
+	{"DIVSR", 		0b100000,	0b10110},
 	
 	{NULL, 0, 0}
 };

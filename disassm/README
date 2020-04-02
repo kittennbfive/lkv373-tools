@@ -1,4 +1,4 @@
-First: This disassembler is not complete, some (quite a few probably) instructions are missing. Also there are probably bugs.
+First: This disassembler is not complete, some instructions are missing. Also there are probably bugs.
 
 Second: This work comes WITHOUT ANY WARRANTY and is released under AGPL version 3 or later.
 
@@ -48,6 +48,6 @@ or
 The meaning of all these things is explained in the pdf, i won't copy it here. The most important fields are opc for opcode and sub for sub-opcode.
 
 
-Inside decode_disassm16.c there is a function translate_to_32() that will translate a 16 bit instruction to its equivalent in 32 bits. This was intended for a simulator and is not usefull for a pure disassembler.
+Inside decode_disassm16.c there is a function translate_to_32() that will translate a 16 bit instruction to its equivalent in 32 bits. This was intended for a simulator and is not useful for a pure disassembler.
 
 written by kitten_nb_five (c) 2019-2020

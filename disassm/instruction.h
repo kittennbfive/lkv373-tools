@@ -30,13 +30,14 @@ typedef struct
 	uint8_t was_16bit_instr; //PC=PC+_2_
 	uint8_t opc_length;
 	uint16_t opc;
-	uint8_t sub;
-	uint8_t sub_10;
+	uint16_t sub; //was 8 bit, modified to fit ALU_2 baseline ver 2
+	uint16_t sub_10;
 	uint8_t rt;
 	uint8_t ra;
 	uint8_t rb;
 	uint8_t rd;
 	uint8_t re;
+	uint8_t rs; //32, DIVR
 	uint8_t dt;
 	uint8_t enable;
 	uint32_t imm1_24;
@@ -51,6 +52,9 @@ typedef struct
 	uint32_t imm1_3; //16
 	uint32_t imm1_2;
 	uint32_t imm2_5;
+	uint8_t usr; //MTUSR and stuff
+	uint8_t group; //idem
+	uint16_t sridx;
 	char *mnemonic;
 	char disassm[SZ_BUFFER_DISASSM];
 } instr_t;

@@ -67,6 +67,7 @@ const sub_opc16_t opc16_sub_list[]=
 	{"SEH33",	0b001011,	0b011}, //sign extend halfword
 	{"ZEB33",	0b001011,	0b000}, //zero extend byte
 	{"ZEH33",	0b001011,	0b001}, //zero extend halfword
+	{"XLSB33",	0b001011,	0b100}, //extract LSB
 	
 	//XWI37
 	{"LWI37",	0b0111,	0b0}, //(Load Word Immediate with Implied FP)
