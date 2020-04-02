@@ -1,0 +1,2 @@
+#! /bin/sh
+./list $* && perl -I .. beautify_call_list.pl
