@@ -1,3 +1,6 @@
+EDIT: THIS IS OLD AND INCOMPLETE. If you want to mess with it ask on freenode for new version or update the disassm yourself.
+
+
 This is some code i wrote trying to implement NDS32-support inside radare2/Cutter.
 
 This code is experimental, incomplete, probably full of bugs and provided AS IS. NO WARRANTY.
