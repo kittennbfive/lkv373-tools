@@ -1,0 +1,54 @@
+MIGHT BE WRONG!
+
+calls in block1.bin starting from 4:
+
+call to ce0
+call to d84
+	call to 848
+	call to 4dc
+call to e30 //never returns
+	call to 5ef0 (bootloader?)
+		call to 2cf6c
+		call to 1460c
+			call to 14d14
+				call to 14ec4
+					call to 14f10 //very long, does most of the work for printf
+						call to 1595c (strlen(r0)?)
+						call to 14e30 (short, some wrapper-kind-thingie)
+							call to 14dcc
+								call to 2cf50 (uart_putchar())
+		call to 5434
+			call to 5b14
+			call to 1464
+			call to 15e0
+			call to 1560
+			call to 1514
+			call to 447c
+				call to 4404
+				call to 5b2c
+				call to 2034
+					call to 5c18
+					call to 5b1c
+				call to 17fc
+					call to 1058
+					call to 591a
+			call to 1678
+				call to edc
+				call to e60
+			call to 5190
+				call to 3d94
+					call to 142c
+				call to ef4
+			call to 5b18
+			call to 5c20
+		call to 14edc (some_output_func())
+		call to 14aa4
+			call to 146f4
+		call to 2d80
+		call to 2e8c
+		call to 156b0 (helper_printf_strcpy??)
+		call to 2f7c
+		call to 14bf0
+			call to 14b0c
+		call to 15ad8
+		call to 1170
