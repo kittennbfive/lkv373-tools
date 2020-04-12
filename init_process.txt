@@ -39,9 +39,23 @@ FUNC de0:
 		call 1a048
 		call 1a09c
 		call 19c64
+			call 0x198b4
 		call 36f4 create_pipe()??
+			call 13dc
 		call 3d44
-			//tbc
+			call 13dc
+		call 1b018
+			call 19c64
+				call 198b4
+			call 442c
+				call 43b4
+				call 5adc
+				call 1fe4
+					call 5bc8
+					call 5acc
+		goto 1120
+		call 1008
+		goto 586c -->this is an ISR, what is going on??
 	while(1);
 
 
@@ -67,7 +81,7 @@ ISR 598c
 open questions/todo:
 -at 0x89497 there is some flag, overwriting it with 0 bricks the device (until power cycle). Is this "OSrunning"? written to "1" @5876 but thats an ISR, can a ISR be called from regular code? strange TODO investigate
 -what are all these hardcoded memory addr like 89494-5, 89354, 8934c
--how does the dispatcher work / understand how the different tasks are called / look at the code of µC-II because we can
+-how does the dispatcher work / understand how the different tasks are called / look at the code of µC-II because we can / look at the datastructures of this OS and try to find them in memory
 -analyze every task to see what it does
 -understand how the peripherals work
 -a lot more...
