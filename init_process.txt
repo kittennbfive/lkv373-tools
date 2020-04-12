@@ -1,0 +1,77 @@
+BLOCK2: add offset 0x50000 if looking at complete disassm!
+
+INIT PROCESS starting at 0x00:
+//...
+copy code of block2 to 0x10000000
+enable remap at 0x316 - base addr of 0x00 and 0x10 are now exchanged, we are now executing block2
+uart_putchar(0x35) //'5'
+call c90 config_cpu_regs_set_SP_memset_0()
+call d34 flush_some_cache_copy_ISR_code() //ISR-code copied to 0x00210000
+call de0 call_init_and_stop() //will not return, endless loop
+
+FUNC c90:
+	memset 0 from 892e4 to cf75c
+	no calls
+
+FUNC d34: //contains lots of delay
+	call 7fc flush_some_cache()
+	call 4dc copy_ISR_code()
+
+FUNC de0:
+	call 7bf4 some_init_register_main()
+		call 32514 //essentially UART setting stuff +1 MMU write -->resets FIFO
+		call to 197e4 print_console_header()
+			call to 19ed4
+				call to 1a084
+					call to 1a0dc
+						call to 1ad10
+						call to 19ff0
+							call to 19f8c
+								call to 324f8 uart_putchar()
+		call 53e4 //lots of memory-writes, details/meaning unknown
+			call 5ac4 //no code here, just RET immediately
+			call 1414
+			call 1510
+				call 1414
+			call 14c4
+				call 1414
+			//...
+		call 1a048
+		call 1a09c
+		call 19c64
+		call 36f4 create_pipe()??
+		call 3d44
+			//tbc
+	while(1);
+
+
+the main_task at 75c0 registers some more tasks:
+	0x6564=>TF_AV_Task (Audio-Video?)
+	0xcbd8=>TF_Console_Task
+	0xee54=>TF_HTTP_Task
+	0x7330=>TF_TFVEP_Task (what's this for?)
+
+
+INTERRUPTS:
+
+most of them go into endless loop, only ISR 10 (dez) goes into real code @598c
+
+ISR 598c
+	call fe0
+	call 380 //dispatcher? calls a computed addr
+	call 103c
+		//...
+	iret
+
+
+open questions/todo:
+-at 0x89497 there is some flag, overwriting it with 0 bricks the device (until power cycle). Is this "OSrunning"? where on earth is this written to 1??
+-what are all these hardcoded memory addr like 89494-5, 89354, 8934c
+-how does the dispatcher work / understand how the different tasks are called / look at the code of µC-II because we can
+-analyze every task to see what it does
+-understand how the peripherals work
+-a lot more...
+-how to dominate the world?
+
+and also:
+-what are those unknown headers for? is there JTAG somewhere? would be so useful...
