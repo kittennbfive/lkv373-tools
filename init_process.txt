@@ -65,7 +65,7 @@ ISR 598c
 
 
 open questions/todo:
--at 0x89497 there is some flag, overwriting it with 0 bricks the device (until power cycle). Is this "OSrunning"? where on earth is this written to 1??
+-at 0x89497 there is some flag, overwriting it with 0 bricks the device (until power cycle). Is this "OSrunning"? written to "1" @5876
 -what are all these hardcoded memory addr like 89494-5, 89354, 8934c
 -how does the dispatcher work / understand how the different tasks are called / look at the code of µC-II because we can
 -analyze every task to see what it does
