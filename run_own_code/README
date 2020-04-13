@@ -1,4 +1,6 @@
 It is possible to insert own code inside the firmware, there are no checksums/signatures/... However code at the end of part2 will not get executed due to unknown reasons (some memory-management-unit-stuff??).
+EDIT: Actually there are 2 reasons: First the size of the code is encoded somewhere in the bootloader and then there are some hardcoded adresses and a loop that initializes memory with 0. So even if we correct the size and inject our code it will be overwritten.
+A workaround is to put code somewhere where there is data that might be unneeded, like stuff for the webserver. Of course this limits the possible size of the injected code.
 
 For my tests i patched the printf-call at 0x58a8a and put my own code based on block2_inserted.asm inside the strings-part of the firmware at 0x551a4. Than you can trigger it by tipping "ver" inside the serial console.
 
@@ -7,3 +9,5 @@ The code was created with `./nds32le-linux-as -mpic -mbaseline=v2 test.asm -o te
 Inside the code $gp is set to zero to make the code work. You could also NOP out the add-instruction with this register manually after assembling.
 
 HIGHLY EXPERIMENTAL. NO WARRANTY. DO NOT MESS WITH THIS UNLESS YOU HAVE A WAY TO REFLASH THE MEMORY-CHIP EXTERNALLY! (also see flashrom.txt)
+
+EDIT: Actually GNU as has a bug that makes it impossible to use labels. I wrote a script to work around this, see folder try2.
