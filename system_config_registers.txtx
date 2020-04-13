@@ -1,0 +1,51 @@
+CPU_VER: 
+0x0A140017
+00001010 00010100 0000000000010111
+CFGID:
+	bit 0: performance extension exists
+	bit 1: 16 bit extension exists
+	bit 2: performance extension 2 exists
+	bit 3: COP/FPU does NOT exist
+	bit 4: string extension exists
+REV: 0x14
+CPU_ID: 0x0A == N10
+
+
+MMU_CFG:
+0x4B089B06
+0 1 0 0 1 0 1 1 00001000 1 0 011 011 0 00001 10
+MMPS: memory management protection scheme == TLB MMU
+MMPV: memory management protection version number == ver 1
+FATB: TLB is Non-fully-associative (whatever that means...)
+TBW: 4 ways IN a TLB cache
+TBS: 4 ways OF a TLB cache
+EP8MIN4: 8KB page is supported
+EPSZ: 1MB page size is also supported
+TLBCK: TLB has locking support
+HPTWK: hardware page table walker is implemented
+DE: default is little-endian
+NTPT: 4 partitions from VA(31,30)
+IVTB: no invisible TLB
+VLPT: no fast TLB fill handling
+NTME: The non-translated VA to PA mapping function is implemented.
+DRDE: device register default is little-endian
+
+
+MSC_CFG:
+0x00002063
+000000000000000 0 001 0 0 0 0 00 1 1 0 0 0 1 1
+EDM: is implemented (what is an EDM??)
+LMDMA: local memory DMA is implemented
+PFM: no performance monitoring
+HSMP: no high-speed memory port
+TRACE: no debug tracer unit
+DIV: DIV/DIVS instructions are supported
+MAC: multiply and multiply-add instructions are supported
+AUDIO: no audio extension
+L2C: no L2 unified cache
+RDREG: we have full 32 registers
+ADR24: we have full 32 bit adresses
+INTLC: Interruption level 1, 2, and 3 are implemented. Level 3 is the overflow level.
+BASEV: we have baseline ver1+2 instruction support
+NOD: Dx registers and the instructions involving Dx registers exist.
+
