@@ -35,6 +35,8 @@ int main(int argc, char **argv)
 {
 	instr_t instr;
 	uint32_t PC=0;
+	uint32_t size=SIZE;
+	uint32_t filesize;
 	
 	if(argc<2)
 	{
@@ -51,11 +53,18 @@ int main(int argc, char **argv)
 		return 1;
 	}
 	
-	fread(buffer, SIZE*sizeof(uint8_t), 1, f);
+	fseek(f, 0, SEEK_END);
+	filesize=ftell(f);
+	fseek(f, 0, SEEK_SET);
+	
+	if(size>filesize)
+		size=filesize;
+	
+	fread(buffer, size*sizeof(uint8_t), 1, f);
 	
 	fclose(f);
 	
-	while(PC<SIZE)
+	while(PC<size)
 	{
 		if(decode_instr(&instr, PC))
 		{

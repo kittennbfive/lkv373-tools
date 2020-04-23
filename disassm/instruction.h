@@ -55,6 +55,7 @@ typedef struct
 	uint8_t usr; //MTUSR and stuff
 	uint8_t group; //idem
 	uint16_t sridx;
+	uint8_t en; //setgie
 	char *mnemonic;
 	char disassm[SZ_BUFFER_DISASSM];
 } instr_t;

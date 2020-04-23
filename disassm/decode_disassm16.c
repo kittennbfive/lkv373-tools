@@ -483,7 +483,7 @@ __attribute__((__unused__)) uint8_t translate_to_32(instr_t * const instr_struct
 				case OPC16_SLLI333:
 					instr_struct->opc=OPC_ALU_1;
 					instr_struct->sub=SUB_ALU_1_SLLI;
-					//imm_3 -> imm_3
+					instr_struct->imm1_5=instr_struct->imm1_3;
 					break;
 				
 				case OPC16_BFMI333:
@@ -551,6 +551,7 @@ __attribute__((__unused__)) uint8_t translate_to_32(instr_t * const instr_struct
 					
 				case OPC16_LWI450:
 					instr_struct->opc=OPC_LWI;
+					instr_struct->rt=reg_4T5(instr_struct->rt);
 					instr_struct->imm1_15=0;
 					break;
 				
@@ -566,14 +567,17 @@ __attribute__((__unused__)) uint8_t translate_to_32(instr_t * const instr_struct
 				
 				case OPC16_LHI333:
 					instr_struct->opc=OPC_LHI;
+					instr_struct->imm1_15=instr_struct->imm1_3;
 					break;
 				
 				case OPC16_LBI333:
 					instr_struct->opc=OPC_LBI;
+					instr_struct->imm1_15=instr_struct->imm1_3;
 					break;
 				
 				case OPC16_SWI450:
 					instr_struct->opc=OPC_SWI;
+					instr_struct->rt=reg_4T5(instr_struct->rt);
 					instr_struct->imm1_15=0;
 					break;
 				
@@ -589,10 +593,12 @@ __attribute__((__unused__)) uint8_t translate_to_32(instr_t * const instr_struct
 				
 				case OPC16_SHI333:
 					instr_struct->opc=OPC_SHI;
+					instr_struct->imm1_15=instr_struct->imm1_3;
 					break;
 				
 				case OPC16_SBI333:
 					instr_struct->opc=OPC_SBI;
+					instr_struct->imm1_15=instr_struct->imm1_3;
 					break;
 				
 				default:

@@ -21,8 +21,7 @@ uint32_t decode_disassm_memory_get_word(const uint32_t addr);
 uint8_t decode_instr(instr_t * const instr_struct, const uint32_t PC)
 {
 	uint16_t instr;
-	instr_struct->opc=0xffff;
-	instr_struct->sub=0xffff;
+	memset(instr_struct, 0xff, sizeof(instr_t));
 	
 	instr=decode_disassm_memory_get_word(PC)>>16;
 	

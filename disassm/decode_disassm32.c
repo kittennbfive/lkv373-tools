@@ -14,6 +14,7 @@ THIS WORK COMES WITHOUT ANY WARRANTY and is released under the AGPL version 3 or
 #include "opc32.h"
 #include "instruction.h"
 #include "sign_extend.h"
+#include "special_regs.h"
 
 #include "opcodes32.h"
 
@@ -90,6 +91,11 @@ static void fill_args_instr_type32(const uint32_t instr, const uint8_t opc, cons
 			instr_struct->imm2_5=(instr&0x000003E0)>>5;
 			instr_struct->sub=(instr&0x0000001F);
 			instr_struct->sridx=(instr&0x000FFC00)>>10;
+			instr_struct->en=(instr&(1<<20))>>20;
+			if(instr_struct->opc==OPC_MISC) //HACK!
+			{
+				instr_struct->ra=(instr&0x01F00000)>>20;
+			}
 			break;
 
 		case TYPE_T5:
@@ -337,18 +343,21 @@ void disassm32(instr_t * const instr_struct, const uint32_t PC)
 				switch(instr_struct->sub)
 				{
 					case SUB_MISC_MFSR:
-						sprintf(instr_struct->disassm, "%s r%u, <sysreg>", instr_struct->mnemonic, instr_struct->rt);
+						sprintf(instr_struct->disassm, "%s r%u, %s", instr_struct->mnemonic, instr_struct->rt, get_special_reg_name(instr_struct->sridx));
 						break;
 					
 					case SUB_MISC_MTSR:
-						sprintf(instr_struct->disassm, "%s r%u, <sysreg>", instr_struct->mnemonic, instr_struct->ra);
+						if(instr_struct->imm2_5==0)
+							sprintf(instr_struct->disassm, "%s r%u, %s", instr_struct->mnemonic, instr_struct->ra, get_special_reg_name(instr_struct->sridx));
+						else if(instr_struct->imm2_5==0b00010)
+							sprintf(instr_struct->disassm, "SETGIE.%c", instr_struct->en?'E':'D');
 						break;
 					
 					//complicated internal processor stuff...
 					case SUB_MISC_CCTL:
 					case SUB_MISC_MSYNC:
 					case SUB_MISC_ISB:
-						sprintf(instr_struct->disassm, "%s <something>", instr_struct->mnemonic);
+						sprintf(instr_struct->disassm, "%s", instr_struct->mnemonic);
 						break;
 					
 					case SUB_MISC_IRET:
