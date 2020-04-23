@@ -1,3 +1,11 @@
+=pod
+(c) 2020 by kitten_nb_five
+
+AGPL v3 or later
+
+NO WARRANTY!
+=cut
+
 package known_funcs;
 
 use Exporter;
@@ -21,12 +29,14 @@ our %known_funcs_bl1=(
 	'15754'=>'strcmp()',
 	'730c'=>'httpd_respond_to_request',
 	'5c24'=>'trigger_reboot()',
-	'5ef0'=>'bootloader?'
+	'5ef0'=>'bootloader?',
+	'15ad8'=>'create/register task',
+	'8c60'=>'uart_putchar(r0)'
 );
 
 #block 2
 our %known_funcs_bl2=(
-	'1b018'=>'os_create_task(r1=callback)',
+	'1b018'=>'os_create_task(r1=callback, returns 0 on error(?))',
 	'7bf4'=>'some_init_register_main()',
 	'de0'=>'call_init_and_stop()',
 	'39ddc'=>'enable_interrupts()',
@@ -40,12 +50,19 @@ our %known_funcs_bl2=(
 	'324f8'=>'uart_putchar()',
 	'36f4'=>'create_pipe()??',
 	'197e4'=>'print_console_header()',
-	'c90'=>'config_cpu_regs()',
-	'7fc'=>'configure_icm_whatsthis()',
-	'd34'=>'configure_mmu_and_unknown_stuff()',
+	'c90'=>'config_cpu_regs_set_SP_memset_0()',
+	'7fc'=>'flush_some_cache()',
+	'4dc'=>'copy_ISR_code()',
+	'd34'=>'flush_some_cache_copy_ISR_code()',
 	'1814c'=>'strcmp()?',
 	'3f6a0'=>'TFEth_Init()',
-	'1a980'=>'copy_some_stuff()?'
+	'1a980'=>'copy_some_stuff()?',
+	'324e4'=>'uart_getchar()',
+	'81c4'=>'some hardware-writes (PMU, unknown)',
+	'8134'=>'INTC_setup()',
+	'b9e0'=>'something_with_FLASH()',
+	'd2a8'=>'some_output_func()',
+	'1bc0'=>'idle task?????'
 );
 
 1;
