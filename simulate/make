@@ -1,0 +1,2 @@
+#! /bin/sh
+gcc -Wall -Wextra -Werror -O3 -std=c99 -DDISASSM_TRANSLATE_TO_32 -DDISASSM_WARN_UNKNOWN -lm -o sim main.c decode_mem_get_word.c simulate.c memory.c endless_loop_detect.c mem_rw.c window.c disassembly_view.c reg_view.c mem_view.c stack_view.c dispatcher.c cmd_parser.c breakpoints.c parse_hex.c peripherals.c uart.c power_management.c interrupt_ctrl.c special_regs.c timer.c cpe.c sspc.c flash_spi.c -I../disassm/ ../disassm/decode_disassm.c ../disassm/decode_disassm32.c ../disassm/decode_disassm16.c ../disassm/opc32.c ../disassm/opc16.c ../disassm/sign_extend.c

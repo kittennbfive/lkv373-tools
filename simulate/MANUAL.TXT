@@ -1,0 +1,53 @@
+the leading 0x on hex numbers is optional
+
+main window:
+available commands:
+quit|exit ->exit immediately
+r ->refresh all window (useful after resizing)
+mem $addr|$reg ->set mem-view to $addr (hex only) (or $addr read from $reg)
+stack [$addr|$reg] ->set stack-view to addr (hex only as above) (default: stack pointer) (or $addr read from $reg)
+s ->simulate single step (breakpoints are ignored!)
+asm ->reset disassembly view to position of PC (works not too well, see disassembly_view.c)
+run $steps ->run $steps at most ($steps is in decimal!)
+bp [...]->work with breakpoints, see below
+msp $page $val ->set memory page (16MB) $page to $val ($page and $val are hex, $val is 8 bit)
+reg $reg $val ->write $val (hex) to $reg (r0-r31, dez)
+byte $addr $val ->write byte $val at memory location $addr
+word $addr $val ->write word $val beginning at memory location (byte) $addr
+read $file ->read commands from file
+layout [load|save] $file ->save position and size of open windows to $file.layout or load them [calls a Perlscript, it's a hack]
+dump $from $to $file ->dump memory to $file (as raw data, use hex-editor to open)
+
+TODO
+load $firmware $PC ->load $firmware and set PC to $PC (hex)
+reset ->reset everything
+
+breakpoint commands:
+bp remove $number ->remove breakpoint $number (in decimal starting at 1)
+bp disable $number|all ->disable breakpoint $number or all bp
+bp enable $number|all ->enable ...
+bp create $event [variable args depending on $event] $action ->create bp
+$event can be:
+	read $addr for bp on memory-read from $addr (hex)
+	write $addr for bp on memory-write to $addr (hex)
+	read|write $addr [$value|!$value|undef] for bp on mem-r/w [not] $value (or r/w from to uninitialized mem) from/to $addr
+	read|write $addr_from-$addr_to [$value|undef] for bp on mem-r/w [$value/undef] to range of addresses
+	reg $reg==$value or $reg!=$value for bp when register (r0-r31) is or is not $value (hex)
+	PC $val for bp when PC==$val
+	script $file for executing file $file
+$action can be:
+	msg to show a message
+	stop to stop if simulation is running
+	jump $addr to set PC to a new $addr (hex)
+
+
+disassembly-view:
+pressing r has the same effect as command "asm"
+scrolling is possible
+
+stack-view:
+pressing r has the same effect as command "stack" without explicit addr
+scrolling is possible
+
+memory-view:
+scrolling is possible
