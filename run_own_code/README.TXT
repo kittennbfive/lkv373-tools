@@ -10,7 +10,7 @@ This is a small "toolchain" to insert arbitrary code at arbitrary locations into
 
 It can be used to insert multiple code-pieces at different adresses in one step.
 
-The code to be injected must be written in assembly, use ONLY 4 bytes instructions(!!) and follow this pattern:
+The code to be injected must be written in assembly, use ONLY 4 byte instructions(!!) and follow this pattern:
 -----------------
 !!addr=0x<addr where to inject the following code>
 push(m) <register(s) we want to use/modify>
