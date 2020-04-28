@@ -5,6 +5,8 @@ This is part of a "toolchain" to inject arbitrary code into the LKV373 firmware.
 
 licence: AGPL v3 or later
 
+version 2 with bugfix
+
 THIS WORK IS EXPERIMENTAL AND COMES WITHOUT ANY WARRANTY!
 */
 
@@ -21,7 +23,7 @@ uint8_t *buffer;
 
 //put code somewhere where non-critical (??) strings are
 //we can't put it at the end of the existing code as the space is overwritten with 0 and then used for data (RAM)
-#define POSITION_NEW_CODE 0x55dc0
+#define POSITION_NEW_CODE 0x55dc2
 
 //for testing: the version-info call is at 8a64
 
