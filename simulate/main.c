@@ -41,8 +41,6 @@ THIS PROGRAM COMES WITHOUT ANY WARRANTY!
 /*
 little-endian
 
-todo: does not work properly, second part ("MAC ...") of UART output is missing - WHY????
-
 todo: interrupt-support is really hacked together
 
 todo: disassm-view needs work
@@ -63,7 +61,6 @@ void stop(PROTOTYPE_ARGS_HANDLER)
 #define SZ_INP_BUFFER 50
 
 #define FILENAME "lkv373.bin"
-//define FILENAME "komplett.bin"
 
 int main(void)
 {	
