@@ -52,6 +52,7 @@ void timer_write(PERIPH_CB_WRITE_ARGUMENTS)
 			break;
 		
 		case AUTO_RELOAD_VAL_REG:
+			printf("TIMER1: 0x%x written to auto_reload_val_reg\n", val);
 			auto_reload_val_reg=val;
 			break;
 		
@@ -63,7 +64,10 @@ void timer_write(PERIPH_CB_WRITE_ARGUMENTS)
 		case TIMER_CTRL_REG:
 			ctrl_reg=val;
 			if(ctrl_reg&T1_ENABLE)
+			{
 				printf("TIMER1: ENABLED\n");
+				//is_irq_pending=true; //TEST
+			}
 			else
 				printf("TIMER1: DISABLED\n");
 			break;
@@ -90,7 +94,7 @@ bool timer_read(PERIPH_CB_READ_ARGUMENTS)
 	return false;
 }
 
-
+static uint8_t prescaler=2; //IS THIS CORRECT??
 
 bool timer_tick(void)
 {
@@ -98,6 +102,11 @@ bool timer_tick(void)
 	{
 		return false;
 	}
+	
+	if(--prescaler)
+		return false;
+	
+	prescaler=2;	
 	
 	cnt_reg--;
 	

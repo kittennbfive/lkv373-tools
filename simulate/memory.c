@@ -68,6 +68,9 @@ mem_word_t memory_get_word(const uint32_t addr, bool * const breakpoint_stop)
 		ret.val=periph_val;
 		return ret;
 	}
+	
+	//if(breakpoint_stop && addr>0x20000000)
+	//	printf("get word for %x\n", addr);
 			
 	uint8_t page=(addr_remapped>>24)&0xFF;
 	if(mem_ptr[page]==0)

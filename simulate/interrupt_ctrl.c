@@ -72,7 +72,10 @@ void intc_write(PERIPH_CB_WRITE_ARGUMENTS)
 			break;
 		
 		case IRQ_INT_CLEAR_REG:
+			printf("INTC: %x written to IRQ_INT_CLEAR_REG\n", val);
 			int_clear_reg=val;
+			if(int_clear_reg&IRQ_MASK_TMR1)
+				timer_clear_irq();
 			break;
 		
 		case FIQ_MASK_REG:
@@ -143,14 +146,14 @@ void trigger_interrupt10(PROTOTYPE_ARGS_HANDLER)
 	
 	printf("triggering interrupt %d, offset in table is 0x%x\n", nb_int, offset);
 	
-	//write_to_special_reg(SR_INT_PEND, 2); //this is only true for INT 10
-	write_to_special_reg(SR_INT_PEND, 0xff); //TEST
-	
+	write_to_special_reg(SR_INT_PEND, 2); //this is only true for INT 10
+		
 	write_to_special_reg(SR_PROC_INT_STATUS_WORD, read_from_special_reg(SR_PROC_STATUS_WORD));
 	write_to_special_reg(SR_INT_PC, get_PC());
+	//printf("INT: PC %x saved\n", get_PC());
 
-	//disable GIE on ISR???
-	//special_reg_setgie(0);
+	//disable GIE on ISR
+	special_reg_setgie(0);
 	
 	set_PC(INT_VECT_TABLE_ADDR+offset);
 }
@@ -160,8 +163,8 @@ bool check_for_pending_irq(void)
 	if(get_gie() && timer_is_irq_pending())
 	//if(timer_is_irq_pending())
 	{
+		//timer_clear_irq(); //????
 		trigger_interrupt10(0, 0);
-		timer_clear_irq();
 		return true;
 	}
 	else

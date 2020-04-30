@@ -63,6 +63,7 @@ void stop(PROTOTYPE_ARGS_HANDLER)
 #define SZ_INP_BUFFER 50
 
 #define FILENAME "lkv373.bin"
+//define FILENAME "komplett.bin"
 
 int main(void)
 {	
@@ -96,6 +97,13 @@ int main(void)
 	memory_set_word(0, 0x9090707c, NULL, true);
 	memory_set_word(0, 0x90907204, NULL, true);
 	memory_set_word(0, 0x9090b050, NULL, true);
+	
+	//is this correct?
+	for(a=0; a<PAGE_SIZE; a+=4)
+	{
+		memory_set_word(0, a+0x10000000, NULL, true);
+		memory_set_word(0, a+0x20000000, NULL, true);
+	}
 	
 	redraw_all();
 	

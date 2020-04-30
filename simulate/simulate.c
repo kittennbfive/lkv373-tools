@@ -80,6 +80,25 @@ void set_PC(const uint32_t addr)
 	PC=addr;
 }
 
+uint32_t get_bits(const uint32_t val, const uint8_t to, const uint8_t from)
+{
+	if(from>to)
+		ERRX(1, "from>to\n");
+		
+	return (val&((((uint64_t)1<<(to+1))-1)&(~(((uint64_t)1<<from)-1))))>>from;
+}
+
+void set_bits(uint32_t * const val, const uint8_t to, const uint8_t from, const uint32_t bits)
+{
+	if(from>to)
+		ERRX(1, "from>to\n");
+	
+	if(from==to)
+		(*val)=(((*val)&~(1<<from))|(bits<<from));
+	else
+		(*val)=(((*val)&(~((((uint64_t)1<<(to+1))-1)&(~(((uint64_t)1<<from)-1)))))|(bits<<from));
+}
+
 typedef enum
 {
 	NO_BRANCH,
@@ -102,17 +121,6 @@ sim_t simulate(instr_t const * const instr, const bool ignore_breakpoints)
 	
 	if(stop)
 		return SIM_STOPPED_ON_BP;
-	
-	//timer_tick();
-	if(timer_tick())
-	{
-		printf("IRQ TIMER\n");
-		//return SIM_STOPPED_ON_IRQ;
-	}
-
-	
-	if(check_for_pending_irq())
-		printf("ENTERING ISR @ 0x%x\n", PC);
 	
 	uint32_t PC_old=PC;
 	is_branch_t is_branch=NO_BRANCH;
@@ -148,7 +156,7 @@ sim_t simulate(instr_t const * const instr, const bool ignore_breakpoints)
 		{
 			uint32_t addr;
 			addr=regs[instr->ra]+nds32_sign_extend(instr->imm1_15, 15, 32); //no shift
-			mem_byte_t val=memory_get_byte(addr, &stop);
+			mem_byte_t val=memory_get_byte(regs[instr->ra], &stop); //CHANGED THIS
 			if(stop && !ignore_breakpoints)
 				return SIM_STOPPED_ON_BP;
 			if(!val.is_initialized)
@@ -189,7 +197,7 @@ sim_t simulate(instr_t const * const instr, const bool ignore_breakpoints)
 		{
 			uint32_t addr;
 			addr=regs[instr->ra]+nds32_sign_extend(instr->imm1_15, 15, 32);
-			memory_set_byte(regs[instr->rt], addr, &stop, false);
+			memory_set_byte(regs[instr->rt]&0xff, addr, &stop, false);
 			break;
 		}
 
@@ -197,7 +205,7 @@ sim_t simulate(instr_t const * const instr, const bool ignore_breakpoints)
 		{
 			uint32_t addr_update;
 			addr_update=regs[instr->ra]+nds32_sign_extend(instr->imm1_15, 15, 32);
-			memory_set_byte(regs[instr->rt], regs[instr->ra], &stop, false);
+			memory_set_byte(regs[instr->rt]&0xff, regs[instr->ra], &stop, false);
 			regs[instr->ra]=addr_update;
 			break;
 		}
@@ -325,7 +333,7 @@ sim_t simulate(instr_t const * const instr, const bool ignore_breakpoints)
 					break;
 				
 				case SUB_ALU_1_ZEH:
-					regs[instr->rt]=regs[instr->ra];
+					regs[instr->rt]=regs[instr->ra]&0xffff;
 					break;
 				
 				case SUB_ALU_1_SLLI:
@@ -479,6 +487,44 @@ sim_t simulate(instr_t const * const instr, const bool ignore_breakpoints)
 							return SIM_GENERIC_ERROR;
 					}
 					break;
+				
+				case SUB_ALU_2_BSP: //this should be tested...
+				{
+					uint32_t M=get_bits(regs[instr->rb], 12, 8);
+					uint32_t N=get_bits(regs[instr->rb], 4, 0);
+					uint32_t D=M+N;
+					set_bits(&regs[instr->rb], 7, 5, 1);
+					if(31>D) //normal condition
+					{
+						set_bits(&regs[instr->rb], 4, 0, D+1);
+						set_bits(&regs[instr->rb], 31, 31, 0);
+						set_bits(&regs[instr->rt], 31-N, 31-N-M, get_bits(regs[instr->ra], M, 0));
+						if(get_bits(regs[instr->rb], 30, 30)==1)
+						{
+							set_bits(&regs[instr->rb], 12, 8, get_bits(regs[instr->rb], 20, 16));
+							set_bits(&regs[instr->rb], 15, 13, 0);
+						}
+						set_bits(&regs[instr->rb], 30, 30, 0);
+					}
+					else if(31==D) //full condition
+					{
+						set_bits(&regs[instr->rb], 4, 0, 0);
+						set_bits(&regs[instr->rb], 30, 30, 0);
+						set_bits(&regs[instr->rb], 31, 31, 1);
+						set_bits(&regs[instr->rt], M, 0, get_bits(regs[instr->ra], M, 0));
+					}
+					else if(31<D) //overflow condition
+					{
+						set_bits(&regs[instr->rb], 20, 16, M);
+						set_bits(&regs[instr->rb], 12, 8, D-32);
+						set_bits(&regs[instr->rb], 4, 0, 0);
+						set_bits(&regs[instr->rb], 30, 30, 1);
+						set_bits(&regs[instr->rb], 31, 31, 1);
+						set_bits(&regs[instr->rt], 31-N, 0, get_bits(regs[instr->ra], M, M+N-31));
+					}	
+				}
+				break;
+				
 				
 				default:
 					printf("simulate: unimplemented sub 0x%x for OPC_ALU_2 (%s)\n", instr->sub, instr->mnemonic);
@@ -693,7 +739,7 @@ sim_t simulate(instr_t const * const instr, const bool ignore_breakpoints)
 				
 				case SUB_MISC_IRET:
 					PC=read_from_special_reg(SR_INT_PC);
-					write_to_special_reg(SR_PROC_STATUS_WORD, read_from_special_reg(SR_PROC_INT_STATUS_WORD));
+					special_reg_setgie(1);
 					is_branch=BR_IRET;
 					break;
 				
@@ -772,7 +818,7 @@ sim_t simulate(instr_t const * const instr, const bool ignore_breakpoints)
 				{
 					uint32_t addr;
 					addr=regs[instr->ra]+(regs[instr->rb]<<instr->imm1_2); //imm1_2 == sv
-					memory_set_byte(regs[instr->rt], addr, &stop, false);
+					memory_set_byte(regs[instr->rt]&0xff, addr, &stop, false);
 					break;
 				}
 				
@@ -784,6 +830,10 @@ sim_t simulate(instr_t const * const instr, const bool ignore_breakpoints)
 		
 		case OPC_XORI:
 			regs[instr->rt]=regs[instr->ra]^instr->imm1_15;
+			break;
+		
+		case OPC_SUBRI:
+			regs[instr->rt]=nds32_sign_extend(instr->imm1_15, 15, 32)-regs[instr->ra];
 			break;
 		
 		default:
@@ -833,6 +883,11 @@ static sim_t sim_step(const bool ignore_breakpoints)
 	instr_t instr;
 	sim_t ret;
 	
+	timer_tick();
+	
+	if(check_for_pending_irq())
+		printf("ENTERING ISR @ 0x%x\n", PC);
+	
 	if(decode_instr(&instr, PC))
 	{
 		printf("error in decode_instr(), stop\n");
@@ -850,8 +905,6 @@ static sim_t sim_step(const bool ignore_breakpoints)
 		printf("unknown error in simulate()\n");
 	else if(ret==SIM_STOPPED_ON_BP)
 		printf("simulate() stopped due to BP\n");
-	else if(ret==SIM_STOPPED_ON_IRQ)
-		printf("IRQ request from TIMER1\n");
 	
 	return ret;
 }

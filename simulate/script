@@ -1,10 +1,15 @@
 layout load lay
 
-#for some magic numbers - what are these??
+#for some magic numbers - what is this??
 word 100d1580 FF000100
-word 99300008 00006000
+
+#GPIO - LED OFF
+word 99300008 00000000
 
 #waiting for some magic value from unknown periph
 bp create pc 0x248 script bp_script
 
-run 20000000
+#what is this?
+#word 100d2e7c 1
+
+run 25000000

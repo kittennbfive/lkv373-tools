@@ -164,13 +164,14 @@ void write_to_special_reg(const uint16_t sridx, const uint32_t val)
 	
 	//printf("value %x written to SR %s\n", val, special_regs[i].name);
 	
-	
 	if(special_regs[i].id==SR_PROC_STATUS_WORD)
 	{
+		/*
 		if(val&PSW_GIE)
 			printf("INTERRUPTS ENABLED\n");
 		else
 			printf("INTERRUPTS DISABLED\n");
+		*/
 	}
 	
 }
