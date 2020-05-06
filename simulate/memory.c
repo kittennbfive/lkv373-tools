@@ -24,6 +24,7 @@ THIS PROGRAM COMES WITHOUT ANY WARRANTY!
 #include "window.h"
 #include "peripherals.h"
 #include "cpe.h" //addr translation
+#include "verbosity.h"
 
 //representing the full adressable 4 GB of memory using pages of 16MB each and allocating memory if needed only
 mem_byte_t * mem_ptr[256];
@@ -66,18 +67,16 @@ mem_word_t memory_get_word(const uint32_t addr, bool * const breakpoint_stop)
 	{
 		ret.is_initialized=true;
 		ret.val=periph_val;
+		mem_rw_check_for_breakpoints(READ, addr, periph_val, true, breakpoint_stop);
 		return ret;
 	}
-	
-	//if(breakpoint_stop && addr>0x20000000)
-	//	printf("get word for %x\n", addr);
-			
+		
 	uint8_t page=(addr_remapped>>24)&0xFF;
 	if(mem_ptr[page]==0)
 	{
 		ret.is_initialized=false;
 #ifdef WARN_IF_READING_UNINITIALIZED
-		printf("warning: memory_get_word: requested uninitialized memory page! (0x%x)\n", page);
+		MSG(MSG_ALWAYS, "warning: memory_get_word: requested uninitialized memory page! (0x%x)\n", page);
 #endif
 		return ret;
 	}
@@ -88,7 +87,7 @@ mem_word_t memory_get_word(const uint32_t addr, bool * const breakpoint_stop)
 	{
 		ret.is_initialized=false;
 #ifdef WARN_IF_READING_UNINITIALIZED
-		printf("warning: memory_get_word: read from uninitialized memory! (0x%x)\n", addr);
+		MSG(MSG_ALWAYS, "warning: memory_get_word: read from uninitialized memory! (0x%x)\n", addr);
 #endif
 	}
 	else
@@ -113,6 +112,7 @@ mem_byte_t memory_get_byte(const uint32_t addr, bool * const breakpoint_stop)
 	{
 		ret.is_initialized=true;
 		ret.val=periph_val&0xFF;
+		mem_rw_check_for_breakpoints(READ, addr, periph_val&0xFF, true, breakpoint_stop);
 		return ret;
 	}
 	
@@ -121,7 +121,7 @@ mem_byte_t memory_get_byte(const uint32_t addr, bool * const breakpoint_stop)
 	{
 		ret.is_initialized=false;
 #ifdef WARN_IF_READING_UNINITIALIZED
-		printf("warning: memory_get_byte: requested uninitialized memory page! (0x%x)\n", page);
+		MSG(MSG_ALWAYS, "warning: memory_get_byte: requested uninitialized memory page! (0x%x)\n", page);
 #endif
 		return ret;
 	}
@@ -132,7 +132,7 @@ mem_byte_t memory_get_byte(const uint32_t addr, bool * const breakpoint_stop)
 	{
 		ret.is_initialized=false;
 #ifdef WARN_IF_READING_UNINITIALIZED
-		printf("warning: memory_get_byte: read from uninitialized memory! (0x%x)\n", addr);
+		MSG(MSG_ALWAYS, "warning: memory_get_byte: read from uninitialized memory! (0x%x)\n", addr);
 #endif
 	}
 	else
@@ -140,8 +140,6 @@ mem_byte_t memory_get_byte(const uint32_t addr, bool * const breakpoint_stop)
 		ret.is_initialized=true;
 		ret.val=mem_ptr[page][addr_in_page].val;
 	}
-	
-	//fprintf(stderr, "%x: memory read byte %x = %x (%c)\n", get_PC(), addr_remapped, ret.val, ret.val?ret.val:' ');
 	
 	mem_rw_check_for_breakpoints(READ, addr, ret.val, ret.is_initialized, breakpoint_stop);
 	
@@ -155,7 +153,10 @@ void memory_set_word(const uint32_t data, const uint32_t addr, bool * const brea
 	if(!no_periph_callback)
 	{
 		if(peripheral_write(addr_remapped, data))
+		{
+			mem_rw_check_for_breakpoints(WRITE, addr, data, true, breakpoint_stop);
 			return;
+		}
 	}
 	
 	uint8_t page=(addr_remapped>>24)&0xFF;
@@ -172,14 +173,6 @@ void memory_set_word(const uint32_t data, const uint32_t addr, bool * const brea
 	}
 	
 	mem_rw_check_for_breakpoints(WRITE, addr, data, 1, breakpoint_stop);
-	
-	//fprintf(stderr, "%c%c%c%c", (data>>0)&0xff, (data>>8)&0xff, (data>>16)&0xff, (data>>24)&0xff);
-	
-	//if(addr>0x4FFFFFFF)
-	//	fwrite(&data, 4, 1, stderr);
-	
-	//if(addr>0x4FFFFFFF)
-	//	printf("mem write word %x %x\n", addr, data);
 }
 
 void memory_set_byte(const uint8_t data, const uint32_t addr, bool * const breakpoint_stop, const bool no_periph_callback)
@@ -189,7 +182,10 @@ void memory_set_byte(const uint8_t data, const uint32_t addr, bool * const break
 	if(!no_periph_callback)
 	{
 		if(peripheral_write(addr_remapped, data))
+		{
+			mem_rw_check_for_breakpoints(WRITE, addr, data, true, breakpoint_stop);
 			return;
+		}
 	}
 	
 	uint8_t page=(addr_remapped>>24)&0xFF;
@@ -202,12 +198,6 @@ void memory_set_byte(const uint8_t data, const uint32_t addr, bool * const break
 	mem_ptr[page][addr_in_page].val=data;
 	
 	mem_rw_check_for_breakpoints(WRITE, addr, data, 1, breakpoint_stop);
-	
-	//fprintf(stderr, "byte: %x=%x (%c)\n", addr, data, data?data:' ');
-	//fwrite(&data, 1, 1, stderr);
-	
-	//if(addr>0x4FFFFFFF)
-	//	printf("mem write byte %x %x (%c)\n", addr, data, data);
 }
 
 void memory_set_halfword(const uint16_t data, const uint32_t addr, bool * const breakpoint_stop, const bool no_periph_callback)
@@ -217,7 +207,10 @@ void memory_set_halfword(const uint16_t data, const uint32_t addr, bool * const 
 	if(!no_periph_callback)
 	{
 		if(peripheral_write(addr_remapped, data))
+		{
+			mem_rw_check_for_breakpoints(WRITE, addr, data, true, breakpoint_stop);
 			return;
+		}
 	}
 	
 	uint8_t page=(addr_remapped>>24)&0xFF;
@@ -236,8 +229,6 @@ void memory_set_halfword(const uint16_t data, const uint32_t addr, bool * const 
 	}
 	
 	mem_rw_check_for_breakpoints(WRITE, addr, data, 1, breakpoint_stop);
-	
-	//fwrite(&data, 2, 1, stderr);
 }
 
 mem_halfword_t memory_get_halfword(const uint32_t addr, bool * const breakpoint_stop)
@@ -251,6 +242,7 @@ mem_halfword_t memory_get_halfword(const uint32_t addr, bool * const breakpoint_
 	{
 		ret.is_initialized=true;
 		ret.val=periph_val&0xFFFF;
+		mem_rw_check_for_breakpoints(READ, addr, periph_val&0xFFFF, true, breakpoint_stop);
 		return ret;
 	}
 	
@@ -259,7 +251,7 @@ mem_halfword_t memory_get_halfword(const uint32_t addr, bool * const breakpoint_
 	{
 		ret.is_initialized=false;
 #ifdef WARN_IF_READING_UNINITIALIZED
-		printf("warning: memory_get_word: requested uninitialized memory page! (0x%x)\n", page);
+		MSG(MSG_ALWAYS, "warning: memory_get_word: requested uninitialized memory page! (0x%x)\n", page);
 #endif
 		return ret;
 	}
@@ -270,7 +262,7 @@ mem_halfword_t memory_get_halfword(const uint32_t addr, bool * const breakpoint_
 	{
 		ret.is_initialized=false;
 #ifdef WARN_IF_READING_UNINITIALIZED
-		printf("warning: memory_get_word: read from uninitialized memory! (0x%x)\n", addr);
+		MSG(MSG_ALWAYS, "warning: memory_get_word: read from uninitialized memory! (0x%x)\n", addr);
 #endif
 	}
 	else
@@ -319,7 +311,7 @@ void read_memory_from_file(char const * const filename, const uint32_t addr)
 	
 	free(buf);
 	
-	printf("%s copied to 0x%x (0x%x bytes)\n", filename, addr, fsize);
+	MSG(MSG_ALWAYS, "%s copied to 0x%x (0x%x bytes)\n", filename, addr, fsize);
 }
 
 void memory_set_page(PROTOTYPE_ARGS_HANDLER) //2 args
@@ -334,7 +326,7 @@ void memory_set_page(PROTOTYPE_ARGS_HANDLER) //2 args
 		return;
 	if(v>0xff)
 	{
-		printf("page must be between 0 and 0xff\n");
+		MSG(MSG_ALWAYS, "page must be between 0 and 0xff\n");
 		return;
 	}
 	page=(uint8_t)v;
@@ -343,7 +335,7 @@ void memory_set_page(PROTOTYPE_ARGS_HANDLER) //2 args
 		return;
 	if(v>0xff)
 	{
-		printf("init value must be between 0 and 0xff\n");
+		MSG(MSG_ALWAYS, "init value must be between 0 and 0xff\n");
 		return;
 	}
 	val=v;
@@ -357,7 +349,7 @@ void memory_set_page(PROTOTYPE_ARGS_HANDLER) //2 args
 		mem_ptr[page][i].val=val;
 	}
 	
-	printf("memory 0x%02xxxxxxxxx initialized to 0x%02x\n", page, val);
+	MSG(MSG_ALWAYS, "memory 0x%02xxxxxxxxx initialized to 0x%02x\n", page, val);
 	
 	redraw(W_MEM);
 }
@@ -378,7 +370,7 @@ void memory_write_value(PROTOTYPE_ARGS_HANDLER)
 	{
 		if(val>0xff)
 		{
-			printf("value is too big for a byte\n");
+			MSG(MSG_ALWAYS, "value is too big for a byte\n");
 			return;
 		}
 		memory_set_byte((uint8_t)val, addr, NULL, false);
@@ -390,7 +382,7 @@ void memory_write_value(PROTOTYPE_ARGS_HANDLER)
 	else
 		ERRX(1, "invalid command");
 	
-	printf("memory value written\n");
+	MSG(MSG_ALWAYS, "memory value written\n");
 	
 	redraw(W_MEM);
 }
@@ -415,10 +407,9 @@ void memory_dump_region(PROTOTYPE_ARGS_HANDLER)
 		return;
 	}
 	
-	printf("dumping memory 0x%08x-0x%08x to %s...\n", addr_from, addr_to, filename);
+	MSG(MSG_ALWAYS, "dumping memory 0x%08x-0x%08x to %s...\n", addr_from, addr_to, filename);
 	
-	//TODO: use direct memory access and write chunks of data to make this faster!
-	//actually it's fine, it's really quick already
+	//this is really fast, no need to use direct memory access
 	
 	uint32_t addr;
 	mem_byte_t byte;
@@ -427,12 +418,12 @@ void memory_dump_region(PROTOTYPE_ARGS_HANDLER)
 		byte=memory_get_byte(addr, NULL);
 		if(!byte.is_initialized)
 		{
-			printf("error: memory at 0x%08x is uninitialized\n", addr);
+			MSG(MSG_ALWAYS, "error: memory at 0x%08x is uninitialized\n", addr);
 			break;
 		}
 		fwrite(&byte.val, sizeof(uint8_t), 1, f);
 	}
 	
 	fclose(f);
-	printf("dump finished\n");
+	MSG(MSG_ALWAYS, "dump finished\n");
 }

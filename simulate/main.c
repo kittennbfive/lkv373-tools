@@ -41,11 +41,13 @@ THIS PROGRAM COMES WITHOUT ANY WARRANTY!
 /*
 little-endian
 
-todo: interrupt-support is really hacked together
-
 todo: disassm-view needs work
 
 todo: mem_view for periph-mem does not work properly, only shows 1 byte of 4
+
+todo: RE MAC
+
+todo: add more peripherals
 
 todo: a lot more
 */
@@ -61,6 +63,8 @@ void stop(PROTOTYPE_ARGS_HANDLER)
 #define SZ_INP_BUFFER 50
 
 #define FILENAME "lkv373.bin"
+//#define FILENAME "t.bin"
+//#define FILENAME "test.bin"
 
 int main(void)
 {	
@@ -72,7 +76,7 @@ int main(void)
 	int w_mem=init_mem_view();
 	int w_stack=init_stack_view();
 	init_breakpoints_view();
-	init_uart_view();
+	int w_uart=init_uart_view();
 	
 	init_pmu();
 	init_intc();
@@ -117,6 +121,7 @@ int main(void)
 		dispatcher(W_ASM, w_disassembly);
 		dispatcher(W_MEM, w_mem);
 		dispatcher(W_STACK, w_stack);
+		dispatcher(W_UART, w_uart);
 		
 		//event for main window
 		//we need all this stuff because we can't use blocking input as it would block the loop and disable scrolling in other windows that relies on

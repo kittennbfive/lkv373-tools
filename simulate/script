@@ -1,15 +1,10 @@
 layout load lay
 
-#for some magic numbers - what is this??
-word 100d1580 FF000100
+#verbosity on PERIPH
 
-#GPIO - LED OFF
-word 99300008 00000000
+#verbosity file log.txt
 
 #waiting for some magic value from unknown periph
 bp create pc 0x248 script bp_script
 
-#what is this?
-#word 100d2e7c 1
-
-run 25000000
+run 25M

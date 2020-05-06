@@ -24,7 +24,8 @@ THIS PROGRAM COMES WITHOUT ANY WARRANTY!
 #include "timer.h"
 #include "cpe.h"
 #include "sspc.h"
-#include "breakpoints.h" //type_mem_access_t
+#include "mac.h"
+#include "gpio.h"
 
 static peripheral_t per[]=
 {
@@ -34,6 +35,9 @@ static peripheral_t per[]=
 	{"INTC", 0x98800000, 0x98810000, &intc_write, &intc_read}, //interrupt controller
 	{"UART", 0x99600000, 0x9960001c, &uart_write, &uart_read},
 	{"SSPC", 0x98b00000, 0x98c00000, &sspc_write, &sspc_read}, //synchronous serial port controller - SPI connected to FLASH - wider range to catch unknown registers
+	{"GPIO", 0x99300000, 0x99300044, &gpio_write, &gpio_read}, //LED and reset button
+	
+	{"MAC", 0x90907000, 0x90907fff, &mac_write, &mac_read}, //TODO
 	
 	{NULL, 0, 0, NULL, NULL}
 };

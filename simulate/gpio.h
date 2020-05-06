@@ -8,17 +8,17 @@ licence: AGPL v3 or later
 THIS PROGRAM COMES WITHOUT ANY WARRANTY!
 */
 
-#ifndef __UART_H__
-#define __UART_H__
+#ifndef __GPIO_H__
+#define __GPIO_H__
 #include <stdint.h>
 #include <stdbool.h>
 
 #include "peripherals.h"
-#include "breakpoints.h"
 
-int init_uart_view(void);
-void uart_write(PERIPH_CB_WRITE_ARGUMENTS);
-bool uart_read(PERIPH_CB_READ_ARGUMENTS);
-uint8_t uart_keypress(char c);
+void gpio_write(PERIPH_CB_WRITE_ARGUMENTS);
+bool gpio_read(PERIPH_CB_READ_ARGUMENTS);
+
+bool get_LED_state(void);
+//bool get_button_state(void);
 
 #endif

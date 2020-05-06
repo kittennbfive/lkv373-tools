@@ -8,9 +8,9 @@ THIS PROGRAM IS PROVIDED WITHOUT ANY WARRANTY!
 
 This is an attempt to implement a simulator for the LKV373 to help with reverse engineering and eventually the development of a FOSS-firmware.
 
-This simulator is currently really incomplete, a lot of the peripherals are not or only partially simulated (we don't have a lot of informations and reversing is hard and prone to errors) and only a fraction of the instruction set of the Andes N10 is implemented.
+This simulator is currently really incomplete, a lot of the peripherals are not or only partially simulated (we don't have a lot of informations and reversing is hard and prone to errors) and only a fraction of the instruction set of the Andes N10 is implemented. However you can get to the serial console and type some commands.
 
-THIS SIMULATOR IS EXPERIMENTAL AND BUGGY! Feedback and help with debugging (see main.c) would be really appreciated!
+THIS SIMULATOR IS EXPERIMENTAL AND PROBABLY BUGGY! Feedback and help with debugging / improvements (see main.c) would be really appreciated!
 
 THIS SIMULATOR WILL COMPILE/WORK ON LINUX ONLY! Tested on Debian 10.
 
@@ -28,18 +28,19 @@ type "read script" and see the magic happen. You will need to adjust the windows
 Known limitations:
 see main.c
 
-If the simulator crashes you can do "rm fifo_sim" to close all remaining windows.
+If the simulator crashes or you pressed Ctrl+C you can do "rm fifo_sim" to close all remaining windows.
+
+If you get a "xfce4-terminal not found" or similar i forgot to edit window.h to switch to generic "x-terminal-emulator". Correct this and recompile.
 
 Current statistics:
-github.com/AlDanial/cloc v 1.81  T=0.04 s (1378.0 files/s, 157471.1 lines/s)
+github.com/AlDanial/cloc v 1.81  T=0.04 s (1378.0 files/s, 156795.5 lines/s)
 -------------------------------------------------------------------------------
 Language                     files          blank        comment           code
 -------------------------------------------------------------------------------
-C                               24            853            268           3820
-C/C++ Header                    26            208            186            419
-Perl                             1             14              2             58
+C                               27            924            307           4259
+C/C++ Header                    29            227            200            455
 -------------------------------------------------------------------------------
-SUM:                            51           1075            456           4297
+SUM:                            56           1151            507           4714
 -------------------------------------------------------------------------------
 +the code in ../disassm, total >6000 LOC.
 

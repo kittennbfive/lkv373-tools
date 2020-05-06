@@ -14,7 +14,6 @@ THIS PROGRAM COMES WITHOUT ANY WARRANTY!
 #include <stdbool.h>
 
 #include "window.h"
-//#include "breakpoints.h" //type_mem_access_t
 
 #define PERIPH_CB_WRITE_ARGUMENTS const uint32_t addr, const uint32_t val
 #define PERIPH_CB_READ_ARGUMENTS const uint32_t addr, uint32_t * const val

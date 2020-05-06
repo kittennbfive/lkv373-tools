@@ -23,6 +23,7 @@ THIS PROGRAM COMES WITHOUT ANY WARRANTY!
 #include "ansi.h"
 #include "cmd_parser.h"
 #include "parse_hex.h"
+#include "verbosity.h"
 
 static int w_bp;
 static event_t bp[NB_BREAKPOINTS_MAX];
@@ -63,7 +64,7 @@ static void register_breakpoint(event_t const * const ev)
 {
 	if(nb_bp>=NB_BREAKPOINTS_MAX)
 	{
-		printf("no space left for more breakpoints, increase NB_BREAKPOINTS_MAX\n");
+		MSG(MSG_ALWAYS, "no space left for more breakpoints, increase NB_BREAKPOINTS_MAX\n");
 		return;
 	}
 	
@@ -72,7 +73,7 @@ static void register_breakpoint(event_t const * const ev)
 	{
 		if(event_compare(&bp[i], ev))
 		{
-			printf("breakpoint already exists (nb %d)\n", i+1);
+			MSG(MSG_ALWAYS, "breakpoint already exists (nb %d)\n", i+1);
 			return;
 		}
 	}
@@ -80,7 +81,7 @@ static void register_breakpoint(event_t const * const ev)
 	memcpy(&bp[nb_bp], ev, sizeof(event_t));
 	nb_bp++;
 	
-	printf("breakpoint saved, total %u\n", nb_bp);
+	MSG(MSG_ALWAYS, "breakpoint saved, total %u\n", nb_bp);
 }
 
 void print_bp_memory(const uint8_t i)
@@ -179,7 +180,7 @@ static uint8_t bp_parse_action(event_t * const ev)
 	char * arg=get_next_argument();
 	if(!arg)
 	{
-		printf("missing action\n");
+		MSG(MSG_ALWAYS, "missing action\n");
 		return 1;
 	}
 	
@@ -196,7 +197,7 @@ static uint8_t bp_parse_action(event_t * const ev)
 		ev->action=JUMP;
 		if(get_number_remaining_args()==0)
 		{
-			printf("missing jump target address\n");
+			MSG(MSG_ALWAYS, "missing jump target address\n");
 			return 1;
 		}
 		if(parse_hex(get_next_argument(), &ev->jump_target))
@@ -207,14 +208,14 @@ static uint8_t bp_parse_action(event_t * const ev)
 		ev->action=SCRIPT;
 		if(get_number_remaining_args()==0)
 		{
-			printf("missing script name\n");
+			MSG(MSG_ALWAYS, "missing script name\n");
 			return 1;
 		}
 		strncpy(ev->script, get_next_argument(), SZ_BUF_BP_NAME_SCRIPT);
 	}
 	else
 	{
-		printf("invalid action\n");
+		MSG(MSG_ALWAYS, "invalid action\n");
 		return 1;
 	}
 	
@@ -229,7 +230,7 @@ static uint8_t bp_parse_mem_rw(event_t * const ev)
 	
 	if(!arg)
 	{
-		printf("missing address\n");
+		MSG(MSG_ALWAYS, "missing address\n");
 		return 1;
 	}
 	
@@ -256,17 +257,13 @@ static uint8_t bp_parse_mem_rw(event_t * const ev)
 			return 1;
 	}
 	
-	//printf("addr or range parsed\n");
-	
 	arg=peek_next_argument();
 	if(!arg)
 	{
-		printf("missing value or action\n");
+		MSG(MSG_ALWAYS, "missing value or action\n");
 		return 1;
 	}
-	
-	//printf("parsing %s\n", arg);
-	
+
 	if(arg[0]=='!')
 	{
 		(void)get_next_argument(); //remove peeked arg it from list
@@ -291,7 +288,6 @@ static uint8_t bp_parse_mem_rw(event_t * const ev)
 	}
 	else
 	{
-		//printf("type is is_accessed\n");
 		ev->type_match_mem=IS_ACCESSED;
 		return 0;
 	}
@@ -320,13 +316,13 @@ static uint8_t bp_parse_reg_is_isnot_val(event_t * const ev)
 	}
 	else
 	{
-		printf("missing operator\n");
+		MSG(MSG_ALWAYS, "missing operator\n");
 		return 1;
 	}
 
 	if(compare==buffer)
 	{
-		printf("missing address\n");
+		MSG(MSG_ALWAYS, "missing address\n");
 		return 1;
 	}	
 	
@@ -334,26 +330,26 @@ static uint8_t bp_parse_reg_is_isnot_val(event_t * const ev)
 	
 	if(buffer[0]!='r')
 	{
-		printf("missing register\n");
+		MSG(MSG_ALWAYS, "missing register\n");
 		return 1;
 	}
 	
 	if(!isdigit(buffer[1]) || (buffer[2] && !isdigit(buffer[2])))
 	{
-		printf("invalid register\n");
+		MSG(MSG_ALWAYS, "invalid register\n");
 		return 1;
 	}
 	ev->reg=atoi(&buffer[1]);
 	if(ev->reg>31)
 	{
-		printf("invalid register\n");
+		MSG(MSG_ALWAYS, "invalid register\n");
 		return 1;
 	}
 	
 	compare+=2;
 	if((*compare)=='\0')
 	{
-		printf("missing value\n");
+		MSG(MSG_ALWAYS, "missing value\n");
 		return 1;
 	}	
 	if(parse_hex(compare, &ev->value))
@@ -375,7 +371,6 @@ static void create_bp_from_string(void)
 	
 		if(bp_parse_mem_rw(&ev))
 			return;
-		//printf("about to call bp_parse_action\n");
 		if(bp_parse_action(&ev))
 			return;
 	}
@@ -405,7 +400,7 @@ static void create_bp_from_string(void)
 	}
 	else
 	{
-		printf("invalid event type\n");
+		MSG(MSG_ALWAYS, "invalid event type\n");
 		return;
 	}
 	
@@ -427,7 +422,7 @@ void cmd_breakpoint(PROTOTYPE_ARGS_HANDLER) //min 2 args guaranteed by cmd_parse
 		uint8_t nb=atoi(get_next_argument());
 		if(nb==0 || nb>nb_bp)
 		{
-			printf("invalid breakpoint specified\n");
+			MSG(MSG_ALWAYS, "invalid breakpoint specified\n");
 			return;
 		}
 		nb--; //first bp is called number 1 but has index 0 of course
@@ -453,7 +448,7 @@ void cmd_breakpoint(PROTOTYPE_ARGS_HANDLER) //min 2 args guaranteed by cmd_parse
 			uint8_t nb=atoi(arg);
 			if(nb==0 || nb>nb_bp)
 			{
-				printf("invalid breakpoint specified\n");
+				MSG(MSG_ALWAYS, "invalid breakpoint specified\n");
 				return;
 			}
 			bp[nb-1].disabled=true; //first bp is called number 1 but has index 0 of course
@@ -473,7 +468,7 @@ void cmd_breakpoint(PROTOTYPE_ARGS_HANDLER) //min 2 args guaranteed by cmd_parse
 			uint8_t nb=atoi(arg);
 			if(nb==0 || nb>nb_bp)
 			{
-				printf("invalid breakpoint specified\n");
+				MSG(MSG_ALWAYS, "invalid breakpoint specified\n");
 				return;
 			}
 			bp[nb-1].disabled=false;
@@ -481,7 +476,7 @@ void cmd_breakpoint(PROTOTYPE_ARGS_HANDLER) //min 2 args guaranteed by cmd_parse
 	}
 	else
 	{
-		printf("set breakpoint: missing command\n");
+		MSG(MSG_ALWAYS, "set breakpoint: missing command\n");
 		return;
 	}
 
@@ -495,27 +490,24 @@ void handle_breakpoint(const uint32_t nb_bp, uint32_t * const PC, bool * const P
 	switch(bp[nb_bp].action)
 	{
 		case MESSAGE:
-			printf("BP %u triggered!\n", nb_bp);
+			MSG(MSG_ALWAYS, "BP %u triggered!\n", nb_bp);
 			break;
 		
 		case STOP:
 			if(stop)
 				*stop=true;
 			else
-			{
-				printf("handle_bp: stop-ptr is NULL\n");
-				exit(1);
-			}
+				ERRX(1, "handle_bp: stop-ptr is NULL\n");
 			break;
 			
 		case JUMP:
-			printf("BP: jump to 0x%08x\n", bp[nb_bp].jump_target);
+			MSG(MSG_ALWAYS, "BP: jump to 0x%08x\n", bp[nb_bp].jump_target);
 			*PC=bp[nb_bp].jump_target;
 			*PC_manipulated=true;
 			break;
 		
 		case SCRIPT:
-			printf("BP: executing script %s\n", bp[nb_bp].script);
+			MSG(MSG_ALWAYS, "BP: executing script %s\n", bp[nb_bp].script);
 			if(execute_script(bp[nb_bp].script))
 				*stop=true;
 			break;

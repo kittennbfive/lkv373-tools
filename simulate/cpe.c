@@ -14,7 +14,7 @@ THIS PROGRAM COMES WITHOUT ANY WARRANTY!
 
 #include "cpe.h"
 #include "peripherals.h"
-#include "decode_mem_get_word.h"
+#include "verbosity.h"
     
 #define CPE_AHB_SLAVE0_REG 0x90100000
 #define CPE_AHB_SLAVE1_REG 0x90100004
@@ -38,7 +38,7 @@ static uint32_t remap_reg=0;
 
 void init_cpe(void)
 {
-	printf("warning: most of CPE config/writes is/are ignored!\n");
+	MSG(MSG_ALWAYS, "warning: most of CPE config/writes is/are ignored!\n");
 }
 
 void cpe_write(PERIPH_CB_WRITE_ARGUMENTS)
@@ -50,7 +50,7 @@ void cpe_write(PERIPH_CB_WRITE_ARGUMENTS)
 			break;
 		
 		default:
-			printf("CPE: unhandled register write 0x%x @0x%x\n", val, addr);
+			MSG(MSG_PERIPH, "CPE: unhandled register write 0x%x @0x%x\n", val, addr);
 	}
 }
 
@@ -64,7 +64,7 @@ bool cpe_read(PERIPH_CB_READ_ARGUMENTS)
 			break;
 		
 		default:
-			printf("CPE: unhandled register read 0x%x\n", addr);
+			MSG(MSG_PERIPH, "CPE: unhandled register read 0x%x\n", addr);
 			return false;
 	}
 }

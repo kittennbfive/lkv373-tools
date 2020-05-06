@@ -20,8 +20,6 @@ void init_intc(void);
 void intc_write(PERIPH_CB_WRITE_ARGUMENTS);
 bool intc_read(PERIPH_CB_READ_ARGUMENTS);
 
-void trigger_interrupt10(PROTOTYPE_ARGS_HANDLER);
-
 bool check_for_pending_irq(void);
 
 #endif

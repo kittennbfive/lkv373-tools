@@ -19,6 +19,7 @@ THIS PROGRAM COMES WITHOUT ANY WARRANTY!
 
 #include "window.h"
 #include "my_err.h"
+#include "verbosity.h"
 
 #define SZ_BUF 250
 #define SZ_PATH_PTS 20
@@ -162,7 +163,7 @@ static uint32_t process_input_buffer(char const * const buf, const uint32_t sz_b
 			}
 			else
 			{
-				printf("process_input_buffer: unknown escape seq!\n");
+				MSG(MSG_ALWAYS, "process_input_buffer: unknown escape seq!\n");
 				i++;
 			}
 		}

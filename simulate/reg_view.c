@@ -18,6 +18,8 @@ THIS PROGRAM COMES WITHOUT ANY WARRANTY!
 #include "ansi.h"
 #include "simulate.h"
 #include "special_regs.h"
+#include "memory.h"
+#include "gpio.h"
 
 static int w_reg;
 
@@ -79,4 +81,12 @@ void print_registers(void)
 		win_printf(w_reg, "Superuser");
 	else
 		win_printf(w_reg, "(invalid)");
+	
+	win_printf(w_reg, "\n");
+	
+	if(get_LED_state())
+		win_printf(w_reg, "LED ON\n");
+	else
+		win_printf(w_reg, "LED OFF\n");
+	
 }

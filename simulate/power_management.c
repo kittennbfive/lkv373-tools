@@ -15,6 +15,7 @@ THIS PROGRAM COMES WITHOUT ANY WARRANTY!
 #include "power_management.h"
 #include "peripherals.h"
 #include "memory.h"
+#include "verbosity.h"
 
 #define OSC_CTRL_REG 0x98100008
 
@@ -35,7 +36,7 @@ static uint32_t unknown1=0;
 
 void init_pmu(void)
 {
-	printf("warning: PMU config is completely ignored!\n");
+	MSG(MSG_ALWAYS, "warning: PMU config is completely ignored!\n");
 }
 
 void pmu_write(PERIPH_CB_WRITE_ARGUMENTS)
@@ -63,7 +64,7 @@ void pmu_write(PERIPH_CB_WRITE_ARGUMENTS)
 			break;
 			
 		default:
-			printf("PMU: unhandled register write 0x%x @0x%x\n", val, addr);
+			MSG(MSG_PERIPH, "PMU: unhandled register write 0x%x @0x%x\n", val, addr);
 	}
 }
 
@@ -97,7 +98,7 @@ bool pmu_read(PERIPH_CB_READ_ARGUMENTS)
 			break;
 	
 		default:
-			printf("PMU: unhandled register read 0x%x\n", addr);
+			MSG(MSG_PERIPH, "PMU: unhandled register read 0x%x\n", addr);
 			return false;
 	}
 }

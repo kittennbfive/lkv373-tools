@@ -25,8 +25,8 @@ THIS PROGRAM COMES WITHOUT ANY WARRANTY!
 #include "breakpoints.h"
 #include "memory.h"
 #include "window.h"
-#include "interrupt_ctrl.h"
 #include "special_regs.h"
+#include "verbosity.h"
 
 char cmd[SZ_BUFFER_COMMAND];
 char args[NB_ARGUMENTS_MAX][SZ_BUFFER_ARGUMENTS];
@@ -51,9 +51,9 @@ const command_t commands[]=
 	{"read", 1, 1, &execute_script_cmd},
 	{"layout", 2, 2, &cmd_layout},
 	{"dump", 3, 3, &memory_dump_region},
-	{"int10", 0, 0, &trigger_interrupt10},
-//	{"writesr", 2, 2, &cmd_write_sr},
-	{"setpc", 1, 1, &set_pc_cmd},
+//	{"writesr", 2, 2, &cmd_write_sr}, //unimplemented
+	{"setpc", 1, 1, &set_pc_cmd}, //use this with great caution, maybe this should be removed?
+	{"verbosity", 2, 10, &cmd_set_verbosity},
 	
 	{NULL, 0, 0, NULL}
 };
@@ -65,7 +65,7 @@ uint8_t execute_script(char const * const filename)
 	FILE *f=fopen(filename, "r");
 	if(!f)
 	{
-		printf("can't open %s!\n", filename);
+		MSG(MSG_ALWAYS, "can't open %s!\n", filename);
 		return 1;
 	}
 	
@@ -79,7 +79,7 @@ uint8_t execute_script(char const * const filename)
 			continue;
 		if(strlen(line)==0)
 			continue;
-		printf("executing %s\n", line);
+		MSG(MSG_ALWAYS, "executing %s\n", line);
 		if(parse_input(line))
 			return 1;
 	}
@@ -131,18 +131,18 @@ uint8_t parse_input(char * const inp)
 	}
 	if(!found)
 	{
-		printf("unknown command %s\n", cmd);
+		MSG(MSG_ALWAYS, "unknown command %s\n", cmd);
 		return 1;
 	}
 	
 	if(nb_args<commands[i].nb_args_min)
 	{
-		printf("not enough arguments for %s\n", cmd);
+		MSG(MSG_ALWAYS, "not enough arguments for %s\n", cmd);
 		return 1;
 	}
 	if(nb_args>commands[i].nb_args_max)
 	{
-		printf("too many arguments for %s\n", cmd);
+		MSG(MSG_ALWAYS, "too many arguments for %s\n", cmd);
 		return 1;
 	}
 	

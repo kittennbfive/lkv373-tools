@@ -14,12 +14,13 @@ THIS PROGRAM COMES WITHOUT ANY WARRANTY!
 #include <ctype.h>
 
 #include "parse_hex.h"
+#include "verbosity.h"
 
 uint8_t is_valid_hex(char const * const str)
 {
 	if(!str)
 	{
-		printf("is_valid_hex: ptr is NULL\n");
+		MSG(MSG_ALWAYS, "is_valid_hex: ptr is NULL\n");
 		return 0;
 	}
 	
@@ -43,7 +44,7 @@ uint8_t parse_hex(char const * const str, uint32_t * const val)
 {
 	if(!str)
 	{
-		printf("hex value missing (ptr is NULL)\n");
+		MSG(MSG_ALWAYS, "hex value missing (ptr is NULL)\n");
 		return 1;
 	}
 
@@ -58,7 +59,7 @@ uint8_t parse_hex(char const * const str, uint32_t * const val)
 	{
 		if(!isxdigit(ptr[i]))
 		{
-			printf("invalid hex value\n");
+			MSG(MSG_ALWAYS, "invalid hex value\n");
 			return 1;
 		}
 	}
@@ -72,7 +73,7 @@ uint8_t parse_register(char const * const str, uint8_t * const reg)
 {
 	if(!str)
 	{
-		printf("register missing (ptr is NULL)\n");
+		MSG(MSG_ALWAYS, "register missing (ptr is NULL)\n");
 		return 1;
 	}
 
@@ -86,13 +87,13 @@ uint8_t parse_register(char const * const str, uint8_t * const reg)
 	
 	if(val==0 && (*ptr!='0'))
 	{
-		printf("invalid register\n");
+		MSG(MSG_ALWAYS, "invalid register\n");
 		return 1;
 	}
 	
 	if(val>31)
 	{
-		printf("invalid register\n");
+		MSG(MSG_ALWAYS, "invalid register\n");
 		return 1;
 	}
 	

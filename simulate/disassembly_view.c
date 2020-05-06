@@ -22,8 +22,8 @@ THIS PROGRAM COMES WITHOUT ANY WARRANTY!
 #include "simulate.h"
 #include "cmd_parser.h"
 #include "dispatcher.h"
-
 #include "my_err.h"
+#include "verbosity.h"
 
 //TODO this needs work!
 
@@ -74,7 +74,7 @@ int init_disassembly_view(void)
 		else
 			addr+=4;
 	}
-	printf("%d instructions decoded\n", index_addr_list_max);
+	MSG(MSG_ALWAYS, "%d instructions decoded\n", index_addr_list_max);
 	index_addr_list=0;
 	
 	atexit(&disassembly_cleanup);

@@ -15,6 +15,7 @@ THIS PROGRAM COMES WITHOUT ANY WARRANTY!
 #include "timer.h"
 #include "peripherals.h"
 #include "memory.h"
+#include "verbosity.h"
 
 #define COUNTER_REG 0x98400000
 #define AUTO_RELOAD_VAL_REG 0x98400004
@@ -39,7 +40,7 @@ static bool is_irq_pending=false; //do it this way because we don't know the det
 
 void init_timer(void)
 {
-	printf("warning: TIMER1 is only partially implemented!\n");
+	MSG(MSG_ALWAYS, "warning: TIMER1 is only partially implemented!\n");
 }
 
 void timer_write(PERIPH_CB_WRITE_ARGUMENTS)
@@ -47,29 +48,26 @@ void timer_write(PERIPH_CB_WRITE_ARGUMENTS)
 	switch(addr)
 	{
 		case COUNTER_REG:
-			printf("TIMER1: value 0x%x written to cnt_reg\n", val);
+			MSG(MSG_PERIPH, "TIMER1: value 0x%x written to cnt_reg\n", val);
 			cnt_reg=val;
 			break;
 		
 		case AUTO_RELOAD_VAL_REG:
-			printf("TIMER1: 0x%x written to auto_reload_val_reg\n", val);
+			MSG(MSG_PERIPH, "TIMER1: 0x%x written to auto_reload_val_reg\n", val);
 			auto_reload_val_reg=val;
 			break;
 		
 		case MATCH1_VAL_REG:
-			printf("TIMER1: 0x%x written to match1_reg\n", val);
+			MSG(MSG_PERIPH, "TIMER1: 0x%x written to match1_reg\n", val);
 			match1_val_reg=val;
 			break;
 		
 		case TIMER_CTRL_REG:
 			ctrl_reg=val;
-			if(ctrl_reg&T1_ENABLE)
-			{
-				printf("TIMER1: ENABLED\n");
-				//is_irq_pending=true; //TEST
-			}
-			else
-				printf("TIMER1: DISABLED\n");
+			//if(ctrl_reg&T1_ENABLE)
+			//	printf("TIMER1: ENABLED\n");
+			//else
+			//	printf("TIMER1: DISABLED\n");
 			break;
 		
 		case TIMER_INT_STATE_REG:
@@ -83,14 +81,14 @@ void timer_write(PERIPH_CB_WRITE_ARGUMENTS)
 			break;
 		
 		default:
-			printf("TIMER1: unhandled register write 0x%x @0x%x\n", val, addr);
+			MSG(MSG_PERIPH, "TIMER1: unhandled register write 0x%x @0x%x\n", val, addr);
 	}
 }
 
 bool timer_read(PERIPH_CB_READ_ARGUMENTS)
 {
 	(void)val;
-	printf("TIMER1: unhandled register read 0x%x\n", addr);
+	MSG(MSG_PERIPH, "TIMER1: unhandled register read 0x%x\n", addr);
 	return false;
 }
 
@@ -110,12 +108,10 @@ bool timer_tick(void)
 	
 	cnt_reg--;
 	
-	//printf("cnt_reg is %x\n", cnt_reg);
-	
 	if(cnt_reg==match1_val_reg)
 	{
 		cnt_reg=auto_reload_val_reg;
-		printf("TIMER1 IRQ\n");
+		MSG(MSG_IRQ, "TIMER1 IRQ\n");
 		is_irq_pending=true;
 		return true;
 	}

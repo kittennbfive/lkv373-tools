@@ -38,7 +38,8 @@ typedef enum
 	W_REG,
 	W_MEM,
 	W_STACK,
-	W_BP
+	W_BP,
+	W_UART
 } window_t;
 
 void window_init(void);

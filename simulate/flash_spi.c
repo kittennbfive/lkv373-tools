@@ -14,8 +14,7 @@ THIS PROGRAM COMES WITHOUT ANY WARRANTY!
 
 #include "flash_spi.h"
 #include "my_err.h"
-
-//TODO: really incomplete, only knows one command == standard read
+#include "verbosity.h"
 
 uint8_t * flash;
 
@@ -38,14 +37,35 @@ void flash_init(char const * const file)
 	atexit(flash_cleanup);
 }
 
-uint32_t addr=0;
+static uint32_t addr=0;
+static uint8_t status_reg=0;
+
+#define WRITE_ENABLE_LATCH 1
 
 uint32_t flash_spi_transfer(const uint32_t val)
 {
 	if(((val>>24)&0xFF)==0x03)
 	{
 		addr=val&0x00FFFFFF;		
-		printf("FLASH set addr to 0x%x\n", addr);
+		MSG(MSG_PERIPH, "FLASH set addr to 0x%x\n", addr);
+		return 0;
+	}
+	else if(val==0x06)
+	{
+		MSG(MSG_PERIPH, "FLASH: write enable bit set\n");
+		status_reg|=(1<<WRITE_ENABLE_LATCH);
+		return 0;
+	}
+	else if(((val>>24)&0xFF)==0x05)
+	{
+		MSG(MSG_PERIPH, "FLASH: read status reg\n");
+		return status_reg;
+	}
+	else if(((val>>24)&0xFF)==0x20)
+	{
+		addr=val&0x00FFFFFF;		
+		MSG(MSG_PERIPH, "FLASH sector erase 0x%x (not impl)\n", addr);
+		status_reg&=~(1<<WRITE_ENABLE_LATCH);
 		return 0;
 	}
 	else if(val==0)
@@ -56,7 +76,7 @@ uint32_t flash_spi_transfer(const uint32_t val)
 	}
 	else
 	{
-		printf("flash_spi_transfer: don't know how to handle received value 0x%08x\n", val);
+		MSG(MSG_PERIPH, "flash_spi_transfer: don't know how to handle received value 0x%08x\n", val);
 		return 0;
 	}	
 }

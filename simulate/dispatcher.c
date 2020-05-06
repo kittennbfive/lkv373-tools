@@ -20,6 +20,7 @@ THIS PROGRAM COMES WITHOUT ANY WARRANTY!
 #include "my_err.h"
 #include "cmd_parser.h"
 #include "breakpoints.h"
+#include "uart.h"
 
 const dispatch_data_t dispatch_data[]=
 {
@@ -28,6 +29,7 @@ const dispatch_data_t dispatch_data[]=
 	{W_MEM, &print_mem, &mem_scroll_up, &mem_scroll_down, &mem_keypress},
 	{W_STACK, &print_stack, &stack_scroll_up, &stack_scroll_down, &stack_keypress},
 	{W_BP, &print_breakpoints, NULL, NULL, NULL},
+	{W_UART, NULL, NULL, NULL, &uart_keypress},
 	
 	{W_EMPTY, NULL, NULL, NULL, NULL}
 };
@@ -112,7 +114,8 @@ void redraw(const window_t win)
 	if(!found)
 		ERRX(1, "win not found in dispatch_data[]");
 	
-	dispatch_data[i].func_redraw();
+	if(dispatch_data[i].func_redraw)
+		dispatch_data[i].func_redraw();
 }
 
 void refresh(PROTOTYPE_ARGS_HANDLER)
@@ -125,5 +128,8 @@ void redraw_all(void)
 {
 	uint8_t i;
 	for(i=0; dispatch_data[i].win; i++)
-		dispatch_data[i].func_redraw();
+	{
+		if(dispatch_data[i].func_redraw)
+			dispatch_data[i].func_redraw();
+	}
 }

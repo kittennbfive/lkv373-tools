@@ -33,6 +33,7 @@ THIS PROGRAM COMES WITHOUT ANY WARRANTY!
 #include "special_regs.h"
 #include "timer.h"
 #include "interrupt_ctrl.h"
+#include "verbosity.h"
 
 //registers
 static uint32_t regs[32];
@@ -85,7 +86,7 @@ uint32_t get_bits(const uint32_t val, const uint8_t to, const uint8_t from)
 	if(from>to)
 		ERRX(1, "from>to\n");
 		
-	return (val&((((uint64_t)1<<(to+1))-1)&(~(((uint64_t)1<<from)-1))))>>from;
+	return (val&((((uint64_t)1<<(to+1))-1)&(~((1<<from)-1))))>>from;
 }
 
 void set_bits(uint32_t * const val, const uint8_t to, const uint8_t from, const uint32_t bits)
@@ -96,7 +97,7 @@ void set_bits(uint32_t * const val, const uint8_t to, const uint8_t from, const 
 	if(from==to)
 		(*val)=(((*val)&~(1<<from))|(bits<<from));
 	else
-		(*val)=(((*val)&(~((((uint64_t)1<<(to+1))-1)&(~(((uint64_t)1<<from)-1)))))|(bits<<from));
+		(*val)=(((*val)&(~((((uint64_t)1<<(to+1))-1)&(~((1<<from)-1)))))|(bits<<from));
 }
 
 typedef enum
@@ -156,7 +157,7 @@ sim_t simulate(instr_t const * const instr, const bool ignore_breakpoints)
 		{
 			uint32_t addr;
 			addr=regs[instr->ra]+nds32_sign_extend(instr->imm1_15, 15, 32); //no shift
-			mem_byte_t val=memory_get_byte(regs[instr->ra], &stop); //CHANGED THIS
+			mem_byte_t val=memory_get_byte(regs[instr->ra], &stop);
 			if(stop && !ignore_breakpoints)
 				return SIM_STOPPED_ON_BP;
 			if(!val.is_initialized)
@@ -353,7 +354,7 @@ sim_t simulate(instr_t const * const instr, const bool ignore_breakpoints)
 				case SUB_ALU_1_DIVR:
 					if(regs[instr->rb]==0)
 					{
-						printf("DIV BY ZERO\n");
+						MSG(MSG_ALWAYS, "DIV BY ZERO\n");
 						return SIM_GENERIC_ERROR;
 					}
 					regs[instr->rt]=regs[instr->ra]/regs[instr->rb];
@@ -363,15 +364,19 @@ sim_t simulate(instr_t const * const instr, const bool ignore_breakpoints)
 				case SUB_ALU_1_DIVSR:
 					if(regs[instr->rb]==0)
 					{
-						printf("DIV BY ZERO\n");
+						MSG(MSG_ALWAYS, "DIV BY ZERO\n");
 						return SIM_GENERIC_ERROR;
 					}
 					regs[instr->rt]=(signed)regs[instr->ra]/(signed)regs[instr->rb];
 					regs[instr->rs]=(signed)regs[instr->ra]%(signed)regs[instr->rb];
 					break;
 				
+				case SUB_ALU_1_XOR:
+					regs[instr->rt]=regs[instr->ra]^regs[instr->rb];
+					break;
+				
 				default:
-					printf("simulate: unimplemented sub 0x%x for OPC_ALU_1 (%s)\n", instr->sub, instr->mnemonic);
+					MSG(MSG_ALWAYS, "simulate: unimplemented sub 0x%x for OPC_ALU_1 (%s)\n", instr->sub, instr->mnemonic);
 					return SIM_UNIMPLEMENTED;
 			}
 			break;
@@ -394,10 +399,8 @@ sim_t simulate(instr_t const * const instr, const bool ignore_breakpoints)
 				
 				case SUB_ALU_2_MUL:
 				{
-					if(instr->dt!=0 && instr->dt!=1)
-						ERRX(1, "ALU_2_MADD32: invalid dt\n");
-					uint64_t Mresult=regs[instr->ra]*regs[instr->rb];
-					usr[instr->dt].L=Mresult&0xffffffff;
+					uint64_t result=regs[instr->ra]*regs[instr->rb];
+					regs[instr->rt]=result&0xffffffff;
 					break;
 				}
 				
@@ -433,7 +436,7 @@ sim_t simulate(instr_t const * const instr, const bool ignore_breakpoints)
 				case SUB_ALU_2_MFUSR:
 					if(instr->group!=0)
 					{
-						printf("ALU_2_MFUSR: unsupported group %u\n", instr->group);
+						MSG(MSG_ALWAYS, "ALU_2_MFUSR: unsupported group %u\n", instr->group);
 						return SIM_GENERIC_ERROR;
 					}
 					switch(instr->usr)
@@ -454,7 +457,7 @@ sim_t simulate(instr_t const * const instr, const bool ignore_breakpoints)
 							regs[instr->rt]=PC;
 							break;
 						default:
-							printf("ALU_2_MFUSR: invalid usr value %u\n", instr->group);
+							MSG(MSG_ALWAYS, "ALU_2_MFUSR: invalid usr value %u\n", instr->group);
 							return SIM_GENERIC_ERROR;
 					}
 					break;
@@ -462,7 +465,7 @@ sim_t simulate(instr_t const * const instr, const bool ignore_breakpoints)
 				case SUB_ALU_2_MTUSR:
 					if(instr->group!=0)
 					{
-						printf("ALU_2_MTUSR: unsupported group %u\n", instr->group);
+						MSG(MSG_ALWAYS, "ALU_2_MTUSR: unsupported group %u\n", instr->group);
 						return SIM_GENERIC_ERROR;
 					}
 					switch(instr->usr)
@@ -483,7 +486,7 @@ sim_t simulate(instr_t const * const instr, const bool ignore_breakpoints)
 							regs[instr->rt]=PC;
 							break;
 						default:
-							printf("ALU_2_MTUSR: invalid usr value %u\n", instr->group);
+							MSG(MSG_ALWAYS, "ALU_2_MTUSR: invalid usr value %u\n", instr->group);
 							return SIM_GENERIC_ERROR;
 					}
 					break;
@@ -527,7 +530,7 @@ sim_t simulate(instr_t const * const instr, const bool ignore_breakpoints)
 				
 				
 				default:
-					printf("simulate: unimplemented sub 0x%x for OPC_ALU_2 (%s)\n", instr->sub, instr->mnemonic);
+					MSG(MSG_ALWAYS, "simulate: unimplemented sub 0x%x for OPC_ALU_2 (%s)\n", instr->sub, instr->mnemonic);
 					return SIM_UNIMPLEMENTED;
 			}
 			break;
@@ -614,7 +617,7 @@ sim_t simulate(instr_t const * const instr, const bool ignore_breakpoints)
 					break;
 				
 				default:
-					printf("simulate: unimplemented sub 0x%x for OPC_BR2 (%s)\n", instr->sub, instr->mnemonic);
+					MSG(MSG_ALWAYS, "simulate: unimplemented sub 0x%x for OPC_BR2 (%s)\n", instr->sub, instr->mnemonic);
 					return SIM_UNIMPLEMENTED;
 			}
 			break;
@@ -714,7 +717,7 @@ sim_t simulate(instr_t const * const instr, const bool ignore_breakpoints)
 				}
 				
 				default:
-					printf("simulate: unimplemented sub 0x%x for OPC_LSMW (%s)\n", instr->sub, instr->mnemonic);
+					MSG(MSG_ALWAYS, "simulate: unimplemented sub 0x%x for OPC_LSMW (%s)\n", instr->sub, instr->mnemonic);
 					return SIM_UNIMPLEMENTED;
 			
 			}
@@ -734,7 +737,6 @@ sim_t simulate(instr_t const * const instr, const bool ignore_breakpoints)
 					break;
 					
 				case SUB_MISC_ISB:
-					//printf("instr %s from OPC_MISC ignored\n", instr->mnemonic);
 					break;
 				
 				case SUB_MISC_IRET:
@@ -744,7 +746,7 @@ sim_t simulate(instr_t const * const instr, const bool ignore_breakpoints)
 					break;
 				
 				default:
-					printf("OPC_MISC: unimplemented: %s\n", instr->mnemonic);
+					MSG(MSG_ALWAYS, "OPC_MISC: unimplemented: %s\n", instr->mnemonic);
 					return SIM_UNIMPLEMENTED;
 			}
 			break;
@@ -823,7 +825,7 @@ sim_t simulate(instr_t const * const instr, const bool ignore_breakpoints)
 				}
 				
 				default:
-					printf("OPC_MEM: unimplemented: %s\n", instr->mnemonic);
+					MSG(MSG_ALWAYS, "OPC_MEM: unimplemented: %s\n", instr->mnemonic);
 					return SIM_UNIMPLEMENTED;
 			}
 			break;
@@ -837,7 +839,7 @@ sim_t simulate(instr_t const * const instr, const bool ignore_breakpoints)
 			break;
 		
 		default:
-			printf("simulate: unimplemented: %s\n", instr->mnemonic);
+			MSG(MSG_ALWAYS, "simulate: unimplemented: %s\n", instr->mnemonic);
 			return SIM_UNIMPLEMENTED;
 	}
 	
@@ -852,25 +854,33 @@ sim_t simulate(instr_t const * const instr, const bool ignore_breakpoints)
 	}
 	else if(is_branch==BR_CALL)
 	{
-		printf("%x: CALL to 0x%x\n", PC_old, PC);
+		//decrease verbosity by removing calls from/to idle task
+		if(PC!=0x5ad4)
+			MSG(MSG_CALL, "%x: CALL to 0x%x\n", PC_old, PC);
 	}
 	else if(is_branch==BR_GOTO || is_branch==BR_RET || is_branch==BR_IRET)
 	{
+		MSG(MSG_GOTO, "%x: GOTO 0x%x\n", PC_old, PC);
+		
 		if(PC==PC_old)
 			return SIM_ENDLESS_LOOP;
-		
+
+//we need to disable this at some point because it does not know about interrupts
+#ifndef NO_ENDLESS_LOOP_DETECT		
 		if(history_check())
 			return SIM_ENDLESS_LOOP;
+#endif
 	}
 	
 	if(is_branch==BR_RET)
-		printf("RET from %x to %x\n", PC_old, PC);
+	{
+		//decrease verbosity by removing calls from/to idle task
+		if(PC!=0x1bf2)
+			MSG(MSG_RET, "RET from %x to %x\n", PC_old, PC);
+	}
 	
 	if(is_branch==BR_IRET)
-		printf("ISR finished, resuming at 0x%x\n", PC);
-	
-	//if(is_branch==BR_GOTO)
-	//	printf("GOTO 0x%x\n", PC);
+		MSG(MSG_IRET, "ISR finished, resuming at 0x%x\n", PC);
 	
 	if(stop && !ignore_breakpoints)
 		return SIM_STOPPED_ON_BP;
@@ -886,25 +896,25 @@ static sim_t sim_step(const bool ignore_breakpoints)
 	timer_tick();
 	
 	if(check_for_pending_irq())
-		printf("ENTERING ISR @ 0x%x\n", PC);
+		MSG(MSG_INT, "ENTERING ISR @ 0x%x\n", PC);
 	
 	if(decode_instr(&instr, PC))
 	{
-		printf("error in decode_instr(), stop\n");
+		MSG(MSG_ALWAYS, "error in decode_instr(), stop\n");
 		return SIM_ERROR_DECODE_INSTR;
 	}
 	
 	ret=simulate(&instr, ignore_breakpoints);
 	if(ret==SIM_UNIMPLEMENTED)
-		printf("unimplemented instr in simulate()\n");
+		MSG(MSG_ALWAYS, "unimplemented instr in simulate()\n");
 	else if(ret==SIM_ENDLESS_LOOP)
-		printf("endless loop detected in simulate()\n");
+		MSG(MSG_ALWAYS, "endless loop detected in simulate()\n");
 	else if(ret==SIM_READ_FROM_UNINITIALIZED)
-		printf("tried to read from uninitialized memory in simulate()\n");
+		MSG(MSG_ALWAYS, "tried to read from uninitialized memory in simulate()\n");
 	else if(ret==SIM_GENERIC_ERROR)
-		printf("unknown error in simulate()\n");
+		MSG(MSG_ALWAYS, "unknown error in simulate()\n");
 	else if(ret==SIM_STOPPED_ON_BP)
-		printf("simulate() stopped due to BP\n");
+		MSG(MSG_ALWAYS, "simulate() stopped due to BP\n");
 	
 	return ret;
 }
@@ -924,13 +934,31 @@ void run_sim(PROTOTYPE_ARGS_HANDLER)
 	(void)cmd;
 	(void)nb_args;
 	
-	uint32_t nb_steps=atoi(get_next_argument());
+	char arg[SZ_BUFFER_ARGUMENTS];
+	strcpy(arg, get_next_argument());
+	char *ptr;
+	uint32_t multiplier=1;
+	
+	if((ptr=strchr(arg, 'k')))
+	{
+		(*ptr)='\0';
+		multiplier=1000;
+	}
+	else if((ptr=strchr(arg, 'M')))
+	{
+		(*ptr)='\0';
+		multiplier=1000*1000;
+	}
+	
+	uint32_t nb_steps=atoi(arg)*multiplier;
 	
 	if(nb_steps==0)
 	{
-		printf("invalid number of steps\n");
+		MSG(MSG_ALWAYS, "invalid number of steps\n");
 		return;
 	}
+	
+	MSG(MSG_ALWAYS, "executing %u steps...\n", nb_steps);
 	
 	uint8_t err_happened=0;
 	uint32_t step;
@@ -939,13 +967,13 @@ void run_sim(PROTOTYPE_ARGS_HANDLER)
 		if(sim_step(false)!=SIM_NO_ERROR)
 		{
 			err_happened=1;
-			printf("stopped after %u steps\n", step);
+			MSG(MSG_ALWAYS, "stopped after %u steps\n", step);
 			break;
 		}
 	}
 	
 	if(!err_happened)
-		printf("%u steps successfully executed\n", nb_steps);
+		MSG(MSG_ALWAYS, "%u steps successfully executed\n", nb_steps);
 	
 	disassm_reset();
 	redraw_all();
@@ -978,9 +1006,9 @@ void set_pc_cmd(PROTOTYPE_ARGS_HANDLER)
 	
 	PC=val;
 	
-	printf("PC set to 0x%x\n", val);
+	MSG(MSG_ALWAYS, "PC set to 0x%x\n", val);
 	
 	redraw(W_ASM); //this will not do what we want for now, the disassm-viewer needs work
 }
-	
-	
+
+

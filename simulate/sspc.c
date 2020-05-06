@@ -18,6 +18,7 @@ THIS PROGRAM COMES WITHOUT ANY WARRANTY!
 #include "peripherals.h"
 #include "memory.h"
 #include "flash_spi.h"
+#include "verbosity.h"
 
 #define SSP_CTRL_REG0 0x98b00000
 #define SSP_CTRL_REG1 0x98b00004
@@ -49,10 +50,10 @@ void init_sspc(char const * const file_flash)
 	
 	status_reg=0;
 	
-	printf("SSPC init ok!\n");
+	MSG(MSG_ALWAYS, "SSPC init ok!\n");
 }
 
-uint32_t fifo_pop(void)
+static uint32_t fifo_pop(void)
 {
 	if(nb_entries_fifo_rx)
 	{
@@ -63,12 +64,12 @@ uint32_t fifo_pop(void)
 	}
 	else
 	{
-		printf("warning: trying to read from empty fifo, returning 0\n");
+		MSG(MSG_PERIPH, "SSPC: trying to read from empty fifo, returning 0\n");
 		return 0;
 	}
 }
 
-void fifo_push(const uint32_t val)
+static void fifo_push(const uint32_t val)
 {
 	if(nb_entries_fifo_rx>=FIFO_RX_SIZE)
 		(void)fifo_pop();
@@ -76,14 +77,14 @@ void fifo_push(const uint32_t val)
 	fifo_rx[nb_entries_fifo_rx++]=val;
 }
 
-void fifo_clear(void)
+static void fifo_clear(void)
 {
 	nb_entries_fifo_rx=0;
 }
 
 void sspc_write(PERIPH_CB_WRITE_ARGUMENTS)
 {
-	//printf("SSPC: write 0x%x to reg 0x%x\n", val, addr);
+	MSG(MSG_PERIPH, "SSPC: write 0x%x to reg 0x%x\n", val, addr);
 	
 	switch(addr)
 	{
@@ -94,8 +95,12 @@ void sspc_write(PERIPH_CB_WRITE_ARGUMENTS)
 		case SSP_CTRL_REG2:
 			if(val&SSP_RX_FIFO_CLR)
 			{
-				printf("SSPC: RX FIFO CLR\n");
+				MSG(MSG_PERIPH, "SSPC: RX FIFO CLR\n");
 				fifo_clear();
+			}
+			if(val&SSP_TX_FIFO_CLR)
+			{
+				MSG(MSG_PERIPH, "SSPC: TX FIFO CLR\n");
 			}
 			break;
 		
@@ -104,7 +109,7 @@ void sspc_write(PERIPH_CB_WRITE_ARGUMENTS)
 			break;
 		
 		default:
-			printf("SSPC: unhandled register write 0x%x @0x%x\n", val, addr);
+			MSG(MSG_PERIPH, "SSPC: unhandled register write 0x%x @0x%x\n", val, addr);
 			break;
 	}
 	
@@ -113,18 +118,23 @@ void sspc_write(PERIPH_CB_WRITE_ARGUMENTS)
 
 bool sspc_read(PERIPH_CB_READ_ARGUMENTS)
 {
+	MSG(MSG_PERIPH, "SSPC: read from 0x%x == ", addr);
+	
 	if(addr==SSP_DATA_REG)
 	{
 		(*val)=fifo_pop();
-	
+		MSG(MSG_PERIPH, "data reg: %x\n", (*val));
 		return true;
 	}
 	else if(addr==SSP_STATUS_REG)
 	{
 		(*val)=status_reg;
-		
+		MSG(MSG_PERIPH, "status reg: %x\n", (*val));
 		return true;
 	}
 	else
+	{
+		MSG(MSG_PERIPH, "unhandled\n");
 		return false;
+	}
 }

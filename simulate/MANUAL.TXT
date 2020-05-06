@@ -8,7 +8,7 @@ mem $addr|$reg ->set mem-view to $addr (hex only) (or $addr read from $reg)
 stack [$addr|$reg] ->set stack-view to addr (hex only as above) (default: stack pointer) (or $addr read from $reg)
 s ->simulate single step (breakpoints are ignored!)
 asm ->reset disassembly view to position of PC (works not too well, see disassembly_view.c)
-run $steps ->run $steps at most ($steps is in decimal!)
+run $steps ->run $steps at most ($steps is in decimal, suffix none or 'k' or 'M')
 bp [...]->work with breakpoints, see below
 msp $page $val ->set memory page (16MB) $page to $val ($page and $val are hex, $val is 8 bit)
 reg $reg $val ->write $val (hex) to $reg (r0-r31, dez)
@@ -17,10 +17,8 @@ word $addr $val ->write word $val beginning at memory location (byte) $addr
 read $file ->read commands from file
 layout [load|save] $file ->save position and size of open windows to $file.layout or load them [calls a Perlscript, it's a hack]
 dump $from $to $file ->dump memory to $file (as raw data, use hex-editor to open)
-
-TODO
-load $firmware $PC ->load $firmware and set PC to $PC (hex)
-reset ->reset everything
+verbosity [on|off] [all|none|$message_type (1 or more)] ->enable/disable output for $message_type, see verbosity.h
+verbosity file $file ->log to $file (existing will be overwritten!)
 
 breakpoint commands:
 bp remove $number ->remove breakpoint $number (in decimal starting at 1)
@@ -43,7 +41,7 @@ $action can be:
 
 disassembly-view:
 pressing r has the same effect as command "asm"
-scrolling is possible
+scrolling is possible but buggy
 
 stack-view:
 pressing r has the same effect as command "stack" without explicit addr
@@ -51,3 +49,6 @@ scrolling is possible
 
 memory-view:
 scrolling is possible
+
+UART-view:
+You can send data/keypresses to the simulator by typing while the window has focus and the sim-loop is not(!) running, however you need to run quite a few steps (like 10-20M) after to see your data appear and the reaction of the simulator/code.

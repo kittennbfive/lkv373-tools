@@ -19,6 +19,8 @@ THIS PROGRAM COMES WITHOUT ANY WARRANTY!
 #include "simulate.h"
 #include "special_regs.h"
 #include "timer.h"
+#include "verbosity.h"
+#include "uart.h"
 
 //FIQ: Fast interrupt request
 
@@ -43,7 +45,7 @@ THIS PROGRAM COMES WITHOUT ANY WARRANTY!
 
 void init_intc(void)
 {
-	printf("warning: INTC config is really hacked together!\n");
+	MSG(MSG_ALWAYS, "warning: INTC implementation is incomplete!\n");
 }
 
 static uint32_t trigger_level_reg=0;
@@ -59,8 +61,8 @@ void intc_write(PERIPH_CB_WRITE_ARGUMENTS)
 	{
 		case IRQ_MASK_REG:
 			int_mask_reg=val;
-			if(int_mask_reg&IRQ_MASK_TMR1)
-				printf("INT for TIMER1 set\n");
+			//if(int_mask_reg&IRQ_MASK_TMR1)
+			//	printf("INT for TIMER1 set\n");
 			break;
 		
 		case IRQ_TRIGGER_LEVEL_REG:
@@ -72,7 +74,7 @@ void intc_write(PERIPH_CB_WRITE_ARGUMENTS)
 			break;
 		
 		case IRQ_INT_CLEAR_REG:
-			printf("INTC: %x written to IRQ_INT_CLEAR_REG\n", val);
+			//printf("INTC: %x written to IRQ_INT_CLEAR_REG\n", val);
 			int_clear_reg=val;
 			if(int_clear_reg&IRQ_MASK_TMR1)
 				timer_clear_irq();
@@ -87,7 +89,7 @@ void intc_write(PERIPH_CB_WRITE_ARGUMENTS)
 			break;
 		
 		default:
-			printf("INTC: unhandled register write 0x%x @0x%x\n", val, addr);
+			MSG(MSG_PERIPH, "INTC: unhandled register write 0x%x @0x%x\n", val, addr);
 	}
 }
 
@@ -121,7 +123,7 @@ bool intc_read(PERIPH_CB_READ_ARGUMENTS)
 			break;
 		
 		default:
-			printf("INTC: unhandled read from 0x%x\n", addr);
+			MSG(MSG_PERIPH, "INTC: unhandled read from 0x%x\n", addr);
 			return false;
 	}
 }
@@ -130,21 +132,17 @@ bool intc_read(PERIPH_CB_READ_ARGUMENTS)
 #define INT_VECT_TABLE_ADDR 0x210000
 #define INT_VECT_TABLE_BYTES_PER_ENTRY 16
 
-void trigger_interrupt10(PROTOTYPE_ARGS_HANDLER)
+static void trigger_interrupt(const uint8_t nb_int)
 {
-	ARGS_HANDLER_UNUSED;
-	
 	if(get_gie()==false)
 	{
-		printf("GIE is 0, not executing\n");
+		MSG(MSG_PERIPH, "trigger_interrupt: GIE is 0, not executing\n");
 		return;
 	}
 	
-	uint8_t nb_int=10;
-	
 	uint32_t offset=nb_int*INT_VECT_TABLE_BYTES_PER_ENTRY;
 	
-	printf("triggering interrupt %d, offset in table is 0x%x\n", nb_int, offset);
+	//printf("triggering interrupt %d, offset in table is 0x%x\n", nb_int, offset);
 	
 	write_to_special_reg(SR_INT_PEND, 2); //this is only true for INT 10
 		
@@ -160,11 +158,12 @@ void trigger_interrupt10(PROTOTYPE_ARGS_HANDLER)
 
 bool check_for_pending_irq(void)
 {
-	if(get_gie() && timer_is_irq_pending())
-	//if(timer_is_irq_pending())
+	if(!get_gie())
+		return false;
+		
+	if(timer_is_irq_pending())
 	{
-		//timer_clear_irq(); //????
-		trigger_interrupt10(0, 0);
+		trigger_interrupt(10);
 		return true;
 	}
 	else

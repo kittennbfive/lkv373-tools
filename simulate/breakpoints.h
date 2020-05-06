@@ -78,6 +78,6 @@ void print_breakpoints(void);
 void cmd_breakpoint(PROTOTYPE_ARGS_HANDLER);
 
 void simulate_check_for_breakpoints(uint32_t * const PC, uint32_t const * const regs, bool * const PC_manipulated, bool * const stop);
-void mem_rw_check_for_breakpoints(const type_mem_access_t type, const uint32_t addr, const uint32_t val, const bool memval_undef, bool * const stop);
+void mem_rw_check_for_breakpoints(const type_mem_access_t type, const uint32_t addr, const uint32_t val, const bool mem_is_initialized, bool * const stop);
 
 #endif
