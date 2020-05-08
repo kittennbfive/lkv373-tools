@@ -1,0 +1,28 @@
+This are some notes on how to get newlib and GCC running for the TF-680. 
+
+written by and (c) 2020 kitten_nb_five
+
+licence: AGPL v3+
+
+Filipe Laíns "FFY00" provides packages for binutils, GCC and newlib for NDS32 for Arch Linux (Thank you for your help!). However these are compiled for a more modern processor version than we have on the TF-680 so we need to recompile everything.
+
+THESE INSTRUCTIONS ARE PROVIDED WITHOUT WARRANTY! YOU MAY BRICK YOUR DEVICE!
+
+Howto:
+0) set up Arch Linux (a virtual machine is fine) with package "base-devel" installed.
+If you don't know anything about Arch don't be scared, i was able to do it, just follow the instructions from their very good wiki.
+1) To speed things up later you can edit /etc/makepkg.conf: Uncomment the line MAKEFLAGS and change the -j2 (or whatever number) to match the number of processor cores you have.
+2) Install nds32le-elf-binutils (kindly provided by FFY00) from the repository using pacman
+3) [maybe you need to install nds32le-elf-gcc too for building newlib, not sure, just try without and see...]
+4) go into folder "newlib" and execute (no need for root) makepkg. This will compile and package newlib.
+5) Become root ("su") and install package: pacman -U nds32le-elf-newlib-3.3.0-1-any.pkg.tar.xz
+We now need to rebuild GCC for NDS32 as it is linked (or whatever) against (the modified) newlib. This is a 2-step process.
+6) go into folder gcc_bootstrap and execute makepkg -p PKGBUILD.bootstrap
+7) install as shown above
+8) go into folder gcc and do the same thing.
+
+Now you should have a working GCC and newlib for TF-680. You can now compile the Hello World-Example and flash it using the web-UI on 192.168.168.55 or 192.168.168.221 if the bootloader is running.
+
+If you have trouble with makepkg complaining about an unknown GPG-key for GCC just add --skippgpcheck to the makepkg-call. The better way of course is to add the key to your computer using gpg --recv-key A328C3A2C3C45C06 but this did not work for me.
+
+If something does not work first look on the internet for solutions and if you can't solve the problem this way you may ask on freenode for help.
