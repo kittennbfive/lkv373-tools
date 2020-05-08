@@ -1,0 +1,18 @@
+This code is a "Hello World" for the TF-680 on the LKV373
+
+provided and (c) 2020 by kitten_nb_five
+
+everything except stubs.c is under AGPL v3 or later
+
+THIS IS PROVIDED WITHOUT ANY WARRANTY! YOU MAY BRICK YOUR DEVICE! DO NOT TRY IT UNLESS YOU HAVE A WAY TO REPROGRAMM THE FLASH EXTERNALLY!
+
+Instructions:
+You will need an Arch Linux machine and recompile newlib and GCC for NDS32. See utils_arch for details.
+
+Once everything is setup just execute ./compile *.c and flash the resulting file firmware.bin using the web-UI. The device will automatically reboot and you should see some output on the serial console (115200 8N1).
+
+This firmware is a simple example and does not contain any web-UI or serial console. However you can get back into the bootloader (web-UI on 192.168.168.221) by pressing the reset-button on your device. You should get some output on the serial console confirming that it worked.
+
+Warning: For going into the bootloader the code is erasing some part of the flash. I have no idea how many times you can do this before the FLASH will be broken. Use at your own risk (i already said this didn't i?).
+
+Have fun. Feedback welcome.
