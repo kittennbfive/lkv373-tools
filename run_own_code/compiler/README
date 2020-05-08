@@ -1,7 +1,0 @@
-this is the command i use in Arch Linux for compiling bare code to test my simulator. might be useful for somebody.
-
-init_SP.bin contains just one instruction: 47 F0 00 19
-
-use at your own risk. highly experimental.
-
-thanks to FFY00 for compiling the GCC for NDS32.
