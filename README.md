@@ -1,7 +1,10 @@
 # lkv373-tools
 some random tools made while trying to reverse the lkv373-firmware
 
+NEW: We now have a way to execute C-Code with newlib. See custom_firmware for instructions and "Hello World".
+
 NEW: simulate/ - My main work on this project. See README there.
+
 
 
 binfind is usefull for searching a binary file inside another one. It supports partial matches (with a configurable amount of different bytes).
