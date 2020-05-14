@@ -34,6 +34,8 @@ static uint32_t pindir=0;
 
 void gpio_write(PERIPH_CB_WRITE_ARGUMENTS)
 {
+	(void)sz;
+	
 	switch(addr)
 	{
 		case GPIO_DATA_OUT_REG:
@@ -60,7 +62,7 @@ void gpio_write(PERIPH_CB_WRITE_ARGUMENTS)
 
 bool gpio_read(PERIPH_CB_READ_ARGUMENTS)
 {
-	(void)val;
+	(void)sz;
 	
 	switch(addr)
 	{

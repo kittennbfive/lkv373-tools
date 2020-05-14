@@ -114,6 +114,8 @@ int init_uart_view(void)
 
 void uart_write(PERIPH_CB_WRITE_ARGUMENTS)
 {
+	(void)sz;
+	
 	static bool divisor_latch_access_bit=false;
 	
 	switch(addr)
@@ -155,6 +157,8 @@ void uart_write(PERIPH_CB_WRITE_ARGUMENTS)
 
 bool uart_read(PERIPH_CB_READ_ARGUMENTS)
 {
+	(void)sz;
+	
 	//MSG(MSG_PERIPH, "UART: read 0x%x\n", addr);
 	
 	switch(addr)

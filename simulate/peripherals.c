@@ -37,12 +37,12 @@ static peripheral_t per[]=
 	{"SSPC", 0x98b00000, 0x98c00000, &sspc_write, &sspc_read}, //synchronous serial port controller - SPI connected to FLASH - wider range to catch unknown registers
 	{"GPIO", 0x99300000, 0x99300044, &gpio_write, &gpio_read}, //LED and reset button
 	
-	{"MAC", 0x90907000, 0x90907fff, &mac_write, &mac_read}, //TODO
+	{"MAC", 0x90900000, 0x90907fff, &mac_write, &mac_read}, //TODO
 	
 	{NULL, 0, 0, NULL, NULL}
 };
 
-bool peripheral_write(const uint32_t addr, const uint32_t val)
+bool peripheral_write(const sz_mem_access_t sz, const uint32_t addr, const uint32_t val)
 {	
 	uint8_t i;
 	bool found=false;
@@ -66,12 +66,12 @@ bool peripheral_write(const uint32_t addr, const uint32_t val)
 	if(!per[i].cb_write)
 		ERRX(1, "no callback for peripherals[%u]", i);
 	
-	per[i].cb_write(addr, val);
+	per[i].cb_write(sz, addr, val);
 	
 	return true;
 }
 
-bool peripheral_read(const uint32_t addr, uint32_t * const val)
+bool peripheral_read(const sz_mem_access_t sz, const uint32_t addr, uint32_t * const val)
 {
 		uint8_t i;
 	bool found=false;
@@ -93,5 +93,5 @@ bool peripheral_read(const uint32_t addr, uint32_t * const val)
 	if(!per[i].cb_read)
 		return false;
 	
-	return per[i].cb_read(addr, val);
+	return per[i].cb_read(sz, addr, val);
 }

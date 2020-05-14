@@ -84,6 +84,8 @@ static void fifo_clear(void)
 
 void sspc_write(PERIPH_CB_WRITE_ARGUMENTS)
 {
+	(void)sz;
+	
 	MSG(MSG_PERIPH, "SSPC: write 0x%x to reg 0x%x\n", val, addr);
 	
 	switch(addr)
@@ -118,6 +120,8 @@ void sspc_write(PERIPH_CB_WRITE_ARGUMENTS)
 
 bool sspc_read(PERIPH_CB_READ_ARGUMENTS)
 {
+	(void)sz;
+	
 	MSG(MSG_PERIPH, "SSPC: read from 0x%x == ", addr);
 	
 	if(addr==SSP_DATA_REG)

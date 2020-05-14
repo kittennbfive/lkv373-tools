@@ -15,8 +15,15 @@ THIS PROGRAM COMES WITHOUT ANY WARRANTY!
 
 #include "window.h"
 
-#define PERIPH_CB_WRITE_ARGUMENTS const uint32_t addr, const uint32_t val
-#define PERIPH_CB_READ_ARGUMENTS const uint32_t addr, uint32_t * const val
+typedef enum
+{
+	BYTE=1,
+	HALFWORD=2,
+	WORD=4
+} sz_mem_access_t;
+
+#define PERIPH_CB_WRITE_ARGUMENTS const sz_mem_access_t sz, const uint32_t addr, const uint32_t val
+#define PERIPH_CB_READ_ARGUMENTS const sz_mem_access_t sz, const uint32_t addr, uint32_t * const val
 
 typedef struct
 {
@@ -27,7 +34,7 @@ typedef struct
 	bool (*cb_read)(PERIPH_CB_READ_ARGUMENTS); //returns true if *val contains a valid value
 } peripheral_t;
 
-bool peripheral_write(const uint32_t addr, const uint32_t val);
-bool peripheral_read(const uint32_t addr, uint32_t * const val);
+bool peripheral_write(const sz_mem_access_t sz, const uint32_t addr, const uint32_t val);
+bool peripheral_read(const sz_mem_access_t sz, const uint32_t addr, uint32_t * const val);
 
 #endif

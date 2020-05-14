@@ -57,6 +57,8 @@ static uint32_t fiq_int_clear_reg=0;
 
 void intc_write(PERIPH_CB_WRITE_ARGUMENTS)
 {
+	(void)sz;
+	
 	switch(addr)
 	{
 		case IRQ_MASK_REG:
@@ -95,6 +97,8 @@ void intc_write(PERIPH_CB_WRITE_ARGUMENTS)
 
 bool intc_read(PERIPH_CB_READ_ARGUMENTS)
 {
+	(void)sz;
+	
 	switch(addr)
 	{
 		case IRQ_STATUS_REG:	

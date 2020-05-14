@@ -161,6 +161,7 @@ void message_printf(const uint32_t msg_type, char const * const fmt, ...)
 	if(!show_this(msg_type))
 		return;
 	
+	static char last_msg[250]={0};
 	char buf[250];
 	
 	va_list ap;
@@ -168,6 +169,10 @@ void message_printf(const uint32_t msg_type, char const * const fmt, ...)
 	vsprintf(buf, fmt, ap);
 	va_end(ap);
 	
+	if(!strcmp(buf, last_msg))
+		return;
+	
+	strcpy(last_msg, buf);
 	printf("%s", buf);
 	
 	if(log_to_file)

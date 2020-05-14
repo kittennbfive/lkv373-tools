@@ -45,6 +45,8 @@ void init_timer(void)
 
 void timer_write(PERIPH_CB_WRITE_ARGUMENTS)
 {
+	(void)sz;
+	
 	switch(addr)
 	{
 		case COUNTER_REG:
@@ -87,9 +89,19 @@ void timer_write(PERIPH_CB_WRITE_ARGUMENTS)
 
 bool timer_read(PERIPH_CB_READ_ARGUMENTS)
 {
-	(void)val;
-	MSG(MSG_PERIPH, "TIMER1: unhandled register read 0x%x\n", addr);
-	return false;
+	(void)sz;
+	
+	switch(addr)
+	{
+		case TIMER_INT_MASK_REG:
+			(*val)=int_mask_reg;
+			return true;
+			break;
+		
+		default:
+			MSG(MSG_PERIPH, "TIMER1: unhandled register read 0x%x\n", addr);
+			return false;
+	}
 }
 
 static uint8_t prescaler=2; //IS THIS CORRECT??

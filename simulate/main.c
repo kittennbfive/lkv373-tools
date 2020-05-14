@@ -37,6 +37,7 @@ THIS PROGRAM COMES WITHOUT ANY WARRANTY!
 #include "timer.h"
 #include "cpe.h"
 #include "sspc.h"
+#include "connector_serial.h"
 
 /*
 little-endian
@@ -63,7 +64,7 @@ void stop(PROTOTYPE_ARGS_HANDLER)
 #define SZ_INP_BUFFER 50
 
 #define FILENAME "lkv373.bin"
-//#define FILENAME "t.bin"
+//#define FILENAME "lkv373_bootloader.bin"
 //#define FILENAME "test.bin"
 
 int main(void)
@@ -83,6 +84,10 @@ int main(void)
 	init_timer();
 	init_cpe();
 	init_sspc(FILENAME);
+	
+#ifdef CONNECT_TO_REAL
+	init_connector();
+#endif
 	
 	//unknown periph
 	uint32_t a;

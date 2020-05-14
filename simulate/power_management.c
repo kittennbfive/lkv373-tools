@@ -41,6 +41,8 @@ void init_pmu(void)
 
 void pmu_write(PERIPH_CB_WRITE_ARGUMENTS)
 {
+	(void)sz;
+	
 	switch(addr)
 	{
 		case OSC_CTRL_REG:
@@ -70,6 +72,8 @@ void pmu_write(PERIPH_CB_WRITE_ARGUMENTS)
 
 bool pmu_read(PERIPH_CB_READ_ARGUMENTS)
 {
+	(void)sz;
+	
 	switch(addr)
 	{
 		case OSC_CTRL_REG:

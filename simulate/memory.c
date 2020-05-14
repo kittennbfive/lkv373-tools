@@ -63,7 +63,7 @@ mem_word_t memory_get_word(const uint32_t addr, bool * const breakpoint_stop)
 	uint32_t addr_remapped=remap_addr(addr);
 	uint32_t periph_val;
 	
-	if(peripheral_read(addr_remapped, &periph_val))
+	if(peripheral_read(WORD, addr_remapped, &periph_val))
 	{
 		ret.is_initialized=true;
 		ret.val=periph_val;
@@ -108,7 +108,7 @@ mem_byte_t memory_get_byte(const uint32_t addr, bool * const breakpoint_stop)
 	uint32_t addr_remapped=remap_addr(addr);
 	uint32_t periph_val;
 	
-	if(peripheral_read(addr_remapped, &periph_val))
+	if(peripheral_read(BYTE, addr_remapped, &periph_val))
 	{
 		ret.is_initialized=true;
 		ret.val=periph_val&0xFF;
@@ -152,7 +152,7 @@ void memory_set_word(const uint32_t data, const uint32_t addr, bool * const brea
 	
 	if(!no_periph_callback)
 	{
-		if(peripheral_write(addr_remapped, data))
+		if(peripheral_write(WORD, addr_remapped, data))
 		{
 			mem_rw_check_for_breakpoints(WRITE, addr, data, true, breakpoint_stop);
 			return;
@@ -181,7 +181,7 @@ void memory_set_byte(const uint8_t data, const uint32_t addr, bool * const break
 	
 	if(!no_periph_callback)
 	{
-		if(peripheral_write(addr_remapped, data))
+		if(peripheral_write(BYTE, addr_remapped, data))
 		{
 			mem_rw_check_for_breakpoints(WRITE, addr, data, true, breakpoint_stop);
 			return;
@@ -206,7 +206,7 @@ void memory_set_halfword(const uint16_t data, const uint32_t addr, bool * const 
 	
 	if(!no_periph_callback)
 	{
-		if(peripheral_write(addr_remapped, data))
+		if(peripheral_write(HALFWORD, addr_remapped, data))
 		{
 			mem_rw_check_for_breakpoints(WRITE, addr, data, true, breakpoint_stop);
 			return;
@@ -238,7 +238,7 @@ mem_halfword_t memory_get_halfword(const uint32_t addr, bool * const breakpoint_
 	uint32_t addr_remapped=remap_addr(addr);
 	uint32_t periph_val;
 	
-	if(peripheral_read(addr_remapped, &periph_val))
+	if(peripheral_read(HALFWORD, addr_remapped, &periph_val))
 	{
 		ret.is_initialized=true;
 		ret.val=periph_val&0xFFFF;

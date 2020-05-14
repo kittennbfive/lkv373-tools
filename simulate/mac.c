@@ -15,18 +15,38 @@ THIS PROGRAM COMES WITHOUT ANY WARRANTY!
 #include "mac.h"
 #include "peripherals.h"
 #include "verbosity.h"
+#include "connector_serial.h"
 
 //This does not do anything useful at the moment except returning some hardcoded values with unknown meaning. At least it permits to avoid an error message in the serial output.
 
 void mac_write(PERIPH_CB_WRITE_ARGUMENTS)
 {
-	(void)val; (void)addr;
-	//MSG(MSG_ALWAYS, "MAC: write 0x%x @0x%x\n", val, addr);
+	//(void)val; (void)addr;
+#ifdef CONNECT_TO_REAL
+	con_setval(sz, addr, val);
+#else
+	(void)sz;
+	
+	MSG(MSG_ALWAYS, "MAC: write 0x%x @0x%x\n", val, addr);
+#endif
 }
 
 bool mac_read(PERIPH_CB_READ_ARGUMENTS)
 {
-	//MSG(MSG_ALWAYS, "MAC: read from 0x%x\n", addr);
+#ifdef CONNECT_TO_REAL
+	(*val)=con_getval(sz, addr);
+	return true;
+#else
+	(void)sz;
+	
+	if(addr!=0x9090700c)
+		MSG(MSG_ALWAYS, "MAC: read from 0x%x\n", addr);
+	
+	if(addr>=0x909003f0 && addr<0x90900500)
+	{
+		(*val)=0xdeadbeef;
+		return true;
+	}
 	
 	switch(addr)
 	{
@@ -73,5 +93,6 @@ bool mac_read(PERIPH_CB_READ_ARGUMENTS)
 	}
 	
 	return false;
+#endif
 }
 

@@ -268,6 +268,20 @@ sim_t simulate(instr_t const * const instr, const bool ignore_breakpoints)
 			break;
 		}
 		
+		case OPC_LHSI:
+		{
+			uint32_t addr;
+			addr=regs[instr->ra]+nds32_sign_extend(instr->imm1_15<<1, 16, 32);
+			mem_halfword_t val=memory_get_halfword(addr, &stop);
+			if(stop && !ignore_breakpoints)
+				return SIM_STOPPED_ON_BP;
+			if(!val.is_initialized)
+				return SIM_READ_FROM_UNINITIALIZED;
+			regs[instr->rt]=nds32_sign_extend(val.val, 16, 32);
+			break;
+		}
+		
+		
 		case OPC_SHI:
 		{
 			uint32_t addr;

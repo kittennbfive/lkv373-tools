@@ -43,6 +43,8 @@ void init_cpe(void)
 
 void cpe_write(PERIPH_CB_WRITE_ARGUMENTS)
 {
+	(void)sz;
+	
 	switch(addr)
 	{
 		case CPE_REMAP_REG:
@@ -56,6 +58,8 @@ void cpe_write(PERIPH_CB_WRITE_ARGUMENTS)
 
 bool cpe_read(PERIPH_CB_READ_ARGUMENTS)
 {
+	(void)sz;
+	
 	switch(addr)
 	{
 		case CPE_REMAP_REG:
