@@ -1,0 +1,8 @@
+This is a custom firmware that allows to read/write arbitrary memory locations using a binary (for speed) protocol (briefly documented in parser.h).
+It is used to connect to the simulator to pass register r/w for the MAC to the real device.
+
+(c) 2020 by kitten_nb_five
+
+APGLv3+
+
+NO WARRANTY!
