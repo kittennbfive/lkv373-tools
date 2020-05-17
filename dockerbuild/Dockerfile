@@ -7,6 +7,6 @@ ENV NEWLIB=nds32le-elf-newlib-3.3.0-1-any.pkg.tar.xz
 RUN curl https://github.com/kittennbfive/lkv373-tools/releases/download/0.01/$GCC -L -O
 RUN curl https://github.com/kittennbfive/lkv373-tools/releases/download/0.01/$NEWLIB -L -O
 
-RUN pacman -Sy --noconfirm nds32le-elf-binutils
-RUN pacman -U --noconfirm $GCC $NEWLIB
+RUN pacman -Suy --noconfirm
+RUN pacman -U --needed --noconfirm $GCC $NEWLIB
 
