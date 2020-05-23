@@ -71,9 +71,16 @@ our %known_funcs_bl2=(
 	'8134'=>'INTC_setup()',
 	'b9e0'=>'something_with_FLASH()',
 	'd2a8'=>'some_output_func()',
-	'1bc0'=>'idle task',
-	'53e4'=>'OSInit',
-	'1414'=>'OS_MemClr (memset to 0)'
+	'1bc0'=>'OS_TaskIdle()',
+	'53e4'=>'OSInit()',
+	'1414'=>'OS_MemClr() (memset to 0)',
+	'1008'=>'OS_SchedNew()?',
+	'fe0'=>'OSIntEnter()',
+	'5918'=>'OSIntCtxSw()',
+	'1830'=>'OSTimeDly()',
+	'1bf4'=>'OSTaskSuspend()',
+	'1d50'=>'OS_TaskStatStkChk()',
+	'1fe4'=>'OS_TCBInit()'
 );
 
 1;
