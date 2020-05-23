@@ -3,7 +3,7 @@ ALL NUMBERS ARE HEX
 
 MANUALLY COPIED FROM SIMULATOR - MIGHT BE WRONG
 
-	r0		r1		r2		r3		r4		r5		name/function
+	r0	r1	r2		r3		r4		r5		name/function
 0)	89378	75c0	3		b		12c		0		TF_MAIN
 1)	d520c	1d994	0		a		3e8		1		Net
 2)	8938c	3edc4	2		36		199		1		unknown Task / unknown purpose
