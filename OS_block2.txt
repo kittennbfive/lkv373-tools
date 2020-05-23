@@ -1,0 +1,47 @@
+BLOCK2 - CALLS TO OSTaskCreate() or something similar
+ALL NUMBERS ARE HEX
+
+MANUALLY COPIED FROM SIMULATOR - MIGHT BE WRONG
+
+	r0		r1		r2		r3		r4		r5		name/function
+0)	89378	75c0	3		b		12c		0		TF_MAIN
+1)	d520c	1d994	0		a		3e8		1		Net
+2)	8938c	3edc4	2		36		199		1		unknown Task / unknown purpose
+3)	89380	6564	5		d		c8		1		TF_AV
+4)	8937c	cbd8	4		e		1f4		1		TF_Console
+5)	89390	ee54	5		10		c8		1		TF_HTTP
+6)	89388	7330	0		11		c8		1		TF_TFVEP
+7)	89384	5dd8	6		f		7d0		1		unknown Task / u. p.
+
+
+r0 is some memory-addr
+r1 is the callback to the actual Task code
+r3 is probably the priority of the task
+meaning of other registers is unknown
+
+The TaskControlBlockTable is at d0b74 and has 22 entries of 92 bytes each.
+
+The exact meaning of each byte is unknown as we don't know what version of OS-II and what options were used.
+
+guesses:
++0: ptr to top of stack
++4: ptr to user defined data(??)
++8: ptr to bottom of stack
++c: ?? should be stack size but the number does not make sense
++10: options from OSTaskCreateExt?
++12: Task ID - this matches r3 from above
++14: ptr to next TCB (?)
++18: ptr to previous TCB (?)
+
++4c: name of task (only used for internal tasks)
+
+
+The OSRdyTbl[OS_RDY_TBL_SIZE] - Table of tasks which are ready to run - might be at cfefc
+
+The OSTCBPrioTbl of size 4x64==128 might be at d135c
+
+
+might be useful: 
+https://courses.washington.edu/cp105/05_uCOS_Tasks/Task%20Control%20Block.html
+https://doc.micrium.com/pages/viewpage.action?pageId=16879192
+...
