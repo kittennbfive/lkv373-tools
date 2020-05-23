@@ -19,8 +19,8 @@ our %known_funcs_bl1=(
 	'156b0'=>'helper_printf_strcpy??',
 	'344c0'=>'helper_printf',
 	'3484c'=>'helper2_printf',
+	'252c8'=>'some_output_func()',
 	'2cf50'=>'uart_putchar()',
-	'6400'=>'console_main?',
 	'35668'=>'programm_memory()?',
 	'14df8'=>'putstr()?',
 	'14edc'=>'some_output_func()',
@@ -29,14 +29,22 @@ our %known_funcs_bl1=(
 	'15754'=>'strcmp()',
 	'730c'=>'httpd_respond_to_request',
 	'5c24'=>'trigger_reboot()',
-	'5ef0'=>'bootloader?',
-	'15ad8'=>'create/register task',
-	'8c60'=>'uart_putchar(r0)'
+	'5ef0'=>'print_header_register_tasks',
+	'15ad8'=>'register task',
+	'8c60'=>'uart_putchar(r0)',
+	'39f94'=>'EthernetTask',
+	'6400'=>'ConsoleTask',
+	'88e8'=>'HTTPTask',
+	'393b0'=>'MAC_transmit()',
+	'155cc'=>'some_copy_loop',
+	'1464'=>'OS_MemClr (memset to 0)',
+	'18178'=>'NetTask',
+	'5434'=>'OSInit'
 );
 
 #block 2
 our %known_funcs_bl2=(
-	'1b018'=>'os_create_task(r1=callback, returns 0 on error(?))',
+	'1b018'=>'os_create_task(r1=callback)',
 	'7bf4'=>'some_init_register_main()',
 	'de0'=>'call_init_and_stop()',
 	'39ddc'=>'enable_interrupts()',
@@ -46,6 +54,7 @@ our %known_funcs_bl2=(
 	'cbd8'=>'TF_Console_Task',
 	'ee54'=>'TF_HTTP_Task',
 	'7330'=>'TF_TFVEP_Task',
+	'1d994' =>'NetTask',
 	'cdc0'=>'some_output_func()',
 	'324f8'=>'uart_putchar()',
 	'36f4'=>'create_pipe()??',
@@ -62,7 +71,9 @@ our %known_funcs_bl2=(
 	'8134'=>'INTC_setup()',
 	'b9e0'=>'something_with_FLASH()',
 	'd2a8'=>'some_output_func()',
-	'1bc0'=>'idle task?????'
+	'1bc0'=>'idle task',
+	'53e4'=>'OSInit',
+	'1414'=>'OS_MemClr (memset to 0)'
 );
 
 1;
