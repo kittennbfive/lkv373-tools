@@ -86,7 +86,14 @@ our %known_funcs_bl2=(
 	'4308'=>'OSTaskCreate()',
 	'43b4'=>'OS_TaskStkClr()',
 	'5adc'=>'OSTaskStkInit()',
-	'442c'=>'OSTaskCreateExt()'
+	'442c'=>'OSTaskCreateExt()',
+	'3d44'=>'OSSemCreate()',
+	'13dc'=>'OS_EventWaitListInit()',
+	'1628'=>'OSTaskNameSet()',
+	'5140'=>'OSTmr_Init()',
+	'14c4'=>'OS_QInit()',
+	'1510'=>'OS_MemInit()',
+	'1590'=>'OS_FlagInit()'
 );
 
 1;

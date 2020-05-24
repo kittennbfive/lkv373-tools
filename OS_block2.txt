@@ -1,6 +1,13 @@
-BLOCK2
+BLOCK2 - ALL NUMBERS ARE HEX unless "dez"-suffix
 
-ALL NUMBERS ARE HEX - VALUES COPIED FROM SIMULATOR - MIGHT BE WRONG
+reversed @ (c) 2020 by kitten_nb_five
+
+NO WARRANTY - PROBABLY CONTAIN ERRORS
+------------------------------------------------------------------------
+
+KNOWN TASKS:
+
+VALUES COPIED FROM SIMULATOR - MIGHT BE WRONG
 
 1b018 is some kind of wrapper for OSTaskCreateExt.
 
@@ -43,10 +50,13 @@ stack size in bytes (can be calculated from r2-r5+4 (?))
 pointer to used supplied mem location used as TCB extension (present??)
 additional flags/infos about task (present??)
 
+------------------------------------------------------------------------
 
-The TaskControlBlockTable is at d0b74 and has 22 entries of 92 bytes each. It looks like only 10 entries are used (7 tasks + 3 system tasks).
+KNOWN MEMORY-STRUCTURES:
 
-The exact meaning of each byte is unknown as we don't know what version of OS-II and what options were used.
+OSTCBTbl (TaskControlBlockTable) @d0b74 22 entries * 92 bytes each. It looks like only 10 entries are used (7 tasks + 3 system tasks).
+
+The exact meaning of each byte is yet unknown.
 
 guesses:
 +0: ptr to top of stack
@@ -63,47 +73,60 @@ guesses:
 +38: OSTCBCtxSwCtr == number of times the task was switched in
 +4c: name of task (only used for internal tasks)
 
+OSRdyTbl[OS_RDY_TBL_SIZE] (Table of tasks which are ready to run) @cfefc. 8*1 byte (?)
 
-The OSRdyTbl[OS_RDY_TBL_SIZE] - Table of tasks which are ready to run - is at cfefc. OS_RDY_TBL_SIZE might be 8 so total size is 8*1=8 bytes
+OSTCBPrioTbl @d135c size 0x80 == 128dez == 4x64
 
-The OSTCBPrioTbl of size 4x64==128 is at d135c.
+priority resolution table (fixed, 256 bytes) @1b10
 
-The priority resolution table (fixed, 256 bytes) is at 1b10.
+OSTmrTbl @cf8a8 size 0x340 == 832dez
+
+OSTmrWheelTbl @cf7dc size 0x40 == 64dez
+
+OSQTbl @cfe9c size 0x60 == 96dez
+
+OSMemTbl @cfbe8 size 0xb4 == 180dez == 5*36
+
+OSFlagTbl @cf81c size 0x8c == 140dez == 5*28
 
 unknown structures set to 0:
-@cf8a8 size 0x340 == 832
-@cf7dc size 0x40 == 64
-@cf81c size 0x8c == 140
-@cfbe8 size 0xb4 == 180
-@cfe9c size 0x60 == 96
+@d0304 size 0x870 == 2160
 
-various variables, lots of guesses...:
-89364 - OSTime??
-89492 - OSIntNesting
-89493 - OSLockNesting  Multitasking lock nesting level
-89498 - OSTaskCtr??
-89497 - OSRunning
+------------------------------------------------------------------------
+
+KNOWN VARIABLES:
+
+89032 - ??
 89334 - OSCtxSwCtr Counter of number of context switches
-89348 - OSIdleCtr
-89344 - OSIdleCtrRun
+89338 - OSEventFreeList
+8933c - OSFlagFreeList
 89340 - OSIdleCtrMax
-89491 - OSStatRdy??
-89496 - OSRdyGrp?? Ready list group
-89495 - OSPrioHighRdy
-89494 - OSPrioCur
-89350 - OSTCBFreeList
-
-89354 - OSTCBHighRdy??
+89344 - OSIdleCtrRun
+89348 - OSIdleCtr
 8934c - OSTCBCur??
-
-89490 - ???
-
+89350 - OSTCBFreeList
+89354 - OSTCBHighRdy??
+89358 - OSTCBList??
+8935c - ???
+89360 - OSQFreeList
+89364 - OSTime??
 893f8 - start of kernel (??) mem
 893fc - end of kernel mem
 89400 - size of kernel mem
 89404 - size in kB
+89408 - ???
+89490 - ???
+89491 - OSStatRdy??
+89492 - OSIntNesting
+89493 - OSLockNesting  Multitasking lock nesting level
+89494 - OSPrioCur
+89495 - OSPrioHighRdy
+89496 - OSRdyGrp?? Ready list group
+89497 - OSRunning
+89498 - OSTaskCtr??
 
-89408 ???
+
+------------------------------------------------------------------------
 
 might be useful: 
 https://courses.washington.edu/cp105/05_uCOS_Tasks/Task%20Control%20Block.html
