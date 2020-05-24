@@ -1,6 +1,6 @@
 BLOCK2 - ALL NUMBERS ARE HEX unless "dez"-suffix
 
-reversed @ (c) 2020 by kitten_nb_five
+reversed & (c) 2020 by kitten_nb_five
 
 NO WARRANTY - PROBABLY CONTAIN ERRORS
 ------------------------------------------------------------------------
