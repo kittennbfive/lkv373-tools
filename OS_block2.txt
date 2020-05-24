@@ -1,8 +1,10 @@
-BLOCK2 - CALLS TO OSTaskCreate() or something similar
-ALL NUMBERS ARE HEX
+BLOCK2
 
-MANUALLY COPIED FROM SIMULATOR - MIGHT BE WRONG
+ALL NUMBERS ARE HEX - VALUES COPIED FROM SIMULATOR - MIGHT BE WRONG
 
+1b018 is some kind of wrapper for OSTaskCreateExt.
+
+CALLS TO THIS WRAPPER:
 	r0		r1		r2		r3		r4		r5		name/function
 0)	89378	75c0	3		b		12c		0		TF_MAIN
 1)	d520c	1d994	0		a		3e8		1		Net (not in TCBTable??)
@@ -13,11 +15,34 @@ MANUALLY COPIED FROM SIMULATOR - MIGHT BE WRONG
 6)	89388	7330	0		11		c8		1		TF_TFVEP
 7)	89384	5dd8	6		f		7d0		1		unknown Task / u. p.
 
-
 r0 is some memory-addr
 r1 is the callback to the actual Task code
-r3 is probably the priority of the task (also called ID by myself)
-meaning of other registers is unknown
+
+CALLS TO OSTaskCreateExt:
+	r0		r1		r2		r3		r4		r5			name/function
+0)	1bc0	0		d0300	3f		ffff	d0104		IdleTask (OS)
+1)	1f48	0		cfe98	3e		fffe	cfc9c		StatTask (OS)
+2)	57ec	0		d0100	5		fffd	cff04		TimerTask (OS)
+3)	75c0	3		1014b4	b		b		101008		TF_MAIN
+4)	1d994	0		102fa4	a		a		102008		Net
+5)	3edc4	2		103404	36		36		103008		unknown / someth. with MAC
+6)	6564	5		104324	d		d		104008		TF_AV
+7)	cbd8	4		1057d4	e		e		105008		TF_Console
+8)	ee54	5		106324	10		10		106008		TF_HTTP
+9)	7330	0		107324	11		11		107008		TF_TFVEP
+10)	5dd8	6		109f44	f		f		108008		unkown
+
+r0 is a pointer to the task's code
+r1 pointer to opt data area?? (does not look like, rather some kind of index??)
+r2 pointer to top of stack
+r3 unique priority
+r4 task ID
+r5 pointer to bottom of stack
+other arguments passed via stack:
+stack size in bytes (can be calculated from r2-r5+4 (?))
+pointer to used supplied mem location used as TCB extension (present??)
+additional flags/infos about task (present??)
+
 
 The TaskControlBlockTable is at d0b74 and has 22 entries of 92 bytes each. It looks like only 10 entries are used (7 tasks + 3 system tasks).
 
@@ -32,18 +57,27 @@ guesses:
 +12: Task ID - this matches r3 from above
 +14: ptr to previous TCB
 +18: ptr to next TCB
-
++34: OSTCBY (?)
++35: OSTCBBitX (?)
++36: OSTCBBitY (?)
++38: OSTCBCtxSwCtr == number of times the task was switched in
 +4c: name of task (only used for internal tasks)
 
 
-The OSRdyTbl[OS_RDY_TBL_SIZE] - Table of tasks which are ready to run - might be at cfefc. OS_RDY_TBL_SIZE might be 8 so total size is 8*1=8 bytes
+The OSRdyTbl[OS_RDY_TBL_SIZE] - Table of tasks which are ready to run - is at cfefc. OS_RDY_TBL_SIZE might be 8 so total size is 8*1=8 bytes
 
-The OSTCBPrioTbl of size 4x64==128 might be at d135c.
+The OSTCBPrioTbl of size 4x64==128 is at d135c.
 
 The priority resolution table (fixed, 256 bytes) is at 1b10.
 
+unknown structures set to 0:
+@cf8a8 size 0x340 == 832
+@cf7dc size 0x40 == 64
+@cf81c size 0x8c == 140
+@cfbe8 size 0xb4 == 180
+@cfe9c size 0x60 == 96
 
-some various variables, lots of guesses...:
+various variables, lots of guesses...:
 89364 - OSTime??
 89492 - OSIntNesting
 89493 - OSLockNesting  Multitasking lock nesting level
@@ -59,9 +93,17 @@ some various variables, lots of guesses...:
 89494 - OSPrioCur
 89350 - OSTCBFreeList
 
-8934c - ???
+89354 - OSTCBHighRdy??
+8934c - OSTCBCur??
+
 89490 - ???
 
+893f8 - start of kernel (??) mem
+893fc - end of kernel mem
+89400 - size of kernel mem
+89404 - size in kB
+
+89408 ???
 
 might be useful: 
 https://courses.washington.edu/cp105/05_uCOS_Tasks/Task%20Control%20Block.html

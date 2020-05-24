@@ -44,7 +44,7 @@ our %known_funcs_bl1=(
 
 #block 2
 our %known_funcs_bl2=(
-	'1b018'=>'os_create_task(r1=callback)',
+	'1b018'=>'selfmade_create_task(r1=callback)', #calls OSTaskCreateExt
 	'7bf4'=>'some_init_register_main()',
 	'de0'=>'call_init_and_stop()',
 	'39ddc'=>'enable_interrupts()',
@@ -74,13 +74,19 @@ our %known_funcs_bl2=(
 	'1bc0'=>'OS_TaskIdle()',
 	'53e4'=>'OSInit()',
 	'1414'=>'OS_MemClr() (memset to 0)',
-	'1008'=>'OS_SchedNew()?',
+	'1008'=>'OS_SchedNew()',
 	'fe0'=>'OSIntEnter()',
 	'5918'=>'OSIntCtxSw()',
 	'1830'=>'OSTimeDly()',
 	'1bf4'=>'OSTaskSuspend()',
 	'1d50'=>'OS_TaskStatStkChk()',
-	'1fe4'=>'OS_TCBInit()'
+	'1fe4'=>'OS_TCBInit()',
+	'17ac'=>'OS_Sched()?',
+	'58ca'=>'OS_TASK_SW()',
+	'4308'=>'OSTaskCreate()',
+	'43b4'=>'OS_TaskStkClr()',
+	'5adc'=>'OSTaskStkInit()',
+	'442c'=>'OSTaskCreateExt()'
 );
 
 1;
