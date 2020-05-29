@@ -94,6 +94,7 @@ our %known_funcs_bl2=(
 	'14c4'=>'OS_QInit()',
 	'1510'=>'OS_MemInit()',
 	'1590'=>'OS_FlagInit()'
+	'1278'=>'OSVersion()'
 );
 
 1;
