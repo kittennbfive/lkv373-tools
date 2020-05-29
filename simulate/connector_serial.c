@@ -51,6 +51,12 @@ void con_setval(const uint8_t sz, const uint32_t addr, const uint32_t val)
 	
 	MSG(MSG_PERIPH, "con_setval: set 0x%x to 0x%x\n", addr, val);
 	
+	if(addr==0x9090a80c)
+	{
+		usleep(WAIT_MS*1000);
+		return;
+	}
+	
 	buf[0]='=';
 	buf[1]=sz;
 	memcpy(&buf[2], &addr, sizeof(uint32_t));
@@ -72,7 +78,9 @@ void con_setval(const uint8_t sz, const uint32_t addr, const uint32_t val)
 		}
 	}
 	else
-		ERRX(1, "setval: read returned -1");
+		ERRX(1, "read returned -1");
+		
+	usleep(WAIT_MS*1000);
 }
 
 uint32_t con_getval(const uint8_t sz, const uint32_t addr)
@@ -101,9 +109,11 @@ uint32_t con_getval(const uint8_t sz, const uint32_t addr)
 		memcpy(&val, &buf2[2], sizeof(uint32_t));
 	}
 	else
-		ERRX(1, "getval: read returned -1");
+		ERRX(1, "read returned -1");
 	
 	MSG(MSG_PERIPH, "con_getval: 0x%x == 0x%x\n", addr, val);
+	
+	usleep(WAIT_MS*1000);
 	
 	return val;
 }

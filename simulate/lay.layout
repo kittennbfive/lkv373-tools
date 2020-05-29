@@ -1,3 +1,3 @@
-disassembly==windowmove 18 580 windowsize 462 439
-registers==windowmove 828 0 windowsize 452 458
-memory==windowmove 486 590 windowsize 792 420
+disassembly==windowmove 30 580 windowsize 462 439
+registers==windowmove 828 58 windowsize 452 458
+memory==windowmove 488 599 windowsize 792 420

@@ -22,6 +22,7 @@ THIS PROGRAM COMES WITHOUT ANY WARRANTY!
 #define MSG_IRQ (1U<<5) //interrupt request from peripheral
 #define MSG_INT (1U<<6) //actual interrupt service routine being entered
 #define MSG_PERIPH (1U<<7) //peripherals - todo make one entry for each?
+#define MSG_MEM (1U<<8) //memory writes
 
 #define MSG_ALWAYS (1U<<30) //print always, used for init-messages, errors, ...
 #define MSG_VARIOUS (1U<<31) //currently unused

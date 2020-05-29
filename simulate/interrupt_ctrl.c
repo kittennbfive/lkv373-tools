@@ -21,6 +21,7 @@ THIS PROGRAM COMES WITHOUT ANY WARRANTY!
 #include "timer.h"
 #include "verbosity.h"
 #include "uart.h"
+#include "connector_serial.h"
 
 //FIQ: Fast interrupt request
 
@@ -58,6 +59,8 @@ static uint32_t fiq_int_clear_reg=0;
 void intc_write(PERIPH_CB_WRITE_ARGUMENTS)
 {
 	(void)sz;
+	
+	MSG(MSG_PERIPH, "INTC: writing 0x%x to 0x%x\n", val, addr);
 	
 	switch(addr)
 	{
@@ -98,6 +101,8 @@ void intc_write(PERIPH_CB_WRITE_ARGUMENTS)
 bool intc_read(PERIPH_CB_READ_ARGUMENTS)
 {
 	(void)sz;
+	
+	MSG(MSG_PERIPH, "INTC: reading from %x\n", addr);
 	
 	switch(addr)
 	{

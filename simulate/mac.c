@@ -16,8 +16,60 @@ THIS PROGRAM COMES WITHOUT ANY WARRANTY!
 #include "peripherals.h"
 #include "verbosity.h"
 #include "connector_serial.h"
+#include "cmd_parser.h"
+#include "my_err.h"
 
-//This does not do anything useful at the moment except returning some hardcoded values with unknown meaning. At least it permits to avoid an error message in the serial output.
+typedef struct
+{
+	uint32_t addr;
+	uint32_t val;
+} mem_t;
+
+#define MAX_MEM 5000
+
+mem_t mem[MAX_MEM];
+uint32_t nb_vals=0;
+
+int32_t search(const uint32_t addr)
+{
+	uint32_t i;
+	for(i=0; i<nb_vals; i++)
+	{
+		if(mem[i].addr==addr)
+			return i;
+	}
+	
+	return -1;
+}
+
+void save(const uint32_t addr, const uint32_t val)
+{
+	int32_t pos=search(addr);
+	if(pos==-1)
+	{
+		if(nb_vals>=MAX_MEM)
+			ERRX(1, "full");
+		pos=nb_vals++;
+	}
+	mem[pos].addr=addr;
+	mem[pos].val=val;
+}
+
+bool load(const uint32_t addr, uint32_t * const val)
+{
+	int32_t pos=search(addr);
+	if(pos==-1)
+		return false;
+	
+	(*val)=mem[pos].val;
+	return true;
+}
+
+void init_mac(void)
+{
+	save(0x90907070, 0x92);
+	save(0x90907078, 0);
+}
 
 void mac_write(PERIPH_CB_WRITE_ARGUMENTS)
 {
@@ -27,9 +79,12 @@ void mac_write(PERIPH_CB_WRITE_ARGUMENTS)
 #else
 	(void)sz;
 	
-	MSG(MSG_ALWAYS, "MAC: write 0x%x @0x%x\n", val, addr);
+	MSG(MSG_PERIPH, "MAC: write 0x%x @0x%x\n", val, addr);
+	
+	save(addr, val);	
 #endif
 }
+
 
 bool mac_read(PERIPH_CB_READ_ARGUMENTS)
 {
@@ -39,60 +94,118 @@ bool mac_read(PERIPH_CB_READ_ARGUMENTS)
 #else
 	(void)sz;
 	
-	if(addr!=0x9090700c)
-		MSG(MSG_ALWAYS, "MAC: read from 0x%x\n", addr);
+	bool r=load(addr, val);
 	
-	if(addr>=0x909003f0 && addr<0x90900500)
-	{
-		(*val)=0xdeadbeef;
-		return true;
-	}
-	
-	switch(addr)
-	{
-		case 0x90907070:
-			(*val)=0x0000009E;
-			return true;
-			break;
-			
-		case 0x90907074:
-			(*val)=0x00000092;
-			return true;
-			break;
-			
-		case 0x90907078:
-			(*val)=0x0000001F;
-			return true;
-			break;
-			
-		case 0x9090707C:
-			(*val)=0;
-			return true;
-			break;
-			
-		case 0x90907200:
-			(*val)=0x00000001;
-			return true;
-			break;
-			
-		case 0x90907204:
-			(*val)=0x00000800;
-			return true;
-			break;
+	if(r)
+		MSG(MSG_PERIPH, "MAC: read from 0x%x: 0x%x\n", addr, *val);
 		
-		case 0x9090700c:
-			(*val)=0;
-			return true;
-			break;
-		
-		//VALUE??
-		case 0x90907010:
-			(*val)=0;
-			return true;
-			break;
-	}
-	
-	return false;
+	return r;	
 #endif
 }
 
+void simulate_ping(PROTOTYPE_ARGS_HANDLER)
+{
+	ARGS_HANDLER_UNUSED;
+	save(0x9090700c, 0x382);
+	save(0x90907010, 0x3f40066);
+	save(0x909003f4, 0x0);
+	save(0x909003f5, 0xb);
+	save(0x909003f6, 0x78);
+	save(0x909003f7, 0x0);
+	save(0x909003f8, 0x60);
+	save(0x909003f9, 0x1);
+	save(0x909003fa, 0x0);
+	save(0x909003fb, 0xe0);
+	save(0x909003fc, 0x4c);
+	save(0x909003fd, 0x53);
+	save(0x909003fe, 0x44);
+	save(0x909003ff, 0x58);
+	save(0x90900400, 0x8);
+	save(0x90900401, 0x0);
+	save(0x90900402, 0x45);
+	save(0x90900403, 0x0);
+	save(0x90900404, 0x0);
+	save(0x90900405, 0x54);
+	save(0x90900406, 0xe0);
+	save(0x90900407, 0x1c);
+	save(0x90900408, 0x40);
+	save(0x90900409, 0x0);
+	save(0x9090040a, 0x40);
+	save(0x9090040b, 0x1);
+	save(0x9090040c, 0x88);
+	save(0x9090040d, 0x53);
+	save(0x9090040e, 0xc0);
+	save(0x9090040f, 0xa8);
+	save(0x90900410, 0xa8);
+	save(0x90900411, 0xa);
+	save(0x90900412, 0xc0);
+	save(0x90900413, 0xa8);
+	save(0x90900414, 0xa8);
+	save(0x90900415, 0xdd);
+	save(0x90900416, 0x8);
+	save(0x90900417, 0x0);
+	save(0x90900418, 0x39);
+	save(0x90900419, 0x6c);
+	save(0x9090041a, 0x1b);
+	save(0x9090041b, 0x1c);
+	save(0x9090041c, 0x0);
+	save(0x9090041d, 0x1);
+	save(0x9090041e, 0x57);
+	save(0x9090041f, 0xe6);
+	save(0x90900420, 0xbe);
+	save(0x90900421, 0x5e);
+	save(0x90900422, 0x0);
+	save(0x90900423, 0x0);
+	save(0x90900424, 0x0);
+	save(0x90900425, 0x0);
+	save(0x90900426, 0xce);
+	save(0x90900427, 0x5e);
+	save(0x90900428, 0x0);
+	save(0x90900429, 0x0);
+	save(0x9090042a, 0x0);
+	save(0x9090042b, 0x0);
+	save(0x9090042c, 0x0);
+	save(0x9090042d, 0x0);
+	save(0x9090042e, 0x10);
+	save(0x9090042f, 0x0);
+	save(0x90900430, 0x12);
+	save(0x90900431, 0x0);
+	save(0x90900432, 0x14);
+	save(0x90900433, 0x15);
+	save(0x90900434, 0x16);
+	save(0x90900435, 0x17);
+	save(0x90900436, 0x18);
+	save(0x90900437, 0x19);
+	save(0x90900438, 0x1a);
+	save(0x90900439, 0x1b);
+	save(0x9090043a, 0x1c);
+	save(0x9090043b, 0x1d);
+	save(0x9090043c, 0x1e);
+	save(0x9090043d, 0x1f);
+	save(0x9090043e, 0x20);
+	save(0x9090043f, 0x21);
+	save(0x90900440, 0x22);
+	save(0x90900441, 0x23);
+	save(0x90900442, 0x24);
+	save(0x90900443, 0x25);
+	save(0x90900444, 0x26);
+	save(0x90900445, 0x27);
+	save(0x90900446, 0x28);
+	save(0x90900447, 0x29);
+	save(0x90900448, 0x2a);
+	save(0x90900449, 0x2b);
+	save(0x9090044a, 0x2c);
+	save(0x9090044b, 0x2d);
+	save(0x9090044c, 0x2e);
+	save(0x9090044d, 0x2f);
+	save(0x9090044e, 0x30);
+	save(0x9090044f, 0x31);
+	save(0x90900450, 0x32);
+	save(0x90900451, 0x33);
+	save(0x90900452, 0x34);
+	save(0x90900453, 0x35);
+	save(0x90900454, 0x36);
+	save(0x90900455, 0x37);
+	
+	MSG(MSG_ALWAYS, "filled registers for ping\n");
+}

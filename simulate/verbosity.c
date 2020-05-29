@@ -42,6 +42,7 @@ static const msg_type_t msg_types[]=
 	{ MSG_IRQ, "IRQ" },
 	{ MSG_INT, "INT" },
 	{ MSG_PERIPH, "PERIPH" },
+	{ MSG_MEM, "MEM" },
 	{ MSG_VARIOUS, "VARIOUS" },
 	
 	{ 0, NULL }

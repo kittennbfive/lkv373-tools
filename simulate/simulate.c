@@ -97,7 +97,7 @@ void set_bits(uint32_t * const val, const uint8_t to, const uint8_t from, const 
 	if(from==to)
 		(*val)=(((*val)&~(1<<from))|(bits<<from));
 	else
-		(*val)=(((*val)&(~((((uint64_t)1<<(to+1))-1)&(~((1<<from)-1)))))|(bits<<from));
+		(*val)=(((*val)&(~((((uint64_t)1<<(to+1))-1)&(~((1<<from)-1)))))|(bits<<from)); //"make readable code" they say...
 }
 
 typedef enum
@@ -265,6 +265,20 @@ sim_t simulate(instr_t const * const instr, const bool ignore_breakpoints)
 			if(!val.is_initialized)
 				return SIM_READ_FROM_UNINITIALIZED;
 			regs[instr->rt]=val.val;
+			break;
+		}
+		
+		case OPC_LHI_bi:
+		{
+			uint32_t addr;
+			addr=regs[instr->ra]+nds32_sign_extend(instr->imm1_15<<1, 16, 32);
+			mem_halfword_t val=memory_get_halfword(addr, &stop);
+			if(stop && !ignore_breakpoints)
+				return SIM_STOPPED_ON_BP;
+			if(!val.is_initialized)
+				return SIM_READ_FROM_UNINITIALIZED;
+			regs[instr->rt]=val.val;
+			regs[instr->ra]=addr;
 			break;
 		}
 		
@@ -856,8 +870,10 @@ sim_t simulate(instr_t const * const instr, const bool ignore_breakpoints)
 			MSG(MSG_ALWAYS, "simulate: unimplemented: %s\n", instr->mnemonic);
 			return SIM_UNIMPLEMENTED;
 	}
-	
+
+#ifndef NO_ENDLESS_LOOP_DETECT
 	history_add(PC_old, regs);
+#endif
 	
 	if(is_branch==NO_BRANCH)
 	{

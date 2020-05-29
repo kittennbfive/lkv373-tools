@@ -27,6 +27,8 @@ THIS PROGRAM COMES WITHOUT ANY WARRANTY!
 #include "mac.h"
 #include "gpio.h"
 
+#include "connector_serial.h"
+
 static peripheral_t per[]=
 {
 	{"CPE", 0x90100000, 0x90100088, &cpe_write, &cpe_read}, //what does this mean "CPE"?? it's important, there is the remap bit inside!!
@@ -38,7 +40,16 @@ static peripheral_t per[]=
 	{"GPIO", 0x99300000, 0x99300044, &gpio_write, &gpio_read}, //LED and reset button
 	
 	{"MAC", 0x90900000, 0x90907fff, &mac_write, &mac_read}, //TODO
-	
+
+//???? 0x90908050-0x9090807c
+//???? 0x90909008
+//???? 0x9090a80c-0x9090a8fc
+//???? 0x9090b044-0x9090b054
+//???? 0x9090d02c
+//I2C 0x99c00000-... ???
+//IR 0x99900000-... ???
+//0x98500000 Watchdog Timer
+
 	{NULL, 0, 0, NULL, NULL}
 };
 
@@ -56,13 +67,20 @@ bool peripheral_write(const sz_mem_access_t sz, const uint32_t addr, const uint3
 	}
 	
 	if(!found)
+	{
+#ifdef CONNECT_TO_REAL
+		if(addr>0x20000000)
+		{
+			con_setval(sz, addr, val);
+			return true;
+		}
+		else
+			return false;
+#else
 		return false;
+#endif
+	}
 	
-	//printf("periph_write: %x @%x == %s\n", val, addr, per[i].name);
-
-	//if(addr%4)
-	//	printf("periph_write: UNALIGNED ADDR %x", addr);
-		
 	if(!per[i].cb_write)
 		ERRX(1, "no callback for peripherals[%u]", i);
 	
@@ -85,11 +103,20 @@ bool peripheral_read(const sz_mem_access_t sz, const uint32_t addr, uint32_t * c
 	}
 	
 	if(!found)
+	{
+#ifdef CONNECT_TO_REAL
+		if(addr>0x20000000)
+		{
+			(*val)=con_getval(sz, addr);
+			return true;
+		}
+		else
+			return false;
+#else
 		return false;
+#endif
+	}
 	
-	//if(addr%4)
-	//	printf("periph_read: UNALIGNED ADDR %x", addr);
-		
 	if(!per[i].cb_read)
 		return false;
 	

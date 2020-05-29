@@ -172,6 +172,9 @@ void memory_set_word(const uint32_t data, const uint32_t addr, bool * const brea
 		mem_ptr[page][addr_in_page+i].val=(data>>(8*i))&0xFF;
 	}
 	
+	if(addr_remapped!=0x10089348 && addr_remapped!=0x10043da8 && breakpoint_stop)
+		MSG(MSG_MEM, "set word: %x to %x\n", addr_remapped, data);
+	
 	mem_rw_check_for_breakpoints(WRITE, addr, data, 1, breakpoint_stop);
 }
 
@@ -196,6 +199,9 @@ void memory_set_byte(const uint8_t data, const uint32_t addr, bool * const break
 	
 	mem_ptr[page][addr_in_page].is_initialized=true;
 	mem_ptr[page][addr_in_page].val=data;
+	
+	if(addr_remapped!=0x10089348 && addr_remapped!=0x10043da8 && breakpoint_stop)
+		MSG(MSG_MEM, "set word: %x to %x\n", addr_remapped, data);
 	
 	mem_rw_check_for_breakpoints(WRITE, addr, data, 1, breakpoint_stop);
 }
@@ -227,6 +233,9 @@ void memory_set_halfword(const uint16_t data, const uint32_t addr, bool * const 
 		mem_ptr[page][addr_in_page+i].is_initialized=true;
 		mem_ptr[page][addr_in_page+i].val=(data>>(8*i))&0xFF;
 	}
+	
+	if(addr_remapped!=0x10089348 && addr_remapped!=0x10043da8 && breakpoint_stop)
+		MSG(MSG_MEM, "set word: %x to %x\n", addr_remapped, data);
 	
 	mem_rw_check_for_breakpoints(WRITE, addr, data, 1, breakpoint_stop);
 }

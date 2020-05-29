@@ -27,6 +27,8 @@ THIS PROGRAM COMES WITHOUT ANY WARRANTY!
 #include "window.h"
 #include "special_regs.h"
 #include "verbosity.h"
+#include "mac.h"
+#include "os_func.h"
 
 char cmd[SZ_BUFFER_COMMAND];
 char args[NB_ARGUMENTS_MAX][SZ_BUFFER_ARGUMENTS];
@@ -54,6 +56,8 @@ const command_t commands[]=
 //	{"writesr", 2, 2, &cmd_write_sr}, //unimplemented
 	{"setpc", 1, 1, &set_pc_cmd}, //use this with great caution, maybe this should be removed?
 	{"verbosity", 2, 10, &cmd_set_verbosity},
+	{"ping", 0, 0, &simulate_ping},
+	{"os", 1, 1, &show_os_info},
 	
 	{NULL, 0, 0, NULL}
 };

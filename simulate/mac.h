@@ -13,8 +13,12 @@ THIS PROGRAM COMES WITHOUT ANY WARRANTY!
 #include <stdbool.h>
 
 #include "peripherals.h"
+#include "cmd_parser.h"
 
+void init_mac(void);
 void mac_write(PERIPH_CB_WRITE_ARGUMENTS);
 bool mac_read(PERIPH_CB_READ_ARGUMENTS);
+
+void simulate_ping(PROTOTYPE_ARGS_HANDLER);
 
 #endif

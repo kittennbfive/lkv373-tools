@@ -1,13 +1,16 @@
 layout load lay
 
-verbosity on PERIPH INT IRET
+verbosity on PERIPH
 
 verbosity file log.txt
 
 #waiting for some magic value from unknown periph
 bp create pc 0x248 script bp_script
+bp create pc 0x24c script bp_script2
+bp create pc 36be0 script bp_script3
 
-#run 25M
+run 25M
+
 
 #bootloader
-run 50M
+#run 60M

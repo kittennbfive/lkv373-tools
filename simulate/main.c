@@ -37,6 +37,7 @@ THIS PROGRAM COMES WITHOUT ANY WARRANTY!
 #include "timer.h"
 #include "cpe.h"
 #include "sspc.h"
+#include "mac.h"
 #include "connector_serial.h"
 
 /*
@@ -63,9 +64,8 @@ void stop(PROTOTYPE_ARGS_HANDLER)
 
 #define SZ_INP_BUFFER 50
 
-#define FILENAME "lkv373.bin"
-//#define FILENAME "lkv373_bootloader.bin"
-//#define FILENAME "test.bin"
+//#define FILENAME "lkv373.bin"
+#define FILENAME "more_verbose.bin"
 
 int main(void)
 {	
@@ -84,7 +84,8 @@ int main(void)
 	init_timer();
 	init_cpe();
 	init_sspc(FILENAME);
-	
+	init_mac();
+		
 #ifdef CONNECT_TO_REAL
 	init_connector();
 #endif

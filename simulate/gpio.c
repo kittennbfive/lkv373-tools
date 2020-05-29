@@ -36,6 +36,8 @@ void gpio_write(PERIPH_CB_WRITE_ARGUMENTS)
 {
 	(void)sz;
 	
+	MSG(MSG_PERIPH, "GPIO: writing 0x%x to 0x%x\n", val, addr);
+	
 	switch(addr)
 	{
 		case GPIO_DATA_OUT_REG:
@@ -63,6 +65,8 @@ void gpio_write(PERIPH_CB_WRITE_ARGUMENTS)
 bool gpio_read(PERIPH_CB_READ_ARGUMENTS)
 {
 	(void)sz;
+	
+	MSG(MSG_PERIPH, "GPIO: reading from %x\n", addr);
 	
 	switch(addr)
 	{
