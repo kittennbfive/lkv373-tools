@@ -5,6 +5,10 @@ reversed & (c) 2020 by kitten_nb_five
 NO WARRANTY - PROBABLY CONTAINS ERRORS
 ------------------------------------------------------------------------
 
+VERSION OF OS-II: probably 2.86 (x100=0x11e)
+
+------------------------------------------------------------------------
+
 KNOWN TASKS:
 
 VALUES COPIED FROM SIMULATOR - MIGHT BE WRONG
@@ -79,13 +83,13 @@ OSTCBPrioTbl @d135c size 0x80 == 128dez == 4x64
 
 OSUnMapTbl (priority resolution table) (const, 256 bytes) @1b10
 
-OSTmrTbl @cf8a8 size 0x340 == 832dez
+OSTmrTbl @cf8a8 size 0x340 == 832dez == 16*52???
 
 OSTmrWheelTbl @cf7dc size 0x40 == 64dez
 
 OSQTbl @cfe9c size 0x60 == 96dez
 
-OSMemTbl @cfbe8 size 0xb4 == 180dez == 5*36
+OSMemTbl @cfbe8 size 0xb4 == 180dez == 5*36 - WRONG - Magic Byte does not match!?
 
 OSFlagTbl @cf81c size 0x8c == 140dez == 5*28
 
