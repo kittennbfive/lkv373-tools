@@ -13,7 +13,7 @@ THIS WORK COMES WITHOUT ANY WARRANTY and is released under the AGPL version 3 or
 
 typedef enum
 {
-	TYPE16_16,
+//	TYPE16_16,
 	TYPE16_333,
 	TYPE16_333_SUB,
 	TYPE16_37_SUB,

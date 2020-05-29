@@ -35,7 +35,7 @@ opcode16_t opc16_list[]=
 	{"LWI450",	6,	0b011010,	TYPE16_450,	FALSE}, //Load Word Immediate
 	{"MOV55",	5,	0b00000,	TYPE16_55,	FALSE}, //Move Register
 	{"MOVI55",	5,	0b00001,	TYPE16_55,	FALSE}, //Move Immediate
-	{"NOP16",	6,	0b001001,	TYPE16_16,	FALSE}, //No Operation
+//	{"NOP16",	6,	0b001001,	TYPE16_16,	FALSE}, //No Operation
 	{"RET5",	10,	0b1011101100,	TYPE16_5,	FALSE}, //Return from Register
 	{"SBI333",	6,	0b010111,	TYPE16_333,	FALSE}, //Store Byte Immediate
 	{"SHI333",	6,	0b010110,	TYPE16_333,	FALSE}, //Store Halfword Immediate

@@ -222,7 +222,7 @@ void disassm32(instr_t * const instr_struct, const uint32_t PC)
 				
 				//%s rt, [ra]
 				case OPC_SBI_bi:
-					sprintf(instr_struct->disassm, "%s r%u, [r%u]", instr_struct->mnemonic, instr_struct->rt, instr_struct->ra);
+					sprintf(instr_struct->disassm, "%s r%u, [r%u], 0x%x", instr_struct->mnemonic, instr_struct->rt, instr_struct->ra, nds32_sign_extend(instr_struct->imm1_15, 15, 32));
 					break;
 				
 				case OPC_BR1:
@@ -255,7 +255,7 @@ void disassm32(instr_t * const instr_struct, const uint32_t PC)
 						case SUB_MEM_SB:
 						case SUB_MEM_LLW:
 						case SUB_MEM_SCW:
-							sprintf(instr_struct->disassm, "%s r%u, [r%u + (r%u << %u)]", instr_struct->mnemonic, instr_struct->rt, instr_struct->ra, instr_struct->rb, instr_struct->imm1_2);
+							sprintf(instr_struct->disassm, "%s r%u, [r%u + (r%u << 0x%x)]", instr_struct->mnemonic, instr_struct->rt, instr_struct->ra, instr_struct->rb, instr_struct->imm1_2);
 							break;
 						
 						//%s rt, [ra], rb << imm
@@ -267,7 +267,7 @@ void disassm32(instr_t * const instr_struct, const uint32_t PC)
 						case SUB_MEM_SW_bi:
 						case SUB_MEM_SH_bi:
 						case SUB_MEM_SB_bi:
-							sprintf(instr_struct->disassm, "%s r%u, [r%u], (r%u << %u)", instr_struct->mnemonic, instr_struct->rt, instr_struct->ra, instr_struct->rb, instr_struct->imm1_2);					
+							sprintf(instr_struct->disassm, "%s r%u, [r%u], (r%u << 0x%x)", instr_struct->mnemonic, instr_struct->rt, instr_struct->ra, instr_struct->rb, instr_struct->imm1_2);					
 							break;
 					}
 					break;
@@ -291,9 +291,6 @@ void disassm32(instr_t * const instr_struct, const uint32_t PC)
 					case SUB_ALU_1_SLTS:
 					case SUB_ALU_1_SVA:
 					case SUB_ALU_1_SVS:
-					case SUB_ALU_1_SEB:
-					case SUB_ALU_1_SEH:
-					case SUB_ALU_1_ZEH:
 					case SUB_ALU_1_SLL:
 					case SUB_ALU_1_SRL:
 					case SUB_ALU_1_SRA:
@@ -303,12 +300,18 @@ void disassm32(instr_t * const instr_struct, const uint32_t PC)
 						sprintf(instr_struct->disassm, "%s r%u, r%u, r%u", instr_struct->mnemonic, instr_struct->rt, instr_struct->ra, instr_struct->rb);
 						break;
 					
+					case SUB_ALU_1_SEH:
+					case SUB_ALU_1_SEB:
+					case SUB_ALU_1_ZEH:
+						sprintf(instr_struct->disassm, "%s r%u, r%u", instr_struct->mnemonic, instr_struct->rt, instr_struct->ra);
+						break;
+					
 					//%s rt, ra, imm5u
 					case SUB_ALU_1_SLLI:
 					case SUB_ALU_1_SRLI:
 					case SUB_ALU_1_SRAI:
 					case SUB_ALU_1_ROTRI:
-						sprintf(instr_struct->disassm, "%s r%u, r%u, %u", instr_struct->mnemonic, instr_struct->rt, instr_struct->ra, instr_struct->imm1_5);
+						sprintf(instr_struct->disassm, "%s r%u, r%u, 0x%x", instr_struct->mnemonic, instr_struct->rt, instr_struct->ra, instr_struct->imm1_5);
 						break;
 					
 					//%s rt, rs, ra, rb
@@ -331,10 +334,10 @@ void disassm32(instr_t * const instr_struct, const uint32_t PC)
 					
 					//%s rb OR %s rt, rb if(rt) 
 					case SUB_JREG_JRAL:
-						if(instr_struct->rt)
+						//if(instr_struct->rt)
 							sprintf(instr_struct->disassm, "%s r%u, r%u", instr_struct->mnemonic, instr_struct->rt, instr_struct->rb);
-						else
-							sprintf(instr_struct->disassm, "%s r%u", instr_struct->mnemonic, instr_struct->rb);
+						//else
+						//	sprintf(instr_struct->disassm, "%s r%u", instr_struct->mnemonic, instr_struct->rb);
 						break;
 				}
 				break;
@@ -408,7 +411,7 @@ void disassm32(instr_t * const instr_struct, const uint32_t PC)
 					//%s rt, ra, imm5u
 					case SUB_ALU_2_BSET:
 					case SUB_ALU_2_BTST:
-						sprintf(instr_struct->disassm, "%s r%u, r%u, %u", instr_struct->mnemonic, instr_struct->rt, instr_struct->ra, instr_struct->imm1_5);
+						sprintf(instr_struct->disassm, "%s r%u, r%u, 0x%x", instr_struct->mnemonic, instr_struct->rt, instr_struct->ra, instr_struct->imm1_5);
 						break;
 					
 					//%s rt, ra
@@ -436,7 +439,7 @@ void disassm32(instr_t * const instr_struct, const uint32_t PC)
 					case SUB_LSMW_LMW_bdm:
 					case SUB_LSMW_LMW_bi:
 					case SUB_LSMW_LMW_bim:
-						sprintf(instr_struct->disassm, "%s r%u, [r%u], r%u, %u", instr_struct->mnemonic, instr_struct->rb, instr_struct->ra, instr_struct->re, instr_struct->enable);
+						sprintf(instr_struct->disassm, "%s r%u, [r%u], r%u, 0x%x", instr_struct->mnemonic, instr_struct->rb, instr_struct->ra, instr_struct->re, instr_struct->enable);
 						break;
 					
 					//%s rb, [ra], re, enable
@@ -448,14 +451,14 @@ void disassm32(instr_t * const instr_struct, const uint32_t PC)
 					case SUB_LSMW_SMW_bdm:
 					case SUB_LSMW_SMW_bi:
 					case SUB_LSMW_SMW_bim:
-						sprintf(instr_struct->disassm, "%s r%u, [r%u], r%u, %u", instr_struct->mnemonic, instr_struct->rb, instr_struct->ra, instr_struct->re, instr_struct->enable);
+						sprintf(instr_struct->disassm, "%s r%u, [r%u], r%u, 0x%x", instr_struct->mnemonic, instr_struct->rb, instr_struct->ra, instr_struct->re, instr_struct->enable);
 						break;
 					
 					//%s rb, [ra], re, enable
 					case SUB_LSMW_SMWA_adm:
 					case SUB_LSMW_SMWA_bdm:
 					case SUB_LSMW_LMWA_bim:
-						sprintf(instr_struct->disassm, "%s r%u, [r%u], r%u, %u", instr_struct->mnemonic, instr_struct->rb, instr_struct->ra, instr_struct->re, instr_struct->enable);
+						sprintf(instr_struct->disassm, "%s r%u, [r%u], r%u, 0x%x", instr_struct->mnemonic, instr_struct->rb, instr_struct->ra, instr_struct->re, instr_struct->enable);
 						break;
 				}
 				break;

@@ -37,10 +37,11 @@ static void fill_args_instr_type16(const uint32_t instr, const uint16_t opc, con
 	instr_struct->type16=type;
 	switch(type)
 	{
+		/*
 		case TYPE16_16:
 			//no operands
 			break;
-		
+		*/
 		case TYPE16_10:
 			instr_struct->imm1_10=(instr&0x03ff);
 			break;
@@ -101,6 +102,7 @@ static void disassm16(instr_t * const instr_struct, const uint32_t PC __attribut
 {
 	switch(instr_struct->type16)
 	{
+		/*
 		case TYPE16_16:
 			switch(instr_struct->opc)
 			{
@@ -109,12 +111,12 @@ static void disassm16(instr_t * const instr_struct, const uint32_t PC __attribut
 					break;
 			}
 			break;
-		
+		*/
 		case TYPE16_10:
 			switch(instr_struct->opc)
 			{
 				case OPC16_ADDI10S:
-					sprintf(instr_struct->disassm, "%s %d", instr_struct->mnemonic, nds32_sign_extend(instr_struct->imm1_10, 10, 32));
+					sprintf(instr_struct->disassm, "%s 0x%x", instr_struct->mnemonic, nds32_sign_extend(instr_struct->imm1_10, 10, 32));
 					break;
 			}
 			break;
@@ -132,31 +134,31 @@ static void disassm16(instr_t * const instr_struct, const uint32_t PC __attribut
 				case OPC16_ADDI333:
 				case OPC16_SLLI333:
 				case OPC16_SUBI333:
-					sprintf(instr_struct->disassm, "%s r%u, r%u, %u", instr_struct->mnemonic, instr_struct->rt, instr_struct->ra, instr_struct->imm1_3);
+					sprintf(instr_struct->disassm, "%s r%u, r%u, 0x%x", instr_struct->mnemonic, instr_struct->rt, instr_struct->ra, instr_struct->imm1_3);
 					break;
 				
 				//%s rt, [ra+imm_u]
 				case OPC16_LBI333:
 				case OPC16_SBI333:
-					sprintf(instr_struct->disassm, "%s r%u, [r%u + %u]", instr_struct->mnemonic, instr_struct->rt, instr_struct->ra, instr_struct->imm1_3);
+					sprintf(instr_struct->disassm, "%s r%u, [r%u + 0x%x]", instr_struct->mnemonic, instr_struct->rt, instr_struct->ra, instr_struct->imm1_3);
 					break;
 				
 				//%s rt, [ra+imm_u<<1]
 				case OPC16_LHI333:
 				case OPC16_SHI333:
-					sprintf(instr_struct->disassm, "%s r%u, [r%u + %u]", instr_struct->mnemonic, instr_struct->rt, instr_struct->ra, instr_struct->imm1_3<<1);
+					sprintf(instr_struct->disassm, "%s r%u, [r%u + 0x%x]", instr_struct->mnemonic, instr_struct->rt, instr_struct->ra, instr_struct->imm1_3<<1);
 					break;
 				
 				//%s rt, [ra+imm_u<<2]
 				case OPC16_LWI333:
 				case OPC16_SWI333:
-					sprintf(instr_struct->disassm, "%s r%u, [r%u + %u]", instr_struct->mnemonic, instr_struct->rt, instr_struct->ra, instr_struct->imm1_3<<2);
+					sprintf(instr_struct->disassm, "%s r%u, [r%u + 0x%x]", instr_struct->mnemonic, instr_struct->rt, instr_struct->ra, instr_struct->imm1_3<<2);
 					break;
 				
 				//%s rt, [ra], imm_u<<2
 				case OPC16_LWI333_bi:
 				case OPC16_SWI333_bi:
-					sprintf(instr_struct->disassm, "%s r%u, [r%u], %u", instr_struct->mnemonic, instr_struct->rt, instr_struct->ra, instr_struct->imm1_3<<2);
+					sprintf(instr_struct->disassm, "%s r%u, [r%u], 0x%x", instr_struct->mnemonic, instr_struct->rt, instr_struct->ra, instr_struct->imm1_3<<2);
 					break;
 				
 			}
@@ -190,14 +192,14 @@ static void disassm16(instr_t * const instr_struct, const uint32_t PC __attribut
 						//%s rt, [fp+imm_u<<2]
 						case SUB_XWI37_LWI37:
 						case SUB_XWI37_SWI37:
-							sprintf(instr_struct->disassm, "%s r%u, [fp + %u]", instr_struct->mnemonic, instr_struct->rt, instr_struct->imm1_7<<2);
+							sprintf(instr_struct->disassm, "%s r%u, [fp + 0x%x]", instr_struct->mnemonic, instr_struct->rt, instr_struct->imm1_7<<2);
 							break;
 					}
 					break;
 				
 				case OPC16_XWI37SP:
 					//%s rt, [sp+imm_u<<2]
-					sprintf(instr_struct->disassm, "%s r%u, [sp + %u]", instr_struct->mnemonic, instr_struct->rt, instr_struct->imm1_7<<2);
+					sprintf(instr_struct->disassm, "%s r%u, [ + 0x%x]", instr_struct->mnemonic, instr_struct->rt, instr_struct->imm1_7<<2);
 					break;
 			}
 			break;
@@ -210,7 +212,7 @@ static void disassm16(instr_t * const instr_struct, const uint32_t PC __attribut
 				case OPC16_BEQZ38:
 				case OPC16_BNES38:
 				case OPC16_BNEZ38:
-					sprintf(instr_struct->disassm, "%s r%u, %x", instr_struct->mnemonic, instr_struct->rt, nds32_sign_extend(instr_struct->imm1_8<<1, 9, 32)+PC);
+					sprintf(instr_struct->disassm, "%s r%u, 0x%x", instr_struct->mnemonic, instr_struct->rt, nds32_sign_extend(instr_struct->imm1_8<<1, 9, 32)+PC);
 					break;
 			}
 			break;
@@ -235,12 +237,12 @@ static void disassm16(instr_t * const instr_struct, const uint32_t PC __attribut
 				case OPC16_SRAI45:
 				case OPC16_SRLI45:
 				case OPC16_SUBI45:
-					sprintf(instr_struct->disassm, "%s r%u, %u", instr_struct->mnemonic, reg_4T5(instr_struct->rt), instr_struct->imm1_5);
+					sprintf(instr_struct->disassm, "%s r%u, 0x%x", instr_struct->mnemonic, reg_4T5(instr_struct->rt), instr_struct->imm1_5);
 					break;
 				
 				case OPC16_SLTI45:
 				case OPC16_SLTSI45:
-					sprintf(instr_struct->disassm, "%s r%u, %u", instr_struct->mnemonic, reg_4T5(instr_struct->ra), instr_struct->imm1_5);
+					sprintf(instr_struct->disassm, "%s r%u, 0x%x", instr_struct->mnemonic, reg_4T5(instr_struct->ra), instr_struct->imm1_5);
 			}
 			break;
 		
@@ -250,7 +252,7 @@ static void disassm16(instr_t * const instr_struct, const uint32_t PC __attribut
 				//%s rt, [ra]
 				case OPC16_LWI450:
 				case OPC16_SWI450:
-					sprintf(instr_struct->disassm, "%s r%u, [r%u]", instr_struct->mnemonic, instr_struct->rt, instr_struct->ra);
+					sprintf(instr_struct->disassm, "%s r%u, [r%u]", instr_struct->mnemonic, reg_4T5(instr_struct->rt), instr_struct->ra);
 					break;
 			}
 			break;
@@ -277,7 +279,7 @@ static void disassm16(instr_t * const instr_struct, const uint32_t PC __attribut
 				
 				//%s rt, imm_s
 				case OPC16_MOVI55:
-					sprintf(instr_struct->disassm, "%s r%u, %d", instr_struct->mnemonic, instr_struct->rt, nds32_sign_extend(instr_struct->imm1_5, 5, 32));
+					sprintf(instr_struct->disassm, "%s r%u, 0x%x", instr_struct->mnemonic, instr_struct->rt, nds32_sign_extend(instr_struct->imm1_5, 5, 32));
 					break;
 			}
 			break;
