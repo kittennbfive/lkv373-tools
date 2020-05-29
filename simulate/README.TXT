@@ -32,17 +32,4 @@ If the simulator crashes or you pressed Ctrl+C you can do "rm fifo_sim" to close
 
 If you get a "xfce4-terminal not found" or similar i forgot to edit window.h to switch to generic "x-terminal-emulator". Correct this and recompile.
 
-Current statistics:
-github.com/AlDanial/cloc v 1.81  T=0.04 s (1378.0 files/s, 156795.5 lines/s)
--------------------------------------------------------------------------------
-Language                     files          blank        comment           code
--------------------------------------------------------------------------------
-C                               27            924            307           4259
-C/C++ Header                    29            227            200            455
--------------------------------------------------------------------------------
-SUM:                            56           1151            507           4714
--------------------------------------------------------------------------------
-+the code in ../disassm, total >6000 LOC.
-
-
 Feedback welcome. Have fun and be careful.
