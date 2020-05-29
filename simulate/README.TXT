@@ -25,6 +25,8 @@ Please read the fine manual "MANUAL.TXT".
 Quick start:
 type "read script" and see the magic happen. You will need to adjust the windows positions and sizes to fit your screen, then you can type "layout save lay" to save everything (this is buggy, see layout.pl, you can edit the file lay.layout manually to fix the values)
 
+The standard firmware will spit out UDP-pakets once a second, for making this happen you need to run like 200M steps!
+
 Known limitations:
 see main.c
 
