@@ -9,7 +9,7 @@ written in Perl for easy hackability using regular expressions (parsers in C are
 
 (c) 2020 kitten_nb_five
 
-version 0.01 - early release for weekend
+version 0.02
 
 licence: AGPL v3 or later
 
@@ -20,6 +20,7 @@ sz,addr=value ->write value to addr using sz byte(s) memory-access (1 or 2 or 4)
 sz,addr? ->read value from addr using sz byte(s) memory-access (1 or 2 or 4)
 read|file $file ->read commands from file
 quit|exit ->exit immediately
+init ->init MAC with some magic numbers
 
 Commands in $file can have the syntax specified above or direct output of the simulator (write only at this point, byte-size is calculated from value).
 Lines starting with # or // are ignored.
@@ -68,6 +69,25 @@ while($run)
 			last if(parse($_));
 		}
 		close $fh;
+	}
+=pod
+does not work, device gets stuck somewhere
+	elsif($line eq "reboot")
+	{
+		print "triggering WDR...\n";
+		write_addr(4, 0x9850000c, 3);
+		sleep(20);
+		$port->purge_rx();
+		$port->purge_tx();
+		print "reboot ok\n";
+	}
+=cut
+	elsif($line eq "init")
+	{
+		#minimum neeeded init of MAC - no idea what these numbers mean
+		parse('MAC: write 0x40 @0x90907000');
+		parse('MAC: write 0x9e @0x90907070');
+		parse('MAC: write 0x1f @0x90907078');
 	}
 	else
 	{
