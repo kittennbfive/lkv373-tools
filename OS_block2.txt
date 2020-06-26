@@ -36,12 +36,12 @@ CALLS TO OSTaskCreateExt:
 2)	57ec	0		d0100	5		fffd	cff04		TimerTask (OS)
 3)	75c0	3		1014b4	b		b		101008		TF_MAIN
 4)	1d994	0		102fa4	a		a		102008		Net
-5)	3edc4	2		103404	36		36		103008		unknown / someth. with MAC
+5)	3edc4	2		103404	36		36		103008		unknown1 / someth. with MAC
 6)	6564	5		104324	d		d		104008		TF_AV
 7)	cbd8	4		1057d4	e		e		105008		TF_Console
 8)	ee54	5		106324	10		10		106008		TF_HTTP
 9)	7330	0		107324	11		11		107008		TF_TFVEP
-10)	5dd8	6		109f44	f		f		108008		unkown
+10)	5dd8	6		109f44	f		f		108008		unknown2
 
 r0 is a pointer to the task's code
 r1 pointer to opt data area?? (does not look like, rather some kind of index??)
@@ -68,20 +68,22 @@ guesses:
 +8: ptr to bottom of stack
 +c: ?? should be stack size but the number does not make sense
 +10: options from OSTaskCreateExt?
-+12: Task ID - this matches r3 from above
++12: Task ID - this matches r4 from above
 +14: ptr to previous TCB
 +18: ptr to next TCB
-+34: OSTCBY (?)
-+35: OSTCBBitX (?)
-+36: OSTCBBitY (?)
-+38: OSTCBCtxSwCtr == number of times the task was switched in
++1c: ptr to Event Control Block
++33: OSTCBPrio - matches r3 from above
++34: OSTCBY
++35: OSTCBBitX 
++36: OSTCBBitY
++38: OSTCBCtxSwCtr == number of times the task was switched in (???)
 +4c: name of task (only used for internal tasks)
 
-OSRdyTbl[OS_RDY_TBL_SIZE] (Table of tasks which are ready to run) @cfefc. 8*1 byte (?)
+OSRdyTbl[OS_RDY_TBL_SIZE] (Table of tasks which are ready to run) @cfefc. 8*1 byte
 
 OSTCBPrioTbl @d135c size 0x80 == 128dez == 4x64
 
-OSUnMapTbl (priority resolution table) (const, 256 bytes) @1b10
+OSUnMapTbl (priority resolution table) (const, 256 bytes) @51b10
 
 OSTmrTbl @cf8a8 size 0x340 == 832dez == 16*52???
 
@@ -89,7 +91,7 @@ OSTmrWheelTbl @cf7dc size 0x40 == 64dez
 
 OSQTbl @cfe9c size 0x60 == 96dez
 
-OSMemTbl @cfbe8 size 0xb4 == 180dez == 5*36 - WRONG - Magic Byte does not match!?
+OSMemTbl @cfbe8 size 0xb4 == 180dez == 5*36 - ???
 
 OSFlagTbl @cf81c size 0x8c == 140dez == 5*28
 
@@ -103,7 +105,7 @@ OSTmrTaskStk @cff04 size 4*128dez == 512dez
 
 ------------------------------------------------------------------------
 
-KNOWN VARIABLES:
+VARIABLES FROM OS AND CUSTOM CODE:
 
 892e4 - OSTmrFree
 892e6 - OSTmrUsed
@@ -119,16 +121,22 @@ KNOWN VARIABLES:
 89358 - OSTCBList
 8935c - OSMemFreeList
 89360 - OSQFreeList
-89364 - OSTime??
+89364 - OSTime
 89368 - OSTmrTime
 8936c - OSTmrSem
 89370 - OSTmrSemSignal
 89374 - OSTmrFreeList
+89394 - addr of ECB sembh_AvData (index 3)
+89398 - addr of ECB sembh_WaitForConnection (index 4)
 893f8 - start of kernel (??) mem
 893fc - end of kernel mem
 89400 - size of kernel mem
 89404 - size in kB
 89408 - ???
+89410 - ???
+89418 - ???
+89420 - ???
+8941c - ???
 89490 - ???
 89491 - OSStatRdy
 89492 - OSIntNesting
@@ -138,7 +146,22 @@ KNOWN VARIABLES:
 89496 - OSRdyGrp
 89497 - OSRunning
 89498 - OSTaskCtr
+89499 - OSTickStepState
 
+------------------------------------------------------------------------
+
+SEMAPHORES AND STUFF:
+
+They are quite a lot, saved in OSEventTbl beginning at d0304.
+
+See also simulator command "os evtbl".
+
+index 3: sembh_AvData
+index 4: sembh_WaitForConnection
+
+index 37: something with MAC, NET-Task is waiting for this but always time-outs which might be normal
+
+used?? pipeh_TfvepAndAv
 
 ------------------------------------------------------------------------
 
