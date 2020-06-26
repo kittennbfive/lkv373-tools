@@ -12,6 +12,7 @@ THIS PROGRAM COMES WITHOUT ANY WARRANTY!
 #include <stdio.h>
 #include <stdint.h>
 #include <string.h>
+#include <stdbool.h>
 #define __USE_MISC
 #include <unistd.h>
 #include <fcntl.h>
@@ -49,7 +50,7 @@ void con_setval(const uint8_t sz, const uint32_t addr, const uint32_t val)
 	char buf[10];
 	char buf2[10];
 	
-	MSG(MSG_PERIPH, "con_setval: set 0x%x to 0x%x\n", addr, val);
+	MSG(MSG_CONNECTOR, "con_setval: set 0x%x to 0x%x\n", addr, val);
 	
 	if(addr==0x9090a80c)
 	{
@@ -83,11 +84,16 @@ void con_setval(const uint8_t sz, const uint32_t addr, const uint32_t val)
 	usleep(WAIT_MS*1000);
 }
 
+bool skip_status_reg_read=false;
+
 uint32_t con_getval(const uint8_t sz, const uint32_t addr)
 {
 	char buf[10];
 	char buf2[10];
-
+	
+	//if(addr==0x9090700c && skip_status_reg_read)
+	//	return 0x10;
+	
 	buf[0]='?';
 	buf[1]=sz;
 	memcpy(&buf[2], &addr, sizeof(uint32_t));
@@ -111,9 +117,7 @@ uint32_t con_getval(const uint8_t sz, const uint32_t addr)
 	else
 		ERRX(1, "read returned -1");
 	
-	MSG(MSG_PERIPH, "con_getval: 0x%x == 0x%x\n", addr, val);
-	
-	usleep(WAIT_MS*1000);
+	MSG(MSG_CONNECTOR, "con_getval: 0x%x == 0x%x\n", addr, val);
 	
 	return val;
 }

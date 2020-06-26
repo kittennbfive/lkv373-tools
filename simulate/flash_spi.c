@@ -47,24 +47,24 @@ uint32_t flash_spi_transfer(const uint32_t val)
 	if(((val>>24)&0xFF)==0x03)
 	{
 		addr=val&0x00FFFFFF;		
-		MSG(MSG_PERIPH, "FLASH set addr to 0x%x\n", addr);
+		MSG(MSG_PERIPH_SSPC, "FLASH set addr to 0x%x\n", addr);
 		return 0;
 	}
 	else if(val==0x06)
 	{
-		MSG(MSG_PERIPH, "FLASH: write enable bit set\n");
+		MSG(MSG_PERIPH_SSPC, "FLASH: write enable bit set\n");
 		status_reg|=(1<<WRITE_ENABLE_LATCH);
 		return 0;
 	}
 	else if(((val>>24)&0xFF)==0x05)
 	{
-		MSG(MSG_PERIPH, "FLASH: read status reg\n");
+		MSG(MSG_PERIPH_SSPC, "FLASH: read status reg\n");
 		return status_reg;
 	}
 	else if(((val>>24)&0xFF)==0x20)
 	{
 		addr=val&0x00FFFFFF;		
-		MSG(MSG_PERIPH, "FLASH sector erase 0x%x (not impl)\n", addr);
+		MSG(MSG_PERIPH_SSPC, "FLASH sector erase 0x%x (not impl)\n", addr);
 		status_reg&=~(1<<WRITE_ENABLE_LATCH);
 		return 0;
 	}
@@ -76,7 +76,7 @@ uint32_t flash_spi_transfer(const uint32_t val)
 	}
 	else
 	{
-		MSG(MSG_PERIPH, "flash_spi_transfer: don't know how to handle received value 0x%08x\n", val);
+		MSG(MSG_PERIPH_SSPC, "flash_spi_transfer: don't know how to handle received value 0x%08x\n", val);
 		return 0;
 	}	
 }

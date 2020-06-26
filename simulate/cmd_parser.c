@@ -12,6 +12,7 @@ THIS PROGRAM COMES WITHOUT ANY WARRANTY!
 #include <stdio.h>
 #include <stdint.h>
 #include <string.h>
+#include <stdbool.h>
 
 #include "cmd_parser.h"
 #include "my_err.h"
@@ -29,11 +30,26 @@ THIS PROGRAM COMES WITHOUT ANY WARRANTY!
 #include "verbosity.h"
 #include "mac.h"
 #include "os_func.h"
+#include "uart.h"
 
 char cmd[SZ_BUFFER_COMMAND];
 char args[NB_ARGUMENTS_MAX][SZ_BUFFER_ARGUMENTS];
 uint8_t nb_args=0;
 uint8_t index_args=0;
+
+/*
+extern bool skip_status_reg_read;
+void set_flag(PROTOTYPE_ARGS_HANDLER)
+{
+	ARGS_HANDLER_UNUSED;
+	skip_status_reg_read=true;
+}
+void clr_flag(PROTOTYPE_ARGS_HANDLER)
+{
+	ARGS_HANDLER_UNUSED;
+	skip_status_reg_read=false;
+}
+*/
 
 const command_t commands[]=
 {
@@ -56,8 +72,13 @@ const command_t commands[]=
 //	{"writesr", 2, 2, &cmd_write_sr}, //unimplemented
 	{"setpc", 1, 1, &set_pc_cmd}, //use this with great caution, maybe this should be removed?
 	{"verbosity", 2, 10, &cmd_set_verbosity},
-	{"ping", 0, 0, &simulate_ping},
 	{"os", 1, 1, &show_os_info},
+	{"u2f", 1, 1, &uart_to_file},
+
+//test, undocumented
+	{"rx", 0, 0, &rx},
+//	{"set", 0, 0, &set_flag},
+//	{"clr", 0, 0, &clr_flag},
 	
 	{NULL, 0, 0, NULL}
 };

@@ -52,7 +52,7 @@ void cpe_write(PERIPH_CB_WRITE_ARGUMENTS)
 			break;
 		
 		default:
-			MSG(MSG_PERIPH, "CPE: unhandled register write 0x%x @0x%x\n", val, addr);
+			MSG(MSG_PERIPH_CPE, "CPE: unhandled register write 0x%x @0x%x\n", val, addr);
 	}
 }
 
@@ -68,7 +68,7 @@ bool cpe_read(PERIPH_CB_READ_ARGUMENTS)
 			break;
 		
 		default:
-			MSG(MSG_PERIPH, "CPE: unhandled register read 0x%x\n", addr);
+			MSG(MSG_PERIPH_CPE, "CPE: unhandled register read 0x%x\n", addr);
 			return false;
 	}
 }

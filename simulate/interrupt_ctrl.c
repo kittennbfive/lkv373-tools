@@ -60,7 +60,7 @@ void intc_write(PERIPH_CB_WRITE_ARGUMENTS)
 {
 	(void)sz;
 	
-	MSG(MSG_PERIPH, "INTC: writing 0x%x to 0x%x\n", val, addr);
+	MSG(MSG_PERIPH_INTC, "INTC: writing 0x%x to 0x%x\n", val, addr);
 	
 	switch(addr)
 	{
@@ -94,7 +94,7 @@ void intc_write(PERIPH_CB_WRITE_ARGUMENTS)
 			break;
 		
 		default:
-			MSG(MSG_PERIPH, "INTC: unhandled register write 0x%x @0x%x\n", val, addr);
+			MSG(MSG_PERIPH_INTC, "INTC: unhandled register write 0x%x @0x%x\n", val, addr);
 	}
 }
 
@@ -102,7 +102,7 @@ bool intc_read(PERIPH_CB_READ_ARGUMENTS)
 {
 	(void)sz;
 	
-	MSG(MSG_PERIPH, "INTC: reading from %x\n", addr);
+	MSG(MSG_PERIPH_INTC, "INTC: reading from %x\n", addr);
 	
 	switch(addr)
 	{
@@ -132,7 +132,7 @@ bool intc_read(PERIPH_CB_READ_ARGUMENTS)
 			break;
 		
 		default:
-			MSG(MSG_PERIPH, "INTC: unhandled read from 0x%x\n", addr);
+			MSG(MSG_PERIPH_INTC, "INTC: unhandled read from 0x%x\n", addr);
 			return false;
 	}
 }
@@ -145,7 +145,7 @@ static void trigger_interrupt(const uint8_t nb_int)
 {
 	if(get_gie()==false)
 	{
-		MSG(MSG_PERIPH, "trigger_interrupt: GIE is 0, not executing\n");
+		MSG(MSG_PERIPH_INTC, "trigger_interrupt: GIE is 0, not executing\n");
 		return;
 	}
 	

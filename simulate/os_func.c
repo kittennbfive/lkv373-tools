@@ -14,77 +14,10 @@ THIS PROGRAM COMES WITHOUT ANY WARRANTY!
 #include <string.h>
 
 #include "cmd_parser.h"
-#include "memory.h"
+#include "os_common.h"
 
 //OFFSETS FOR NORMAL FIRMWARE - BLOCK2 ONLY
 //NOT VALID FOR BOOTLOADER!
-
-//----------------------------------------------------------------------
-//GENERAL FUNCTIONS
-
-uint32_t get_word(const uint32_t addr)
-{
-	mem_word_t word;
-	word=memory_get_word(addr, NULL);
-	return word.val;
-}
-
-uint32_t get_halfword(const uint32_t addr)
-{
-	mem_halfword_t halfword;
-	halfword=memory_get_halfword(addr, NULL);
-	return halfword.val;
-}
-
-uint32_t get_byte(const uint32_t addr)
-{
-	mem_byte_t byte;
-	byte=memory_get_byte(addr, NULL);
-	return byte.val;
-}
-
-//again, this is for block2 only!
-char * get_task_name_from_id(const uint16_t id)
-{
-	switch(id)
-	{
-		case 0x0b: return "TF_MAIN";
-		case 0x0a: return "Net";
-		case 0x36: return "unknown1 (MAC)";
-		case 0x0d: return "TF_AV";
-		case 0x0e: return "TF_Console";
-		case 0x10: return "TF_HTTP";
-		case 0x11: return "TF_TFVEP";
-		case 0xf: return "unknown2";
-		
-		case 0xffff: return "IDLE";
-		case 0xfffe: return "STAT";
-		case 0xfffd: return "TMR";
-		
-		default: return "unknown!";
-	}
-}
-
-char * get_task_name_from_priority(const uint8_t prio)
-{
-	switch(prio)
-	{
-		case 0x0b: return "TF_MAIN";
-		case 0x0a: return "Net";
-		case 0x36: return "unknown1 (MAC)";
-		case 0x0d: return "TF_AV";
-		case 0x0e: return "TF_Console";
-		case 0x10: return "TF_HTTP";
-		case 0x11: return "TF_TFVEP";
-		case 0xf: return "unknown2";
-		
-		case 0x3f: return "IDLE";
-		case 0x3e: return "STAT";
-		case 0x05: return "TMR";
-		
-		default: return "unknown!";
-	}
-}
 
 //----------------------------------------------------------------------
 //TASK CONTROL BLOCKS
@@ -131,6 +64,7 @@ void show_all_tcb(void)
 		printf("  Task ID: 0x%x (%s)\n", task_id, get_task_name_from_id(task_id));
 		printf("  prev TCB: 0x%x\n", TCB_WORD(i, 0x14));
 		printf("  next TCB: 0x%x\n", TCB_WORD(i, 0x18));
+		printf("  event ctrl block: 0x%0x\n", TCB_WORD(i, 0x1c));
 		
 		j=0;
 		do
@@ -167,6 +101,108 @@ void decode_rdy_tbl(void)
 }
 
 //----------------------------------------------------------------------
+//OSEventTbl
+#define POS_OSEVENTTBL 0xd0304
+#define NB_ENTRIES_OSEVENTTBL 60
+#define SIZEOF_OSEVENTTBL 36
+
+#define OS_EVENT_TBL_SIZE 8
+#define OS_EVENT_NAME_SIZE 17
+
+#include "priotable.c"
+
+typedef struct __attribute__((__packed__))
+{
+    uint8_t    OSEventType;                    /* Type of event control block (see OS_EVENT_TYPE_xxxx)    */
+    uint8_t align[3];
+    uint32_t	OSEventPtr; /*actually a pointer but sizeof==4, not 8 as on a modern PC! */ /* Pointer to message or queue structure                   */
+    uint16_t   OSEventCnt;                     /* Semaphore Count (not used if other EVENT type)          */
+    uint8_t    OSEventGrp;                     /* Group corresponding to tasks waiting for event to occur */
+    uint8_t    OSEventTbl[OS_EVENT_TBL_SIZE];  /* List of tasks waiting for event to occur                */
+    char    OSEventName[OS_EVENT_NAME_SIZE];
+} os_event_t;
+
+char *get_type_str(const uint8_t t)
+{
+	switch(t)
+	{
+		case 0: return "OS_EVENT_TYPE_UNUSED";
+		case 1: return "OS_EVENT_TYPE_MBOX";
+		case 2: return "OS_EVENT_TYPE_Q";
+		case 3: return "OS_EVENT_TYPE_SEM";
+		case 4: return "OS_EVENT_TYPE_MUTEX";
+		case 5: return "OS_EVENT_TYPE_FLAG";
+		
+		case 100: return "OS_TMR_TYPE";
+		
+		default: return "unknown!";
+	}  
+}
+
+void parse_os_event(const uint8_t index)
+{
+	os_event_t ev;
+	
+	//yeah...
+	uint8_t i;
+	for(i=0; i<SIZEOF_OSEVENTTBL; i++)
+		*((uint8_t*)&ev+i)=get_byte(POS_OSEVENTTBL+index*SIZEOF_OSEVENTTBL+i);
+		
+	uint8_t type=ev.OSEventType;
+		if(type==0)
+		{
+			printf("(empty)\n");
+			return;
+		}
+		
+		printf("OSEventType: %u==%s\n", type, get_type_str(type));
+		printf("OSEventPtr: 0x%x\n", ev.OSEventPtr);
+		printf("OSEventCnt: %u\n", ev.OSEventCnt);
+		printf("OSEventName: %s\n", ev.OSEventName);
+		
+		uint8_t grp=ev.OSEventGrp;
+		if(grp==0)
+		{
+			printf("no tasks waiting for this event\n");
+			return;
+		}
+		
+		printf("OSEventGrp: %u\n", grp);
+		printf("Prio of tasks waiting for this event: ");
+		uint8_t y=OSUnMapTbl[ev.OSEventGrp];
+		uint8_t j;
+		for(j=0; j<OS_EVENT_TBL_SIZE; j++)
+		{
+			if(ev.OSEventTbl[j]==0)	
+				continue;
+			uint8_t x=OSUnMapTbl[ev.OSEventTbl[y]];
+			uint8_t prio=(y<<3)+x;			
+			printf("0x%x (%s)", prio, get_task_name_from_priority(prio));
+		}
+		printf("\n");
+}
+
+void decode_os_ev_tbl(void)
+{
+	uint8_t i;
+	for(i=0; i<NB_ENTRIES_OSEVENTTBL; i++)
+	{
+		printf("OSEventTbl[%u] @0x%x:\n", i, POS_OSEVENTTBL+i*SIZEOF_OSEVENTTBL);
+		parse_os_event(i);
+		printf("\n");
+	}
+}
+
+//----------------------------------------------------------------------
+//OSTCBCur
+
+void show_curr_task(void)
+{
+	uint16_t task_id=get_current_task_id();
+	printf("ID of current task is 0x%x (%s)\n", task_id, get_task_name_from_id(task_id));
+}
+
+//----------------------------------------------------------------------
 //DISPATCHER
 
 void show_os_info(PROTOTYPE_ARGS_HANDLER)
@@ -179,6 +215,10 @@ void show_os_info(PROTOTYPE_ARGS_HANDLER)
 		show_all_tcb();
 	else if(!strcmp(show_what, "rdy"))
 		decode_rdy_tbl();
+	else if(!strcmp(show_what, "evtbl"))
+		decode_os_ev_tbl();
+	else if(!strcmp(show_what, "curr"))
+		show_curr_task();
 	else
 		printf("unknown: %s\n", show_what);
 }

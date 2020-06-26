@@ -43,7 +43,6 @@ uint32_t status_reg;
 static uint32_t fifo_rx[FIFO_RX_SIZE]={0};
 static uint8_t nb_entries_fifo_rx=0;
 
-
 void init_sspc(char const * const file_flash)
 {
 	flash_init(file_flash);
@@ -64,7 +63,7 @@ static uint32_t fifo_pop(void)
 	}
 	else
 	{
-		MSG(MSG_PERIPH, "SSPC: trying to read from empty fifo, returning 0\n");
+		MSG(MSG_PERIPH_SSPC, "SSPC: trying to read from empty fifo, returning 0\n");
 		return 0;
 	}
 }
@@ -86,7 +85,7 @@ void sspc_write(PERIPH_CB_WRITE_ARGUMENTS)
 {
 	(void)sz;
 	
-	MSG(MSG_PERIPH, "SSPC: write 0x%x to reg 0x%x\n", val, addr);
+	MSG(MSG_PERIPH_SSPC, "SSPC: write 0x%x to reg 0x%x\n", val, addr);
 	
 	switch(addr)
 	{
@@ -97,12 +96,12 @@ void sspc_write(PERIPH_CB_WRITE_ARGUMENTS)
 		case SSP_CTRL_REG2:
 			if(val&SSP_RX_FIFO_CLR)
 			{
-				MSG(MSG_PERIPH, "SSPC: RX FIFO CLR\n");
+				MSG(MSG_PERIPH_SSPC, "SSPC: RX FIFO CLR\n");
 				fifo_clear();
 			}
 			if(val&SSP_TX_FIFO_CLR)
 			{
-				MSG(MSG_PERIPH, "SSPC: TX FIFO CLR\n");
+				MSG(MSG_PERIPH_SSPC, "SSPC: TX FIFO CLR\n");
 			}
 			break;
 		
@@ -111,34 +110,32 @@ void sspc_write(PERIPH_CB_WRITE_ARGUMENTS)
 			break;
 		
 		default:
-			MSG(MSG_PERIPH, "SSPC: unhandled register write 0x%x @0x%x\n", val, addr);
+			MSG(MSG_PERIPH_SSPC, "SSPC: unhandled register write 0x%x @0x%x\n", val, addr);
 			break;
 	}
-	
-	
 }
 
 bool sspc_read(PERIPH_CB_READ_ARGUMENTS)
 {
 	(void)sz;
 	
-	MSG(MSG_PERIPH, "SSPC: read from 0x%x == ", addr);
+	MSG(MSG_PERIPH_SSPC, "SSPC: read from 0x%x == ", addr);
 	
 	if(addr==SSP_DATA_REG)
 	{
 		(*val)=fifo_pop();
-		MSG(MSG_PERIPH, "data reg: %x\n", (*val));
+		MSG(MSG_PERIPH_SSPC, "data reg: %x\n", (*val));
 		return true;
 	}
 	else if(addr==SSP_STATUS_REG)
 	{
 		(*val)=status_reg;
-		MSG(MSG_PERIPH, "status reg: %x\n", (*val));
+		MSG(MSG_PERIPH_SSPC, "status reg: %x\n", (*val));
 		return true;
 	}
 	else
 	{
-		MSG(MSG_PERIPH, "unhandled\n");
+		MSG(MSG_PERIPH_SSPC, "unhandled\n");
 		return false;
 	}
 }

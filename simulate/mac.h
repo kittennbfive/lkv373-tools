@@ -19,6 +19,6 @@ void init_mac(void);
 void mac_write(PERIPH_CB_WRITE_ARGUMENTS);
 bool mac_read(PERIPH_CB_READ_ARGUMENTS);
 
-void simulate_ping(PROTOTYPE_ARGS_HANDLER);
+void rx(PROTOTYPE_ARGS_HANDLER);
 
 #endif

@@ -66,7 +66,7 @@ void pmu_write(PERIPH_CB_WRITE_ARGUMENTS)
 			break;
 			
 		default:
-			MSG(MSG_PERIPH, "PMU: unhandled register write 0x%x @0x%x\n", val, addr);
+			MSG(MSG_PERIPH_PMU, "PMU: unhandled register write 0x%x @0x%x\n", val, addr);
 	}
 }
 
@@ -102,7 +102,7 @@ bool pmu_read(PERIPH_CB_READ_ARGUMENTS)
 			break;
 	
 		default:
-			MSG(MSG_PERIPH, "PMU: unhandled register read 0x%x\n", addr);
+			MSG(MSG_PERIPH_PMU, "PMU: unhandled register read 0x%x\n", addr);
 			return false;
 	}
 }

@@ -29,6 +29,7 @@ THIS PROGRAM COMES WITHOUT ANY WARRANTY!
 
 #include "connector_serial.h"
 
+//if compiled with -DCONNECT_TO_REAL: If a peripheral is NOT in this list the real one on the LKV will be used. Does not work for CPE/PMU/TMR1/INTC and of course UART because that's used for the connector
 static peripheral_t per[]=
 {
 	{"CPE", 0x90100000, 0x90100088, &cpe_write, &cpe_read}, //what does this mean "CPE"?? it's important, there is the remap bit inside!!
@@ -40,6 +41,7 @@ static peripheral_t per[]=
 	{"GPIO", 0x99300000, 0x99300044, &gpio_write, &gpio_read}, //LED and reset button
 	
 	{"MAC", 0x90900000, 0x90907fff, &mac_write, &mac_read}, //TODO
+//	{"MAC", 0x90900000, 0x909fffff, &mac_write, &mac_read}, //TODO
 
 //???? 0x90908050-0x9090807c
 //???? 0x90909008

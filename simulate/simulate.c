@@ -34,6 +34,7 @@ THIS PROGRAM COMES WITHOUT ANY WARRANTY!
 #include "timer.h"
 #include "interrupt_ctrl.h"
 #include "verbosity.h"
+#include "os_info.h"
 
 //registers
 static uint32_t regs[32];
@@ -380,24 +381,35 @@ sim_t simulate(instr_t const * const instr, const bool ignore_breakpoints)
 					break;
 				
 				case SUB_ALU_1_DIVR:
+				{
 					if(regs[instr->rb]==0)
 					{
 						MSG(MSG_ALWAYS, "DIV BY ZERO\n");
 						return SIM_GENERIC_ERROR;
 					}
-					regs[instr->rt]=regs[instr->ra]/regs[instr->rb];
-					regs[instr->rs]=regs[instr->ra]%regs[instr->rb];
+					
+					uint32_t res=regs[instr->ra]/regs[instr->rb];
+					uint32_t rem=regs[instr->ra]%regs[instr->rb];
+					
+					regs[instr->rt]=res;
+					regs[instr->rs]=rem;
 					break;
+				}
 				
 				case SUB_ALU_1_DIVSR:
+				{
 					if(regs[instr->rb]==0)
 					{
 						MSG(MSG_ALWAYS, "DIV BY ZERO\n");
 						return SIM_GENERIC_ERROR;
 					}
-					regs[instr->rt]=(signed)regs[instr->ra]/(signed)regs[instr->rb];
-					regs[instr->rs]=(signed)regs[instr->ra]%(signed)regs[instr->rb];
+					uint32_t res=(signed)regs[instr->ra]/(signed)regs[instr->rb];
+					uint32_t rem=(signed)regs[instr->ra]%(signed)regs[instr->rb];
+					
+					regs[instr->rt]=res;
+					regs[instr->rs]=rem;
 					break;
+				}
 				
 				case SUB_ALU_1_XOR:
 					regs[instr->rt]=regs[instr->ra]^regs[instr->rb];
@@ -448,9 +460,11 @@ sim_t simulate(instr_t const * const instr, const bool ignore_breakpoints)
 				
 				case SUB_ALU_2_MULR64:
 				{
-					uint64_t Mresult=regs[instr->ra]*regs[instr->rb];
-					regs[((regs[instr->rt]&0xe)<<1)|1]=Mresult>>32;
-					regs[((regs[instr->rt]&0xe)<<1)|0]=Mresult&0xffffffff;
+					uint64_t Mresult=(uint64_t)regs[instr->ra]*regs[instr->rb];
+					uint8_t d=(instr->rt&0x1e)>>1;
+					//printf("MULR64: ra=%u, rb=%u, rt=%u -> %u %u\n", regs[instr->ra], regs[instr->rb], instr->rt, 2*d, 2*d+1);
+					regs[2*d+1]=Mresult>>32;
+					regs[2*d]=Mresult&0xffffffff;
 					break;
 				}
 				
@@ -887,6 +901,8 @@ sim_t simulate(instr_t const * const instr, const bool ignore_breakpoints)
 		//decrease verbosity by removing calls from/to idle task
 		if(PC!=0x5ad4)
 			MSG(MSG_CALL, "%x: CALL to 0x%x\n", PC_old, PC);
+		
+		os_info(PC);
 	}
 	else if(is_branch==BR_GOTO || is_branch==BR_RET || is_branch==BR_IRET)
 	{
@@ -900,6 +916,8 @@ sim_t simulate(instr_t const * const instr, const bool ignore_breakpoints)
 		if(history_check())
 			return SIM_ENDLESS_LOOP;
 #endif
+		
+		os_info(PC); //goto is sometimes used, like for calling OSStart
 	}
 	
 	if(is_branch==BR_RET)
@@ -907,10 +925,16 @@ sim_t simulate(instr_t const * const instr, const bool ignore_breakpoints)
 		//decrease verbosity by removing calls from/to idle task
 		if(PC!=0x1bf2)
 			MSG(MSG_RET, "RET from %x to %x\n", PC_old, PC);
+		
+		os_info(PC_old); //for task switch info
 	}
 	
 	if(is_branch==BR_IRET)
+	{
 		MSG(MSG_IRET, "ISR finished, resuming at 0x%x\n", PC);
+		
+		os_info(PC_old);
+	}
 	
 	if(stop && !ignore_breakpoints)
 		return SIM_STOPPED_ON_BP;

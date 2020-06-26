@@ -19,6 +19,8 @@ layout [load|save] $file ->save position and size of open windows to $file.layou
 dump $from $to $file ->dump memory to $file (as raw data, use hex-editor to open)
 verbosity [on|off] [all|none|$message_type (1 or more)] ->enable/disable output for $message_type, see verbosity.h
 verbosity file $file ->log to $file (existing will be overwritten!)
+u2f $file ->dump UART output to $file
+os $request -> decode/print some internals of the OS, see below
 
 breakpoint commands:
 bp remove $number ->remove breakpoint $number (in decimal starting at 1)
@@ -38,6 +40,11 @@ $action can be:
 	stop to stop if simulation is running
 	jump $addr to set PC to a new $addr (hex)
 
+os commands:
+tcb ->decode Task Control Block Table
+rdy ->show tasks that are ready to run
+evtbl ->decode Event Table
+curr ->show which task is currently executed
 
 disassembly-view:
 pressing r has the same effect as command "asm"

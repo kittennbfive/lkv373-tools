@@ -1,6 +1,10 @@
 layout load lay
 
-verbosity on PERIPH
+#verbosity on PER_MAC CONNECTOR CALL RET GOTO
+
+verbosity on OS_CALLS
+
+#verbosity on CALL RET PER_MAC
 
 verbosity file log.txt
 
@@ -10,7 +14,6 @@ bp create pc 0x24c script bp_script2
 bp create pc 36be0 script bp_script3
 
 run 25M
-
 
 #bootloader
 #run 60M

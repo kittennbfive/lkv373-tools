@@ -41,9 +41,18 @@ static const msg_type_t msg_types[]=
 	{ MSG_GOTO, "GOTO" },
 	{ MSG_IRQ, "IRQ" },
 	{ MSG_INT, "INT" },
-	{ MSG_PERIPH, "PERIPH" },
+	{ MSG_PERIPH_CPE, "PER_CPE" },
+	{ MSG_PERIPH_PMU, "PER_PMU" },
+	{ MSG_PERIPH_TMR1, "PER_TMR1" },
+	{ MSG_PERIPH_INTC, "PER_INTC" },
+	{ MSG_PERIPH_UART, "PER_UART" },
+	{ MSG_PERIPH_SSPC, "PER_SSPC" },
+	{ MSG_PERIPH_MAC, "PER_MAC" },
+	{ MSG_PERIPH_GPIO, "PER_GPIO" },
+	{ MSG_CONNECTOR, "CONNECTOR" },
 	{ MSG_MEM, "MEM" },
 	{ MSG_VARIOUS, "VARIOUS" },
+	{ MSG_OS_CALLS, "OS_CALLS"},
 	
 	{ 0, NULL }
 };

@@ -9,6 +9,7 @@ THIS PROGRAM COMES WITHOUT ANY WARRANTY!
 */
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include <string.h>
@@ -20,8 +21,11 @@ THIS PROGRAM COMES WITHOUT ANY WARRANTY!
 #include "ansi.h"
 #include "memory.h"
 #include "verbosity.h"
+#include "cmd_parser.h"
 
 static int w_uart;
+
+FILE *output=NULL;
 
 //some adresses are corresponding to different registers depending on access mode (read or write)!
 //page 320
@@ -84,7 +88,7 @@ static uint32_t fifo_pop(void)
 	}
 	else
 	{
-		MSG(MSG_PERIPH, "UART: trying to read from empty fifo, returning 0\n");
+		MSG(MSG_PERIPH_UART, "UART: trying to read from empty fifo, returning 0\n");
 		return 0;
 	}
 }
@@ -123,12 +127,13 @@ void uart_write(PERIPH_CB_WRITE_ARGUMENTS)
 		case TRANSMITTER_HOLDING_REG:
 			if(divisor_latch_access_bit)
 			{
-				MSG(MSG_PERIPH, "UART: prescaler set to %x\n", val);
+				MSG(MSG_PERIPH_UART, "UART: prescaler set to %x\n", val);
 			}
 			else
 			{
 				win_printf(w_uart, "%c", (uint8_t)val);
-				//fprintf(stderr, "%c", (uint8_t)val);
+				if(output)
+					fprintf(output, "%c", (uint8_t)val);
 			}
 				
 			break;
@@ -143,14 +148,14 @@ void uart_write(PERIPH_CB_WRITE_ARGUMENTS)
 		
 		case INT_ENABLE_REG:
 			int_enable_reg=val;
-			MSG(MSG_PERIPH, "val 0x%x written to UART INT_ENABLE_REG\n", val);
+			MSG(MSG_PERIPH_UART, "val 0x%x written to UART INT_ENABLE_REG\n", val);
 			break;
 		
 		case FIFO_CTRL_REG:
 			break;
 		
 		default:
-			MSG(MSG_PERIPH, "UART: unhandled register write 0x%x @0x%x\n", val, addr);
+			MSG(MSG_PERIPH_UART, "UART: unhandled register write 0x%x @0x%x\n", val, addr);
 			break;
 	}
 }
@@ -158,8 +163,6 @@ void uart_write(PERIPH_CB_WRITE_ARGUMENTS)
 bool uart_read(PERIPH_CB_READ_ARGUMENTS)
 {
 	(void)sz;
-	
-	//MSG(MSG_PERIPH, "UART: read 0x%x\n", addr);
 	
 	switch(addr)
 	{
@@ -194,7 +197,7 @@ bool uart_read(PERIPH_CB_READ_ARGUMENTS)
 			break;
 		
 		default:
-			MSG(MSG_PERIPH, "UART: unhandled read from 0x%x\n", addr);
+			MSG(MSG_PERIPH_UART, "UART: unhandled read from 0x%x\n", addr);
 			return false;
 	}
 }
@@ -203,4 +206,27 @@ uint8_t uart_keypress(char c)
 {
 	fifo_push(c);
 	return 0;
+}
+
+static void cleanup(void)
+{
+	if(output)
+		fclose(output);
+}
+
+void uart_to_file(PROTOTYPE_ARGS_HANDLER)
+{
+	ARGS_HANDLER_UNUSED;
+	
+	char *filename=get_next_argument();
+	
+	output=fopen(filename, "wb");
+	if(!output)
+	{
+		printf("UART: can't open file %s for logging!\n", filename);
+		return;
+	}	
+	
+	atexit(&cleanup);
+	printf("writing UART to file %s\n", filename);
 }

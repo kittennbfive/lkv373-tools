@@ -15,10 +15,12 @@ THIS PROGRAM COMES WITHOUT ANY WARRANTY!
 
 #include "peripherals.h"
 #include "breakpoints.h"
+#include "cmd_parser.h"
 
 int init_uart_view(void);
 void uart_write(PERIPH_CB_WRITE_ARGUMENTS);
 bool uart_read(PERIPH_CB_READ_ARGUMENTS);
 uint8_t uart_keypress(char c);
+void uart_to_file(PROTOTYPE_ARGS_HANDLER);
 
 #endif

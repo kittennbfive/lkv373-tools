@@ -50,17 +50,17 @@ void timer_write(PERIPH_CB_WRITE_ARGUMENTS)
 	switch(addr)
 	{
 		case COUNTER_REG:
-			MSG(MSG_PERIPH, "TIMER1: value 0x%x written to cnt_reg\n", val);
+			MSG(MSG_PERIPH_TMR1, "TIMER1: value 0x%x written to cnt_reg\n", val);
 			cnt_reg=val;
 			break;
 		
 		case AUTO_RELOAD_VAL_REG:
-			MSG(MSG_PERIPH, "TIMER1: 0x%x written to auto_reload_val_reg\n", val);
+			MSG(MSG_PERIPH_TMR1, "TIMER1: 0x%x written to auto_reload_val_reg\n", val);
 			auto_reload_val_reg=val;
 			break;
 		
 		case MATCH1_VAL_REG:
-			MSG(MSG_PERIPH, "TIMER1: 0x%x written to match1_reg\n", val);
+			MSG(MSG_PERIPH_TMR1, "TIMER1: 0x%x written to match1_reg\n", val);
 			match1_val_reg=val;
 			break;
 		
@@ -83,7 +83,7 @@ void timer_write(PERIPH_CB_WRITE_ARGUMENTS)
 			break;
 		
 		default:
-			MSG(MSG_PERIPH, "TIMER1: unhandled register write 0x%x @0x%x\n", val, addr);
+			MSG(MSG_PERIPH_TMR1, "TIMER1: unhandled register write 0x%x @0x%x\n", val, addr);
 	}
 }
 
@@ -99,7 +99,7 @@ bool timer_read(PERIPH_CB_READ_ARGUMENTS)
 			break;
 		
 		default:
-			MSG(MSG_PERIPH, "TIMER1: unhandled register read 0x%x\n", addr);
+			MSG(MSG_PERIPH_TMR1, "TIMER1: unhandled register read 0x%x\n", addr);
 			return false;
 	}
 }

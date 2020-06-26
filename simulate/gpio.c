@@ -36,7 +36,7 @@ void gpio_write(PERIPH_CB_WRITE_ARGUMENTS)
 {
 	(void)sz;
 	
-	MSG(MSG_PERIPH, "GPIO: writing 0x%x to 0x%x\n", val, addr);
+	MSG(MSG_PERIPH_GPIO, "GPIO: writing 0x%x to 0x%x\n", val, addr);
 	
 	switch(addr)
 	{
@@ -57,7 +57,7 @@ void gpio_write(PERIPH_CB_WRITE_ARGUMENTS)
 			break;
 			
 		default:
-			MSG(MSG_PERIPH, "GPIO: unhandled register write 0x%x @0x%x\n", val, addr);
+			MSG(MSG_PERIPH_GPIO, "GPIO: unhandled register write 0x%x @0x%x\n", val, addr);
 			break;
 	}
 }
@@ -66,7 +66,7 @@ bool gpio_read(PERIPH_CB_READ_ARGUMENTS)
 {
 	(void)sz;
 	
-	MSG(MSG_PERIPH, "GPIO: reading from %x\n", addr);
+	MSG(MSG_PERIPH_GPIO, "GPIO: reading from %x\n", addr);
 	
 	switch(addr)
 	{
@@ -92,7 +92,7 @@ bool gpio_read(PERIPH_CB_READ_ARGUMENTS)
 			break;
 		
 		default:
-			MSG(MSG_PERIPH, "GPIO: unhandled read from 0x%x\n", addr);
+			MSG(MSG_PERIPH_GPIO, "GPIO: unhandled read from 0x%x\n", addr);
 			return false;
 	}
 }

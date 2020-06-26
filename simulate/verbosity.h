@@ -21,8 +21,21 @@ THIS PROGRAM COMES WITHOUT ANY WARRANTY!
 #define MSG_GOTO (1U<<4) //j (jump) or conditional branch
 #define MSG_IRQ (1U<<5) //interrupt request from peripheral
 #define MSG_INT (1U<<6) //actual interrupt service routine being entered
-#define MSG_PERIPH (1U<<7) //peripherals - todo make one entry for each?
-#define MSG_MEM (1U<<8) //memory writes
+//peripherals
+#define MSG_PERIPH_CPE (1U<<7)
+#define MSG_PERIPH_PMU (1U<<8)
+#define MSG_PERIPH_TMR1 (1U<<9)
+#define MSG_PERIPH_INTC (1U<<10)
+#define MSG_PERIPH_UART (1U<<11)
+#define MSG_PERIPH_SSPC (1U<<12)
+#define MSG_PERIPH_MAC (1U<<13)
+#define MSG_PERIPH_GPIO (1U<<14)
+//connector to real
+#define MSG_CONNECTOR (1U<<15)
+
+#define MSG_OS_CALLS (1U<<16) //calls to functions from OS and results
+
+#define MSG_MEM (1U<<29) //memory writes
 
 #define MSG_ALWAYS (1U<<30) //print always, used for init-messages, errors, ...
 #define MSG_VARIOUS (1U<<31) //currently unused
