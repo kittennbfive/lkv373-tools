@@ -1,2 +1,2 @@
 #! /bin/sh
-gcc -Wall -Wextra -Werror -O3 -std=c99 -lm -o callg -DDISASSM_TRANSLATE_TO_32 -I../disassm/ main.c ../disassm/decode_disassm.c ../disassm/decode_disassm32.c ../disassm/decode_disassm16.c ../disassm/opc32.c ../disassm/opc16.c ../disassm/sign_extend.c
+gcc -Wall -Wextra -Werror -O3 -std=c99 -lm -o callg -DDISASSM_TRANSLATE_TO_32 -I../disassm/ main.c ../disassm/decode_disassm.c ../disassm/decode_disassm32.c ../disassm/decode_disassm16.c ../disassm/opc32.c ../disassm/opc16.c ../disassm/sign_extend.c ../disassm/special_regs.c

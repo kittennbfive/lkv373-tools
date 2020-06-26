@@ -31,7 +31,7 @@ Also calls/jumps to adresses computed at runtime (like jumptables) will not be s
 uint8_t * firmware;
 uint32_t fsize;
 
-uint32_t memory_get_word(const uint32_t addr)
+uint32_t decode_disassm_memory_get_word(const uint32_t addr)
 {
 	if(addr>fsize)
 	{
@@ -52,7 +52,7 @@ uint8_t is_valid(const uint32_t addr)
 }
 
 //If we jump to an address we put it here so we know we already went there. This is needed to avoid endless-loops
-#define JUMP_TARGETS_MAX 1000
+#define JUMP_TARGETS_MAX 5000
 uint32_t * jump_targets;
 uint32_t nb_jmp_targets;
 
