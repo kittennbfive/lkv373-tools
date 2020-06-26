@@ -8,6 +8,10 @@ The V1.3 has some errors. What follows are the types as i defined them in my cod
 
 There are 6 format types for 32 bit instructions:
 
+
+-------THIS MIGHT BE OUTDATED-------
+
+
 For 32 bit instructions Bit 31 is always 0.
 
 MSB of byte 3 ... LSB of byte 0
