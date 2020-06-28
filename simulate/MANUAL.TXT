@@ -20,7 +20,8 @@ dump $from $to $file ->dump memory to $file (as raw data, use hex-editor to open
 verbosity [on|off] [all|none|$message_type (1 or more)] ->enable/disable output for $message_type, see verbosity.h
 verbosity file $file ->log to $file (existing will be overwritten!)
 u2f $file ->dump UART output to $file
-os $request -> decode/print some internals of the OS, see below
+os $request ->decode/print some internals of the OS, see below
+rx $file ->load binary file into MAC RX and status register (see code for specifications)
 
 breakpoint commands:
 bp remove $number ->remove breakpoint $number (in decimal starting at 1)
@@ -59,3 +60,10 @@ scrolling is possible
 
 UART-view:
 You can send data/keypresses to the simulator by typing while the window has focus and the sim-loop is not(!) running, however you need to run quite a few steps (like 10-20M) after to see your data appear and the reaction of the simulator/code.
+
+MAC:
+Packets that are sent are written to current file as tx%02u.bin.
+
+
+COMPILE OPTIONS:
+see file "make"

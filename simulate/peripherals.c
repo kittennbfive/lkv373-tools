@@ -41,7 +41,6 @@ static peripheral_t per[]=
 	{"GPIO", 0x99300000, 0x99300044, &gpio_write, &gpio_read}, //LED and reset button
 	
 	{"MAC", 0x90900000, 0x90907fff, &mac_write, &mac_read}, //TODO
-//	{"MAC", 0x90900000, 0x909fffff, &mac_write, &mac_read}, //TODO
 
 //???? 0x90908050-0x9090807c
 //???? 0x90909008

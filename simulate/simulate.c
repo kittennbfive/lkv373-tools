@@ -35,6 +35,7 @@ THIS PROGRAM COMES WITHOUT ANY WARRANTY!
 #include "interrupt_ctrl.h"
 #include "verbosity.h"
 #include "os_info.h"
+#include "mac.h"
 
 //registers
 static uint32_t regs[32];
@@ -271,15 +272,15 @@ sim_t simulate(instr_t const * const instr, const bool ignore_breakpoints)
 		
 		case OPC_LHI_bi:
 		{
-			uint32_t addr;
-			addr=regs[instr->ra]+nds32_sign_extend(instr->imm1_15<<1, 16, 32);
-			mem_halfword_t val=memory_get_halfword(addr, &stop);
+			uint32_t addr_update;
+			addr_update=regs[instr->ra]+nds32_sign_extend(instr->imm1_15<<1, 16, 32);
+			mem_halfword_t val=memory_get_halfword(regs[instr->ra], &stop);
 			if(stop && !ignore_breakpoints)
 				return SIM_STOPPED_ON_BP;
 			if(!val.is_initialized)
 				return SIM_READ_FROM_UNINITIALIZED;
 			regs[instr->rt]=val.val;
-			regs[instr->ra]=addr;
+			regs[instr->ra]=addr_update;
 			break;
 		}
 		
@@ -302,6 +303,15 @@ sim_t simulate(instr_t const * const instr, const bool ignore_breakpoints)
 			uint32_t addr;
 			addr=regs[instr->ra]+nds32_sign_extend(instr->imm1_15<<1, 16, 32);
 			memory_set_halfword(regs[instr->rt], addr, &stop, false);
+			break;
+		}
+		
+		case OPC_SHI_bi:
+		{
+			uint32_t addr_update;
+			addr_update=regs[instr->ra]+nds32_sign_extend(instr->imm1_15<<1, 16, 32);
+			memory_set_halfword(regs[instr->rt], regs[instr->ra], &stop, false);
+			regs[instr->ra]=addr_update;
 			break;
 		}
 		
@@ -364,6 +374,10 @@ sim_t simulate(instr_t const * const instr, const bool ignore_breakpoints)
 				
 				case SUB_ALU_1_ZEH:
 					regs[instr->rt]=regs[instr->ra]&0xffff;
+					break;
+				
+				case SUB_ALU_1_SEH:
+					regs[instr->rt]=nds32_sign_extend(regs[instr->ra]&0xffff, 16, 32);
 					break;
 				
 				case SUB_ALU_1_SLLI:
@@ -432,21 +446,21 @@ sim_t simulate(instr_t const * const instr, const bool ignore_breakpoints)
 				{
 					if(instr->dt!=0 && instr->dt!=1)
 						ERRX(1, "ALU_2_MADD32: invalid dt\n");
-					uint64_t Mresult=regs[instr->ra]*regs[instr->rb];
+					uint64_t Mresult=(uint64_t)regs[instr->ra]*regs[instr->rb];
 					usr[instr->dt].L+=Mresult&0xffffffff; //ADD!
 					break;
 				}
 				
 				case SUB_ALU_2_MUL:
 				{
-					uint64_t result=regs[instr->ra]*regs[instr->rb];
+					uint64_t result=(uint64_t)regs[instr->ra]*regs[instr->rb];
 					regs[instr->rt]=result&0xffffffff;
 					break;
 				}
 				
 				case SUB_ALU_2_MADDR32:
 				{
-					uint64_t Mresult=regs[instr->ra]*regs[instr->rb];
+					uint64_t Mresult=(uint64_t)regs[instr->ra]*regs[instr->rb];
 					regs[instr->rt]+=Mresult&0xffffffff; //ADD!
 					break;
 				}
@@ -462,7 +476,6 @@ sim_t simulate(instr_t const * const instr, const bool ignore_breakpoints)
 				{
 					uint64_t Mresult=(uint64_t)regs[instr->ra]*regs[instr->rb];
 					uint8_t d=(instr->rt&0x1e)>>1;
-					//printf("MULR64: ra=%u, rb=%u, rt=%u -> %u %u\n", regs[instr->ra], regs[instr->rb], instr->rt, 2*d, 2*d+1);
 					regs[2*d+1]=Mresult>>32;
 					regs[2*d]=Mresult&0xffffffff;
 					break;
@@ -470,7 +483,7 @@ sim_t simulate(instr_t const * const instr, const bool ignore_breakpoints)
 				
 				case SUB_ALU_2_MSUBR32:
 				{
-					uint64_t Mresult=regs[instr->ra]*regs[instr->rb];
+					uint64_t Mresult=(uint64_t)regs[instr->ra]*regs[instr->rb];
 					regs[instr->rt]-=Mresult&0xffffffff; //SUBSTRACT!
 					break;
 				}
@@ -534,42 +547,48 @@ sim_t simulate(instr_t const * const instr, const bool ignore_breakpoints)
 					break;
 				
 				case SUB_ALU_2_BSP: //this should be tested...
-				{
-					uint32_t M=get_bits(regs[instr->rb], 12, 8);
-					uint32_t N=get_bits(regs[instr->rb], 4, 0);
-					uint32_t D=M+N;
-					set_bits(&regs[instr->rb], 7, 5, 1);
-					if(31>D) //normal condition
 					{
-						set_bits(&regs[instr->rb], 4, 0, D+1);
-						set_bits(&regs[instr->rb], 31, 31, 0);
-						set_bits(&regs[instr->rt], 31-N, 31-N-M, get_bits(regs[instr->ra], M, 0));
-						if(get_bits(regs[instr->rb], 30, 30)==1)
+						uint32_t M=get_bits(regs[instr->rb], 12, 8);
+						uint32_t N=get_bits(regs[instr->rb], 4, 0);
+						uint32_t D=M+N;
+						set_bits(&regs[instr->rb], 7, 5, 1);
+						if(31>D) //normal condition
 						{
-							set_bits(&regs[instr->rb], 12, 8, get_bits(regs[instr->rb], 20, 16));
-							set_bits(&regs[instr->rb], 15, 13, 0);
+							set_bits(&regs[instr->rb], 4, 0, D+1);
+							set_bits(&regs[instr->rb], 31, 31, 0);
+							set_bits(&regs[instr->rt], 31-N, 31-N-M, get_bits(regs[instr->ra], M, 0));
+							if(get_bits(regs[instr->rb], 30, 30)==1)
+							{
+								set_bits(&regs[instr->rb], 12, 8, get_bits(regs[instr->rb], 20, 16));
+								set_bits(&regs[instr->rb], 15, 13, 0);
+							}
+							set_bits(&regs[instr->rb], 30, 30, 0);
 						}
-						set_bits(&regs[instr->rb], 30, 30, 0);
+						else if(31==D) //full condition
+						{
+							set_bits(&regs[instr->rb], 4, 0, 0);
+							set_bits(&regs[instr->rb], 30, 30, 0);
+							set_bits(&regs[instr->rb], 31, 31, 1);
+							set_bits(&regs[instr->rt], M, 0, get_bits(regs[instr->ra], M, 0));
+						}
+						else if(31<D) //overflow condition
+						{
+							set_bits(&regs[instr->rb], 20, 16, M);
+							set_bits(&regs[instr->rb], 12, 8, D-32);
+							set_bits(&regs[instr->rb], 4, 0, 0);
+							set_bits(&regs[instr->rb], 30, 30, 1);
+							set_bits(&regs[instr->rb], 31, 31, 1);
+							set_bits(&regs[instr->rt], 31-N, 0, get_bits(regs[instr->ra], M, M+N-31));
+						}	
 					}
-					else if(31==D) //full condition
-					{
-						set_bits(&regs[instr->rb], 4, 0, 0);
-						set_bits(&regs[instr->rb], 30, 30, 0);
-						set_bits(&regs[instr->rb], 31, 31, 1);
-						set_bits(&regs[instr->rt], M, 0, get_bits(regs[instr->ra], M, 0));
-					}
-					else if(31<D) //overflow condition
-					{
-						set_bits(&regs[instr->rb], 20, 16, M);
-						set_bits(&regs[instr->rb], 12, 8, D-32);
-						set_bits(&regs[instr->rb], 4, 0, 0);
-						set_bits(&regs[instr->rb], 30, 30, 1);
-						set_bits(&regs[instr->rb], 31, 31, 1);
-						set_bits(&regs[instr->rt], 31-N, 0, get_bits(regs[instr->ra], M, M+N-31));
-					}	
-				}
-				break;
+					break;
 				
+				case SUB_ALU_2_ABS:
+					if((signed)regs[instr->ra]>=0)
+						regs[instr->rt]=regs[instr->ra];
+					else
+						regs[instr->rt]=-regs[instr->ra];
+					break;
 				
 				default:
 					MSG(MSG_ALWAYS, "simulate: unimplemented sub 0x%x for OPC_ALU_2 (%s)\n", instr->sub, instr->mnemonic);
@@ -877,7 +896,7 @@ sim_t simulate(instr_t const * const instr, const bool ignore_breakpoints)
 			break;
 		
 		case OPC_SUBRI:
-			regs[instr->rt]=nds32_sign_extend(instr->imm1_15, 15, 32)-regs[instr->ra];
+			regs[instr->rt]=nds32_sign_extend(instr->imm1_15, 15, 32)-(signed)regs[instr->ra];
 			break;
 		
 		default:
@@ -1018,6 +1037,10 @@ void run_sim(PROTOTYPE_ARGS_HANDLER)
 	uint32_t step;
 	for(step=1; step<=nb_steps; step++)
 	{
+#ifdef CONNECT_TO_TAP
+		check_for_mac_rx();
+#endif
+
 		if(sim_step(false)!=SIM_NO_ERROR)
 		{
 			err_happened=1;

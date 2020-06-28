@@ -37,20 +37,6 @@ char args[NB_ARGUMENTS_MAX][SZ_BUFFER_ARGUMENTS];
 uint8_t nb_args=0;
 uint8_t index_args=0;
 
-/*
-extern bool skip_status_reg_read;
-void set_flag(PROTOTYPE_ARGS_HANDLER)
-{
-	ARGS_HANDLER_UNUSED;
-	skip_status_reg_read=true;
-}
-void clr_flag(PROTOTYPE_ARGS_HANDLER)
-{
-	ARGS_HANDLER_UNUSED;
-	skip_status_reg_read=false;
-}
-*/
-
 const command_t commands[]=
 {
 	{"quit", 0, 0, &stop},
@@ -74,11 +60,7 @@ const command_t commands[]=
 	{"verbosity", 2, 10, &cmd_set_verbosity},
 	{"os", 1, 1, &show_os_info},
 	{"u2f", 1, 1, &uart_to_file},
-
-//test, undocumented
-	{"rx", 0, 0, &rx},
-//	{"set", 0, 0, &set_flag},
-//	{"clr", 0, 0, &clr_flag},
+	{"rx", 1, 1, &rx},
 	
 	{NULL, 0, 0, NULL}
 };

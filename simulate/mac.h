@@ -21,4 +21,6 @@ bool mac_read(PERIPH_CB_READ_ARGUMENTS);
 
 void rx(PROTOTYPE_ARGS_HANDLER);
 
+void check_for_mac_rx(void);
+
 #endif

@@ -15,7 +15,8 @@ THIS PROGRAM COMES WITHOUT ANY WARRANTY!
 #include <sys/ioctl.h>	/* ioctl, TIOCGWINSZ */
 #include <fcntl.h> //open
 #include <unistd.h>	//close
-#include <stdarg.h> //variadic
+#include <err.h>
+#include <stdarg.h>
 
 #include "window.h"
 #include "my_err.h"

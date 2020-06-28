@@ -43,7 +43,7 @@ THIS PROGRAM COMES WITHOUT ANY WARRANTY!
 /*
 little-endian
 
-todo: WHY ON EARTH DOES THIS THING NOT RESPOND TO NETWORK REQUESTS???
+todo: the simulator does respond to ARP but not to ping or HTTP GET - why???
 
 todo: disassm-view needs work
 
@@ -134,9 +134,9 @@ int main(void)
 	memory_set_word(0xc2, 0x9090a80c, NULL, true);
 	memory_set_word(0, 0x9090c408, NULL, true);
 	memory_set_word(0, 0x9090c40c, NULL, true);
-	memory_set_word(0x00, 0x90907070, NULL, true); //TODO: real value?
+	memory_set_word(0x92, 0x90907070, NULL, true);
 	memory_set_word(0x92, 0x90907074, NULL, true);
-	memory_set_word(0x00, 0x90907078, NULL, true); //idem
+	memory_set_word(0x00, 0x90907078, NULL, true);
 	memory_set_word(0, 0x9090707c, NULL, true);
 	memory_set_word(0, 0x90907204, NULL, true);
 	memory_set_word(0, 0x9090b050, NULL, true);

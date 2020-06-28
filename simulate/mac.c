@@ -8,9 +8,14 @@ licence: AGPL v3 or later
 THIS PROGRAM COMES WITHOUT ANY WARRANTY!
 */
 
+#include <stdlib.h>
 #include <stdio.h>
 #include <stdint.h>
 #include <stdbool.h>
+#include <unistd.h>
+#include <fcntl.h>
+#include <errno.h>
+#include <sys/ioctl.h>
 
 #include "mac.h"
 #include "peripherals.h"
@@ -39,7 +44,7 @@ uint32_t nb_vals=0;
 uint8_t tx_buffer[SZ_TX_RX_BUFFER];
 uint8_t rx_buffer[SZ_TX_RX_BUFFER];
 uint16_t sz_data_tx_buffer=0;
-//uint16_t sz_data_rx_buffer=0;
+uint16_t sz_data_rx_buffer=0;
 
 int32_t search(const uint32_t addr)
 {
@@ -55,19 +60,14 @@ int32_t search(const uint32_t addr)
 
 void save(const uint32_t addr, const uint32_t val)
 {
-	if(addr>=ADDR_TX_BUFFER && addr<ADDR_TX_BUFFER+SZ_TX_RX_BUFFER)
-	{
-		tx_buffer[addr-ADDR_TX_BUFFER]=val&0xff;
-		return;
-	}
-	else if(addr>=ADDR_RX_BUFFER && addr<ADDR_RX_BUFFER+SZ_TX_RX_BUFFER)
-	{
-		rx_buffer[addr-ADDR_RX_BUFFER]=val&0xff;
-		return;
-	}
-	else if(addr==ADDR_SZ_TX_DATA)
+	if(addr==ADDR_SZ_TX_DATA)
 	{
 		sz_data_tx_buffer=val;
+		return;
+	}
+	else if(addr>=ADDR_TX_BUFFER && addr<ADDR_TX_BUFFER+SZ_TX_RX_BUFFER)
+	{
+		tx_buffer[addr-ADDR_TX_BUFFER]=val&0xff;
 		return;
 	}
 		
@@ -84,19 +84,14 @@ void save(const uint32_t addr, const uint32_t val)
 
 bool load(const uint32_t addr, uint32_t * const val)
 {
-	if(addr>=ADDR_TX_BUFFER && addr<ADDR_TX_BUFFER+SZ_TX_RX_BUFFER)
+	if(addr==ADDR_SZ_TX_DATA)
 	{
-		(*val)=tx_buffer[addr-ADDR_TX_BUFFER];
+		(*val)=sz_data_tx_buffer;
 		return true;
 	}
 	else if(addr>=ADDR_RX_BUFFER && addr<ADDR_RX_BUFFER+SZ_TX_RX_BUFFER)
 	{
 		(*val)=rx_buffer[addr-ADDR_RX_BUFFER];
-		return true;
-	}
-	else if(addr==ADDR_SZ_TX_DATA)
-	{
-		(*val)=sz_data_tx_buffer;
 		return true;
 	}
 	
@@ -108,13 +103,37 @@ bool load(const uint32_t addr, uint32_t * const val)
 	return true;
 }
 
+#ifdef CONNECT_TO_TAP
+#define NAME_FIFO_1 "connector_tap/fifo_net1" //from tap to sim - READ from there
+#define NAME_FIFO_2 "connector_tap/fifo_net2" //from sim to tap - WRITE to there
+
+int fifo_rx, fifo_tx;
+
+static void cleanup(void)
+{
+	close(fifo_rx);
+	close(fifo_tx);
+}
+#endif
+
 void init_mac(void)
 {
-	;
+#ifdef CONNECT_TO_TAP
+	fifo_rx=open(NAME_FIFO_1, O_RDWR|O_NONBLOCK);
+	if(fifo_rx<0)
+		err(1, "open fifo_rx (1)");
+
+	fifo_tx=open(NAME_FIFO_2, O_RDWR);
+	if(fifo_tx<0)
+		err(1, "open fifo_tx (2)");
+	
+	atexit(&cleanup);
+#endif
+
 }
 
-
-uint8_t save_tx(void)
+#ifndef CONNECT_TO_TAP
+static uint8_t save_tx(void)
 {
 	MSG(MSG_PERIPH_MAC, "MAC: TX: %d bytes\n", sz_data_tx_buffer);
 
@@ -127,12 +146,13 @@ uint8_t save_tx(void)
 	if(!f)
 		ERR(1, "could not open %s", filename);
 	
-	fwrite(tx_buffer, sz_data_tx_buffer, 1, f);
+	fwrite(tx_buffer, sz_data_tx_buffer*sizeof(uint8_t), 1, f);
 	
 	fclose(f);
 	
 	return filenumber++;
 }
+#endif
 
 void mac_write(PERIPH_CB_WRITE_ARGUMENTS)
 {
@@ -142,8 +162,22 @@ void mac_write(PERIPH_CB_WRITE_ARGUMENTS)
 	
 	if(addr==0x90907118 && val==0x90)
 	{
+#ifndef CONNECT_TO_TAP
 		MSG(MSG_PERIPH_MAC, "MAC: TX packet saved to tx%02d.bin\n", save_tx());
+#else
+		//we need to send those 4 bytes before the actual packet but it looks like the Kernel
+		//does not actually use them, so let's just leave them as zero
+		uint16_t flags=0;
+		uint16_t proto=0;
+		if(write(fifo_tx, &flags, sizeof(uint16_t))<0)
+			ERR(1, "write flags to fifo_tx");
+		if(write(fifo_tx, &proto, sizeof(uint16_t))<0)
+			ERR(1, "write proto to fifo_tx");
+		if(write(fifo_tx, &tx_buffer, sz_data_tx_buffer*sizeof(uint8_t))<0)
+			ERR(1, "write to fifo_tx");
+		MSG(MSG_PERIPH_MAC, "MAC: TX packed sent to pipe\n");
 		save(0x90907118, 0x10); //value after TX, read from real device
+#endif
 	}
 	else
 	{
@@ -167,107 +201,79 @@ bool mac_read(PERIPH_CB_READ_ARGUMENTS)
 void rx(PROTOTYPE_ARGS_HANDLER)
 {
 	ARGS_HANDLER_UNUSED;
+
+#ifndef CONNECT_TO_TAP
+	char * filename=get_next_argument();
 	
-	save(0x9090700c, 0x382);
-	save(0x90907010, 0x3f40066);
-	save(0x909003f4, 0x0);
-	save(0x909003f5, 0xb);
-	save(0x909003f6, 0x78);
-	save(0x909003f7, 0x0);
-	save(0x909003f8, 0x60);
-	save(0x909003f9, 0x1);
-	save(0x909003fa, 0x0);
-	save(0x909003fb, 0xe0);
-	save(0x909003fc, 0x4c);
-	save(0x909003fd, 0x53);
-	save(0x909003fe, 0x44);
-	save(0x909003ff, 0x58);
-	save(0x90900400, 0x8);
-	save(0x90900401, 0x0);
-	save(0x90900402, 0x45);
-	save(0x90900403, 0x0);
-	save(0x90900404, 0x0);
-	save(0x90900405, 0x54);
-	save(0x90900406, 0x22);
-	save(0x90900407, 0xc2);
-	save(0x90900408, 0x40);
-	save(0x90900409, 0x0);
-	save(0x9090040a, 0x40);
-	save(0x9090040b, 0x1);
-	save(0x9090040c, 0x46);
-	save(0x9090040d, 0x54);
-	save(0x9090040e, 0xc0);
-	save(0x9090040f, 0xa8);
-	save(0x90900410, 0xa8);
-	save(0x90900411, 0xa);
-	save(0x90900412, 0xc0);
-	save(0x90900413, 0xa8);
-	save(0x90900414, 0xa8);
-	save(0x90900415, 0x37);
-	save(0x90900416, 0x8);
-	save(0x90900417, 0x0);
-	save(0x90900418, 0x9);
-	save(0x90900419, 0x59);
-	save(0x9090041a, 0x7d);
-	save(0x9090041b, 0x7d);
-	save(0x9090041c, 0x0);
-	save(0x9090041d, 0x1);
-	save(0x9090041e, 0x1b);
-	save(0x9090041f, 0x70);
-	save(0x90900420, 0xee);
-	save(0x90900421, 0x5e);
-	save(0x90900422, 0x0);
-	save(0x90900423, 0x0);
-	save(0x90900424, 0x0);
-	save(0x90900425, 0x0);
-	save(0x90900426, 0xa8);
-	save(0x90900427, 0x86);
-	save(0x90900428, 0x0);
-	save(0x90900429, 0x0);
-	save(0x9090042a, 0x0);
-	save(0x9090042b, 0x0);
-	save(0x9090042c, 0x0);
-	save(0x9090042d, 0x0);
-	save(0x9090042e, 0x10);
-	save(0x9090042f, 0x11);
-	save(0x90900430, 0x12);
-	save(0x90900431, 0x13);
-	save(0x90900432, 0x14);
-	save(0x90900433, 0x15);
-	save(0x90900434, 0x16);
-	save(0x90900435, 0x17);
-	save(0x90900436, 0x18);
-	save(0x90900437, 0x19);
-	save(0x90900438, 0x1a);
-	save(0x90900439, 0x1b);
-	save(0x9090043a, 0x1c);
-	save(0x9090043b, 0x1d);
-	save(0x9090043c, 0x1e);
-	save(0x9090043d, 0x1f);
-	save(0x9090043e, 0x20);
-	save(0x9090043f, 0x21);
-	save(0x90900440, 0x22);
-	save(0x90900441, 0x23);
-	save(0x90900442, 0x24);
-	save(0x90900443, 0x25);
-	save(0x90900444, 0x26);
-	save(0x90900445, 0x27);
-	save(0x90900446, 0x28);
-	save(0x90900447, 0x29);
-	save(0x90900448, 0x2a);
-	save(0x90900449, 0x2b);
-	save(0x9090044a, 0x2c);
-	save(0x9090044b, 0x2d);
-	save(0x9090044c, 0x2e);
-	save(0x9090044d, 0x2f);
-	save(0x9090044e, 0x30);
-	save(0x9090044f, 0x31);
-	save(0x90900450, 0x32);
-	save(0x90900451, 0x33);
-	save(0x90900452, 0x34);
-	save(0x90900453, 0x35);
-	save(0x90900454, 0x36);
-	save(0x90900455, 0x37);
+	printf("reading rx data from file %s\n", filename);
 	
-	MSG(MSG_PERIPH_MAC, "real ping data saved\n"); //why are we getting no answer?????
+	FILE *f=fopen(filename, "rb");
+	if(!f)
+	{
+		printf("could not open %s\n", filename);
+		return;
+	}
+	
+	uint16_t status_reg;
+	if(fread(&status_reg, 2, 1, f)!=1)
+	{
+		printf("error reading status_reg\n");
+		return;
+	}
+	
+	
+	if(fread(&sz_data_rx_buffer, 2, 1, f)!=1)
+	{
+		printf("error reading size\n");
+		return;
+	}
+	
+	if(fread(rx_buffer, 1, sz_data_rx_buffer, f)!=sz_data_rx_buffer)
+	{
+		printf("error reading data\n");
+		return;
+	}
+
+	save(0x90907010, 0x3f40004+sz_data_rx_buffer);
+	save(0x9090700c, status_reg);
+	
+	printf("saved %u bytes in MAC RX-buffer\n", sz_data_rx_buffer);
+#else
+	printf("error: You can't use command rx when compiled with -DCONNECT_TO_TAP\n");
+#endif
 }
+
+
+#ifdef CONNECT_TO_TAP
+void check_for_mac_rx(void)
+{
+	int nb_bytes;
+	if(ioctl(fifo_rx, FIONREAD, &nb_bytes)<0)
+		ERR(1, "ioctl");
+	
+	if(nb_bytes>0)
+	{
+		//these are in network order!
+		uint16_t flags, proto;
+		if(read(fifo_rx, &flags, sizeof(uint16_t))<0)
+			ERR(1, "read flags");
+		if(read(fifo_rx, &proto, sizeof(uint16_t))<0)
+			ERR(1, "read proto");
+		
+		int nb_bytes_read=read(fifo_rx, rx_buffer, nb_bytes-4);
+		if(nb_bytes_read>0)
+		{
+			MSG(MSG_PERIPH_MAC, "MAC: received %d bytes\n", nb_bytes_read);
+			save(0x90907010, 0x3f40004+nb_bytes_read);
+			switch(proto)
+			{
+				case 0x608:	save(0x9090700c, 0x382); break; //ARP
+				case 0x8: save(0x9090700c, 0x482); break; //IPv4
+				default: ERRX(1, "unknown proto %x\n", proto);
+			}
+		}
+		else if(errno!=EAGAIN)
+			ERR(1, "read");
+	}
+}
+#endif
