@@ -8,7 +8,7 @@ mem $addr|$reg ->set mem-view to $addr (hex only) (or $addr read from $reg)
 stack [$addr|$reg] ->set stack-view to addr (hex only as above) (default: stack pointer) (or $addr read from $reg)
 s ->simulate single step (breakpoints are ignored!)
 asm ->reset disassembly view to position of PC (works not too well, see disassembly_view.c)
-run $steps ->run $steps at most ($steps is in decimal, suffix none or 'k' or 'M')
+run $steps ->run $steps at most ($steps is in decimal, suffix none or 'k' or 'M'). You can press Ctrl+C to interrupt the running simulation.
 bp [...]->work with breakpoints, see below
 msp $page $val ->set memory page (16MB) $page to $val ($page and $val are hex, $val is 8 bit)
 reg $reg $val ->write $val (hex) to $reg (r0-r31, dez)

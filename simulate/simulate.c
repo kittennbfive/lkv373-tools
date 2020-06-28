@@ -13,6 +13,7 @@ THIS PROGRAM COMES WITHOUT ANY WARRANTY!
 #include <stdint.h>
 #include <string.h>
 #include <stdbool.h>
+#include <signal.h>
 
 #include "instruction.h"
 #include "decode_disassm.h"
@@ -40,10 +41,18 @@ THIS PROGRAM COMES WITHOUT ANY WARRANTY!
 //registers
 static uint32_t regs[32];
 
-usr_t usr[2]; //are these used on lkv373?
+static usr_t usr[2]; //are these used on lkv373?
 
 //PC
 static uint32_t PC;
+
+static uint8_t sigint_received=0;
+
+void handler_sigint(int s)
+{
+	(void)s;
+	sigint_received=1;
+}
 
 void init_sim(char const * const filename)
 {
@@ -54,8 +63,12 @@ void init_sim(char const * const filename)
 	read_memory_from_file(filename, 0x00);
 	
 	PC=0;
-	
+
+	signal(SIGINT, &handler_sigint);
+
+#ifndef NO_ENDLESS_LOOP_DETECT	
 	history_init();
+#endif
 }
 
 uint32_t get_register(const uint8_t i)
@@ -1023,7 +1036,7 @@ void run_sim(PROTOTYPE_ARGS_HANDLER)
 		multiplier=1000*1000;
 	}
 	
-	uint32_t nb_steps=atoi(arg)*multiplier;
+	uint64_t nb_steps=atoi(arg)*multiplier;
 	
 	if(nb_steps==0)
 	{
@@ -1034,17 +1047,25 @@ void run_sim(PROTOTYPE_ARGS_HANDLER)
 	MSG(MSG_ALWAYS, "executing %u steps...\n", nb_steps);
 	
 	uint8_t err_happened=0;
-	uint32_t step;
+	uint64_t step;
 	for(step=1; step<=nb_steps; step++)
 	{
 #ifdef CONNECT_TO_TAP
 		check_for_mac_rx();
 #endif
-
 		if(sim_step(false)!=SIM_NO_ERROR)
 		{
 			err_happened=1;
 			MSG(MSG_ALWAYS, "stopped after %u steps\n", step);
+			break;
+		}
+		
+		if(sigint_received)
+		{
+			sigint_received=0;
+			err_happened=1;
+			MSG(MSG_ALWAYS, "received Ctrl+C, stopping after %u steps\n", step);
+			signal(SIGINT, &handler_sigint); //needs to be re-registered each time??
 			break;
 		}
 	}
