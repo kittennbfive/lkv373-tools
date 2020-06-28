@@ -29,7 +29,7 @@ THIS PROGRAM COMES WITHOUT ANY WARRANTY!
 #define PIN_LED 14
 #define PIN_RESET_BUTTON 16
 
-static uint32_t data=0;
+static uint32_t data=(1<<PIN_RESET_BUTTON);
 static uint32_t pindir=0;
 
 void gpio_write(PERIPH_CB_WRITE_ARGUMENTS)
