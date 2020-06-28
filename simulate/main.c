@@ -43,8 +43,6 @@ THIS PROGRAM COMES WITHOUT ANY WARRANTY!
 /*
 little-endian
 
-todo: the simulator does respond to ARP but not to ping or HTTP GET - why???
-
 todo: disassm-view needs work
 
 todo: mem_view for periph-mem does not work properly, only shows 1 byte of 4
