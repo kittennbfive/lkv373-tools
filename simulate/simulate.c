@@ -1024,8 +1024,13 @@ void run_sim(PROTOTYPE_ARGS_HANDLER)
 	strcpy(arg, get_next_argument());
 	char *ptr;
 	uint32_t multiplier=1;
+	uint8_t run_forever=0;	
 	
-	if((ptr=strchr(arg, 'k')))
+	if(!strcmp(arg, "forever"))
+	{
+		run_forever=1;
+	}
+	else if((ptr=strchr(arg, 'k')))
 	{
 		(*ptr)='\0';
 		multiplier=1000;
@@ -1036,19 +1041,29 @@ void run_sim(PROTOTYPE_ARGS_HANDLER)
 		multiplier=1000*1000;
 	}
 	
-	uint64_t nb_steps=atoi(arg)*multiplier;
+	uint64_t nb_steps;
 	
-	if(nb_steps==0)
+	if(!run_forever)
 	{
-		MSG(MSG_ALWAYS, "invalid number of steps\n");
-		return;
+		nb_steps=atoi(arg)*multiplier;
+		
+		if(nb_steps==0)
+		{
+			MSG(MSG_ALWAYS, "invalid number of steps\n");
+			return;
+		}
+		
+		MSG(MSG_ALWAYS, "executing %u steps...\n", nb_steps);
 	}
-	
-	MSG(MSG_ALWAYS, "executing %u steps...\n", nb_steps);
+	else
+	{
+		nb_steps=0;
+		MSG(MSG_ALWAYS, "will run until error, breakpoint or Ctrl+C\n");
+	}
 	
 	uint8_t err_happened=0;
 	uint64_t step;
-	for(step=1; step<=nb_steps; step++)
+	for(step=1; step<=nb_steps || run_forever; step++)
 	{
 #ifdef CONNECT_TO_TAP
 		check_for_mac_rx();
