@@ -1,0 +1,3 @@
+#! /bin/sh
+./flow $* && dot flow.txt -Tsvg -o flow.svg && echo flow.svg written
+
