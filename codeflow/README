@@ -1,0 +1,26 @@
+This C-code makes flowgraphs of a function using graphviz, ie a graphical representation of a function with all the conditional and unconditional jumps. It was written to help understand the firmware of the LKV373 but might be modified for other stuff. This work was tested on Linux only. This work comes WITHOUT ANY WARRANTY and is released under AGPL version 3 or later. THIS CODE IS EXPERIMENTAL AND MOSTLY UNTESTED! It probably has bugs. Expect messy results, error messages and maybe segfaults.
+
+This code relies on my disassembler that can be found in the disassm-folder. Please read the README of the disassembler too.
+
+Compile: ./make (yes thats not the right way to do it but it works!)
+
+Compiletime options: If you prefer orthogonal lines instead of rounded ones uncomment #define SPLINES_ORTHO and recompile.
+
+Runtime-dependencies: You must have graphviz installed and "dot" in your PATH.
+
+Use: ./make_graph address_in_hex (block2 only, could be changed in the code)
+
+Final result: flow.svg
+
+known limitations:
+-JR (jump register) is currently unimplemented
+-code is not beautified
+
+For a simple example execute ./make_graph fa0
+
+For a horribly complex one execute ./make_graph 5dd8
+
+This code was written with very little knowledge of the "dot-language". Comments how to improve the flowgraphs welcome.
+
+
+written by kitten_nb_five (c) 2020
