@@ -5,6 +5,8 @@ Main work: An (incomplete) simulator, see simulate/README. Based on a custom dis
 
 To learn how to execute C-Code with newlib on the device see custom_firmware for instructions and "Hello World".
 
+NEW: codeflow/ for making graphical representations of a function.
+
 -------------------------------------------------------------------------------
 other stuff:
 
