@@ -104,7 +104,7 @@ uint32_t get_target(const uint32_t PC, instr_t const * const instr)
 	else if(instr->opc==OPC_BR2)
 		return PC+nds32_sign_extend(instr->imm1_16<<1, 17, 32);
 	else
-		ERR(1, "unknown instr %s", instr->disassm);
+		ERRX(1, "unknown instr %s", instr->disassm);
 }
 
 //we first need to know where to start a new block because of a jump from above or below
@@ -117,8 +117,8 @@ void get_blocks(const uint32_t addr_start)
 		
 	do
 	{
-		if(decode_instr(&instr, PC))
-			ERR(1, "decode_instr");
+		if(decode_instr(&instr, PC, false))
+			ERRX(1, "decode_instr");
 
 		if(instr.opc==OPC_BR1 || instr.opc==OPC_BR2) //COND JUMP
 		{
@@ -160,8 +160,8 @@ void parse(const uint32_t addr_start)
 	
 	for(PC=addr_start; ; )
 	{
-		if(decode_instr(&instr, PC))
-			ERR(1, "decode_instr");
+		if(decode_instr(&instr, PC, false))
+			ERRX(1, "decode_instr");
 
 		if(!is_known_target(PC))
 			push_jump_target(PC);
@@ -262,7 +262,7 @@ int main(int argc, char **argv)
 	if(argc!=2)
 	{
 		printf("usage: ./flow $addr_in_block_2\n");
-		return 0;
+		return 1;
 	}
 	
 	uint32_t addr_start;
