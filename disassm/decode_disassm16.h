@@ -8,9 +8,11 @@ THIS WORK COMES WITHOUT ANY WARRANTY and is released under the AGPL version 3 or
 
 #ifndef __DECODE_DISASSM16_H__
 #define __DECODE_DISASSM16_H__
+#include <stdint.h>
+#include <stdbool.h>
 
 #include "instruction.h"
 
-uint8_t decode_16(const uint16_t instr, instr_t * const instr_struct, const uint32_t PC);
+uint8_t decode_16(const uint16_t instr, instr_t * const instr_struct, const uint32_t PC, const bool decode_only);
 
 #endif

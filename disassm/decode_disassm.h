@@ -8,9 +8,12 @@ THIS WORK COMES WITHOUT ANY WARRANTY and is released under the AGPL version 3 or
 
 #ifndef __DECODE_DISASSM_H__
 #define __DECODE_DISASSM_H__
+#include <stdint.h>
+#include <stdbool.h>
 
 #include "instruction.h"
 
-uint8_t decode_instr(instr_t * const instr_struct, const uint32_t PC);
+//if decode_only==true then the mnemonic will not be printed but only decoded, this saves a lot of time in the simulator because sprintf() is a slow function and the mnemonics are not needed for the actual simulation
+uint8_t decode_instr(instr_t * const instr_struct, const uint32_t PC, const bool decode_only);
 
 #endif

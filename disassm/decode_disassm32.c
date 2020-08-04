@@ -10,6 +10,7 @@ THIS WORK COMES WITHOUT ANY WARRANTY and is released under the AGPL version 3 or
 #include <stdio.h>
 #include <stdint.h>
 #include <string.h>
+#include <stdbool.h>
 
 #include "opc32.h"
 #include "instruction.h"
@@ -467,7 +468,7 @@ void disassm32(instr_t * const instr_struct, const uint32_t PC)
 	}
 }
 
-uint8_t decode_32(const uint32_t instr, instr_t * const instr_struct, const uint32_t PC)
+uint8_t decode_32(const uint32_t instr, instr_t * const instr_struct, const uint32_t PC, const bool decode_only)
 {
 	strcpy(instr_struct->disassm, "unknown");
 	
@@ -495,30 +496,32 @@ uint8_t decode_32(const uint32_t instr, instr_t * const instr_struct, const uint
 	
 	fill_args_instr_type32(instr, opc, type, instr_struct);
 	
-	if(opc32_list[i].has_sub)
+	if(!decode_only)
 	{
-		found=0;
-		for(i=0; opc32_sub_list[i].mnemonic!=NULL; i++)
+		if(opc32_list[i].has_sub)
 		{
-			if(opc32_sub_list[i].opc==opc && opc32_sub_list[i].sub==instr_struct->sub)
+			found=0;
+			for(i=0; opc32_sub_list[i].mnemonic!=NULL; i++)
 			{
-				found=1;
-				break;
+				if(opc32_sub_list[i].opc==opc && opc32_sub_list[i].sub==instr_struct->sub)
+				{
+					found=1;
+					break;
+				}
 			}
-		}
-		if(!found)
-		{
+			if(!found)
+			{
 #ifdef DISASSM_WARN_UNKNOWN
-			printf("decode_32: unknown sub 0x%02x for opc 0x%02x @0x%x\n", instr_struct->sub, instr_struct->opc, PC);
+				printf("decode_32: unknown sub 0x%02x for opc 0x%02x @0x%x\n", instr_struct->sub, instr_struct->opc, PC);
 #endif
-			return 1;
-		}
-			
-		instr_struct->mnemonic=opc32_sub_list[i].mnemonic;
+				return 1;
+			}
+				
+			instr_struct->mnemonic=opc32_sub_list[i].mnemonic;
+		}		
+		
+		disassm32(instr_struct, PC);
 	}
-	
-	disassm32(instr_struct, PC);
-	
 	return 0;
 }
 

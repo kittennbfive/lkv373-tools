@@ -12,6 +12,7 @@ This file is just a quick example of how to use all this code. Some stuff has be
 #include <stdio.h>
 #include <stdint.h>
 #include <string.h>
+#include <stdbool.h>
 
 #include "instruction.h"
 #include "decode_disassm.h"
@@ -29,7 +30,7 @@ uint32_t decode_disassm_memory_get_word(const uint32_t addr)
 #endif
 }
 
-#define SIZE 500*1024*1024
+#define SIZE 4*1024*1024
 
 int main(int argc, char **argv)
 {
@@ -66,7 +67,7 @@ int main(int argc, char **argv)
 	
 	while(PC<size)
 	{
-		if(decode_instr(&instr, PC))
+		if(decode_instr(&instr, PC, false))
 		{
 			printf("error!\n");
 			break;
@@ -74,7 +75,7 @@ int main(int argc, char **argv)
 		
 		printf("%x: %s\n", PC, instr.disassm);
 		
-		if(instr.width==WIDTH16)
+		if(instr.width==WIDTH16) //if you compile with -DDISASSM_TRANSLATE_TO_32 you need to check instr.was_16bit_instr !!
 			PC+=2;
 		else
 			PC+=4;

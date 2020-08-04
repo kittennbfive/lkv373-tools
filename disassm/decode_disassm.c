@@ -10,6 +10,7 @@ THIS WORK COMES WITHOUT ANY WARRANTY and is released under the AGPL version 3 or
 #include <stdio.h>
 #include <stdint.h>
 #include <string.h>
+#include <stdbool.h>
 
 #include "decode_disassm.h"
 #include "decode_disassm32.h"
@@ -18,7 +19,7 @@ THIS WORK COMES WITHOUT ANY WARRANTY and is released under the AGPL version 3 or
 
 uint32_t decode_disassm_memory_get_word(const uint32_t addr);
 
-uint8_t decode_instr(instr_t * const instr_struct, const uint32_t PC)
+uint8_t decode_instr(instr_t * const instr_struct, const uint32_t PC, const bool decode_only)
 {
 	uint16_t instr;
 	memset(instr_struct, 0xff, sizeof(instr_t));
@@ -35,14 +36,14 @@ uint8_t decode_instr(instr_t * const instr_struct, const uint32_t PC)
 		uint32_t instr32=decode_disassm_memory_get_word(PC);
 		PRINTF_DEBUG("instr is now 0x%08x\n", instr32);
 		instr_struct->width=WIDTH32;
-		if(decode_32(instr32, instr_struct, PC))
+		if(decode_32(instr32, instr_struct, PC, decode_only))
 			return 1;
 	}
 	else
 	{
 		PRINTF_DEBUG("16 bit instr\n");
 		instr_struct->width=WIDTH16;
-		if(decode_16(instr, instr_struct, PC))
+		if(decode_16(instr, instr_struct, PC, decode_only))
 			return 1;
 	}
 	

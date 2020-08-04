@@ -10,6 +10,7 @@ THIS WORK COMES WITHOUT ANY WARRANTY and is released under the AGPL version 3 or
 #include <stdio.h>
 #include <stdint.h>
 #include <string.h>
+#include <stdbool.h>
 
 #include "opc16.h"
 #include "instruction.h"
@@ -98,7 +99,7 @@ static void fill_args_instr_type16(const uint32_t instr, const uint16_t opc, con
 	}
 }
 
-static void disassm16(instr_t * const instr_struct, const uint32_t PC __attribute__((__unused__)))
+void disassm16(instr_t * const instr_struct, const uint32_t PC __attribute__((__unused__)))
 {
 	switch(instr_struct->type16)
 	{
@@ -676,7 +677,7 @@ __attribute__((__unused__)) uint8_t translate_to_32(instr_t * const instr_struct
 	return 0;
 }
 
-uint8_t decode_16(const uint16_t instr, instr_t * const instr_struct, const uint32_t PC)
+uint8_t decode_16(const uint16_t instr, instr_t * const instr_struct, const uint32_t PC, const bool decode_only)
 {
 	strcpy(instr_struct->disassm, "unknown");
 	
@@ -718,29 +719,32 @@ uint8_t decode_16(const uint16_t instr, instr_t * const instr_struct, const uint
 	
 	fill_args_instr_type16(instr, opc, type, instr_struct);
 	
-	if(opc16_list[i].has_sub)
+	if(!decode_only)
 	{
-		found=0;
-		for(i=0; opc16_sub_list[i].mnemonic!=NULL; i++)
+		if(opc16_list[i].has_sub)
 		{
-			if(opc16_sub_list[i].opc==opc && opc16_sub_list[i].sub==instr_struct->sub)
+			found=0;
+			for(i=0; opc16_sub_list[i].mnemonic!=NULL; i++)
 			{
-				found=1;
-				break;
+				if(opc16_sub_list[i].opc==opc && opc16_sub_list[i].sub==instr_struct->sub)
+				{
+					found=1;
+					break;
+				}
 			}
-		}
-		if(!found)
-		{
+			if(!found)
+			{
 #ifdef DISASSM_WARN_UNKNOWN
-			printf("decode_16: unknown sub 0x%02x for opc 0x%x @0x%x\n", instr_struct->sub, instr_struct->opc, PC);
+				printf("decode_16: unknown sub 0x%02x for opc 0x%x @0x%x\n", instr_struct->sub, instr_struct->opc, PC);
 #endif
-			return 1;
+				return 1;
+			}
+			
+			instr_struct->mnemonic=opc16_sub_list[i].mnemonic;
 		}
 		
-		instr_struct->mnemonic=opc16_sub_list[i].mnemonic;
+		disassm16(instr_struct, PC);
 	}
-	
-	disassm16(instr_struct, PC);
 	
 	//turn this on or off depending on what you want to do
 #ifdef DISASSM_TRANSLATE_TO_32
