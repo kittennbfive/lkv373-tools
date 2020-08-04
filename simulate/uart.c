@@ -134,6 +134,8 @@ void uart_write(PERIPH_CB_WRITE_ARGUMENTS)
 				win_printf(w_uart, "%c", (uint8_t)val);
 				if(output)
 					fprintf(output, "%c", (uint8_t)val);
+				
+				//fprintf(stderr, "%c", (uint8_t)val);
 			}
 				
 			break;

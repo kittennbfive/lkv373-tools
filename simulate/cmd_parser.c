@@ -31,6 +31,7 @@ THIS PROGRAM COMES WITHOUT ANY WARRANTY!
 #include "mac.h"
 #include "os_func.h"
 #include "uart.h"
+#include "i2c.h"
 
 char cmd[SZ_BUFFER_COMMAND];
 char args[NB_ARGUMENTS_MAX][SZ_BUFFER_ARGUMENTS];
@@ -61,6 +62,7 @@ const command_t commands[]=
 	{"os", 1, 1, &show_os_info},
 	{"u2f", 1, 1, &uart_to_file},
 	{"rx", 1, 1, &rx},
+	{"hdmi", 1, 1, &hdmi},
 	
 	{NULL, 0, 0, NULL}
 };

@@ -21,7 +21,7 @@ THIS PROGRAM COMES WITHOUT ANY WARRANTY!
 
 #include "errorcodes.c"
 
-void os_init(const pos_t pos)
+static void os_init(const pos_t pos)
 {
 	if(pos==START)
 		MSG(MSG_OS_CALLS, "OSInit() called\n");
@@ -29,7 +29,7 @@ void os_init(const pos_t pos)
 		MSG(MSG_OS_CALLS, "OSInit() finished\n");
 }
 
-void os_start(const pos_t pos)
+static void os_start(const pos_t pos)
 {
 	if(pos==START)
 		MSG(MSG_OS_CALLS, "OSStart() called - MULTITASKING WILL START\n");
@@ -37,13 +37,13 @@ void os_start(const pos_t pos)
 		MSG(MSG_OS_CALLS, "OSStart() finished\n");
 }
 
-void task_create(const pos_t pos) //not called so why bother?
+static void task_create(const pos_t pos) //not called so why bother?
 {
 	(void)pos;
 	MSG(MSG_OS_CALLS, "os_info.c: OSTaskCreate() unimpl\n");
 }
 
-void task_create_ext(const pos_t pos)
+static void task_create_ext(const pos_t pos)
 {
 	if(pos==START)
 	{
@@ -60,7 +60,7 @@ void task_create_ext(const pos_t pos)
 	}
 }
 
-void sem_create(const pos_t pos)
+static void sem_create(const pos_t pos)
 {
 	if(pos==START)
 	{
@@ -79,7 +79,7 @@ void sem_create(const pos_t pos)
 	}
 }
 
-void sem_accept(const pos_t pos)
+static void sem_accept(const pos_t pos)
 {
 	if(pos==START)
 	{
@@ -120,7 +120,7 @@ static uint32_t pop(void)
 		ERRX(1, "trying to read from empty stack");
 }
 
-void sem_pend(const pos_t pos)
+static void sem_pend(const pos_t pos)
 {
 	if(pos==START)
 	{
@@ -138,7 +138,7 @@ void sem_pend(const pos_t pos)
 	}
 }
 
-void sem_post(const pos_t pos)
+static void sem_post(const pos_t pos)
 {
 	if(pos==START)
 	{
@@ -152,7 +152,7 @@ void sem_post(const pos_t pos)
 	}
 }
 
-void task_suspend(const pos_t pos)
+static void task_suspend(const pos_t pos)
 {
 	if(pos==START)
 	{
@@ -166,7 +166,7 @@ void task_suspend(const pos_t pos)
 	}
 }
 
-void task_switch(const pos_t pos)
+static void task_switch(const pos_t pos)
 {
 	if(pos==START)
 	{
@@ -178,7 +178,7 @@ void task_switch(const pos_t pos)
 	}
 }
 
-void time_get(const pos_t pos)
+static void time_get(const pos_t pos)
 {
 	if(pos==START)
 	{
@@ -191,7 +191,7 @@ void time_get(const pos_t pos)
 	}
 }
 
-void q_create(const pos_t pos)
+static void q_create(const pos_t pos)
 {
 	if(pos==START)
 	{
@@ -213,19 +213,19 @@ void q_create(const pos_t pos)
 
 
 //TODO, seem unused??
-void time_set(const pos_t pos)
+static void time_set(const pos_t pos)
 { (void)pos; MSG(MSG_OS_CALLS, "------------->time_set\n"); }
 
-void ev_pend_multi(const pos_t pos)
+static void ev_pend_multi(const pos_t pos)
 { (void)pos; MSG(MSG_OS_CALLS, "------------->ev_pend_multi\n"); }
 
-void flag_accept(const pos_t pos)
+static void flag_accept(const pos_t pos)
 { (void)pos; MSG(MSG_OS_CALLS, "------------->flag_accept\n"); }
 
-void flag_create(const pos_t pos)
+static void flag_create(const pos_t pos)
 { (void)pos; MSG(MSG_OS_CALLS, "------------->flag_create\n"); }
 
-void flag_block(const pos_t pos)
+static void flag_block(const pos_t pos)
 { (void)pos; MSG(MSG_OS_CALLS, "------------->flag_block\n"); }
 
 
@@ -253,7 +253,7 @@ typedef struct
 	void (*callback)(const pos_t pos);
 } OS_func_t;
 
-const OS_func_t list[]=
+static const OS_func_t list[]=
 {
 	{ 0x53e4, 0x57e8, "OSInit()", &os_init },
 	{ 0x1120, 0x1176, "OSStart()", &os_start },

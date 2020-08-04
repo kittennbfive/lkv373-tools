@@ -45,6 +45,8 @@ void init_connector(void)
 	MSG(MSG_ALWAYS, "init_connector: ok, port is %s\n", SERIALPORT);
 }
 
+uint32_t saved=0;
+
 void con_setval(const uint8_t sz, const uint32_t addr, const uint32_t val)
 {
 	char buf[10];
@@ -58,6 +60,9 @@ void con_setval(const uint8_t sz, const uint32_t addr, const uint32_t val)
 		return;
 	}
 	
+	if(addr==0x9090c208)
+		saved=val;
+		
 	buf[0]='=';
 	buf[1]=sz;
 	memcpy(&buf[2], &addr, sizeof(uint32_t));
@@ -84,15 +89,13 @@ void con_setval(const uint8_t sz, const uint32_t addr, const uint32_t val)
 	usleep(WAIT_MS*1000);
 }
 
-bool skip_status_reg_read=false;
-
 uint32_t con_getval(const uint8_t sz, const uint32_t addr)
 {
 	char buf[10];
 	char buf2[10];
 	
-	//if(addr==0x9090700c && skip_status_reg_read)
-	//	return 0x10;
+	if(addr==0x9090c20c)
+		return saved;
 	
 	buf[0]='?';
 	buf[1]=sz;

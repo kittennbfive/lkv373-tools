@@ -26,6 +26,8 @@ THIS PROGRAM COMES WITHOUT ANY WARRANTY!
 #include "sspc.h"
 #include "mac.h"
 #include "gpio.h"
+#include "periph_unknown.h"
+#include "i2c.h"
 
 #include "connector_serial.h"
 
@@ -37,17 +39,19 @@ static peripheral_t per[]=
 	{"TMR1", 0x98400000, 0x98400038, &timer_write, &timer_read}, //timer1
 	{"INTC", 0x98800000, 0x98810000, &intc_write, &intc_read}, //interrupt controller
 	{"UART", 0x99600000, 0x9960001c, &uart_write, &uart_read},
-	{"SSPC", 0x98b00000, 0x98c00000, &sspc_write, &sspc_read}, //synchronous serial port controller - SPI connected to FLASH - wider range to catch unknown registers
+	{"SSPC", 0x98b00000, 0x98b00020, &sspc_write, &sspc_read}, //synchronous serial port controller - SPI connected to FLASH
 	{"GPIO", 0x99300000, 0x99300044, &gpio_write, &gpio_read}, //LED and reset button
-	
-	{"MAC", 0x90900000, 0x90907fff, &mac_write, &mac_read}, //TODO
+	{"MAC", 0x90900000, 0x90907118, &mac_write, &mac_read}, //ethernet - UPPER ADDR????
+	{"I2C", 0x99c00000, 0x99c00014, &i2c_write, &i2c_read}, //I2C interface to IT6604
 
+
+	{"UNK", 0x90907120, 0x9090ffff, &unknown_write, &unknown_read },
+	
 //???? 0x90908050-0x9090807c
 //???? 0x90909008
 //???? 0x9090a80c-0x9090a8fc
 //???? 0x9090b044-0x9090b054
 //???? 0x9090d02c
-//I2C 0x99c00000-... ???
 //IR 0x99900000-... ???
 //0x98500000 Watchdog Timer
 

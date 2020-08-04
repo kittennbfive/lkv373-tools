@@ -37,16 +37,16 @@ typedef struct
 
 #define MAX_MEM 500
 
-mem_t mem[MAX_MEM];
-uint32_t nb_vals=0;
+static mem_t mem[MAX_MEM];
+static uint32_t nb_vals=0;
 
 #define SZ_TX_RX_BUFFER 1024
-uint8_t tx_buffer[SZ_TX_RX_BUFFER];
-uint8_t rx_buffer[SZ_TX_RX_BUFFER];
-uint16_t sz_data_tx_buffer=0;
-uint16_t sz_data_rx_buffer=0;
+static uint8_t tx_buffer[SZ_TX_RX_BUFFER];
+static uint8_t rx_buffer[SZ_TX_RX_BUFFER];
+static uint16_t sz_data_tx_buffer=0;
+static uint16_t sz_data_rx_buffer=0;
 
-int32_t search(const uint32_t addr)
+static int32_t search(const uint32_t addr)
 {
 	uint32_t i;
 	for(i=0; i<nb_vals; i++)
@@ -58,7 +58,7 @@ int32_t search(const uint32_t addr)
 	return -1;
 }
 
-void save(const uint32_t addr, const uint32_t val)
+static void save(const uint32_t addr, const uint32_t val)
 {
 	if(addr==ADDR_SZ_TX_DATA)
 	{
@@ -82,7 +82,7 @@ void save(const uint32_t addr, const uint32_t val)
 	mem[pos].val=val;
 }
 
-bool load(const uint32_t addr, uint32_t * const val)
+static bool load(const uint32_t addr, uint32_t * const val)
 {
 	if(addr==ADDR_SZ_TX_DATA)
 	{
@@ -221,7 +221,6 @@ void rx(PROTOTYPE_ARGS_HANDLER)
 		return;
 	}
 	
-	
 	if(fread(&sz_data_rx_buffer, 2, 1, f)!=1)
 	{
 		printf("error reading size\n");
@@ -255,7 +254,7 @@ void check_for_mac_rx(void)
 	{
 		//these are in network order!
 		uint16_t flags, proto;
-		if(read(fifo_rx, &flags, sizeof(uint16_t))<0)
+		if(read(fifo_rx, &flags, sizeof(uint16_t))<0) //what are these "flags" actually??
 			ERR(1, "read flags");
 		if(read(fifo_rx, &proto, sizeof(uint16_t))<0)
 			ERR(1, "read proto");
@@ -267,6 +266,8 @@ void check_for_mac_rx(void)
 			save(0x90907010, 0x3f40004+nb_bytes_read);
 			switch(proto)
 			{
+				//this must be improved, for the heartbeat-packets the value is 282
+				//what are the meanings of these values exactly?
 				case 0x608:	save(0x9090700c, 0x382); break; //ARP
 				case 0x8: save(0x9090700c, 0x482); break; //IPv4
 				default: ERRX(1, "unknown proto %x\n", proto);

@@ -37,6 +37,7 @@ THIS PROGRAM COMES WITHOUT ANY WARRANTY!
 #include "verbosity.h"
 #include "os_info.h"
 #include "mac.h"
+#include "hooks.h"
 
 //registers
 static uint32_t regs[32];
@@ -494,6 +495,15 @@ sim_t simulate(instr_t const * const instr, const bool ignore_breakpoints)
 					break;
 				}
 				
+				case SUB_ALU_2_MULSR64:
+				{
+					int64_t Mresult=(int64_t)regs[instr->ra]*(int64_t)regs[instr->rb];
+					uint8_t d=(instr->rt&0x1e)>>1;
+					regs[2*d+1]=Mresult>>32;
+					regs[2*d]=Mresult&0xffffffff;
+					break;
+				}
+				
 				case SUB_ALU_2_MSUBR32:
 				{
 					uint64_t Mresult=(uint64_t)regs[instr->ra]*regs[instr->rb];
@@ -876,6 +886,19 @@ sim_t simulate(instr_t const * const instr, const bool ignore_breakpoints)
 					break;
 				}
 				
+				case SUB_MEM_LH:
+				{
+					uint32_t addr;
+					addr=regs[instr->ra]+(regs[instr->rb]<<instr->imm1_2); //imm1_2 == sv
+					mem_halfword_t val=memory_get_halfword(addr, &stop);
+					if(stop && !ignore_breakpoints)
+						return SIM_STOPPED_ON_BP;
+					if(!val.is_initialized)
+						return SIM_READ_FROM_UNINITIALIZED;
+					regs[instr->rt]=val.val;
+					break;
+				}
+				
 				case SUB_MEM_LBS:
 				{
 					uint32_t addr;
@@ -935,6 +958,7 @@ sim_t simulate(instr_t const * const instr, const bool ignore_breakpoints)
 			MSG(MSG_CALL, "%x: CALL to 0x%x\n", PC_old, PC);
 		
 		os_info(PC);
+		hooks(PC);
 	}
 	else if(is_branch==BR_GOTO || is_branch==BR_RET || is_branch==BR_IRET)
 	{
@@ -984,7 +1008,7 @@ static sim_t sim_step(const bool ignore_breakpoints)
 	if(check_for_pending_irq())
 		MSG(MSG_INT, "ENTERING ISR @ 0x%x\n", PC);
 	
-	if(decode_instr(&instr, PC))
+	if(decode_instr(&instr, PC, true))
 	{
 		MSG(MSG_ALWAYS, "error in decode_instr(), stop\n");
 		return SIM_ERROR_DECODE_INSTR;

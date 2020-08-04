@@ -19,15 +19,16 @@ THIS PROGRAM COMES WITHOUT ANY WARRANTY!
 #define GPIO_DATA_OUT_REG 0x99300000 //RW
 #define GPIO_DATA_INP_REG 0x99300004 //R
 #define GPIO_PINDIR_REG 0x99300008 //RW, 1==output
-#define GPIO_DATA_SET_REG 0x99300010 //W
+#define GPIO_DATA_SET_REG 0x99300010 //W (but is read in firmware - ??)
 #define GPIO_DATA_CLR_REG 0x99300014 //W (but is read in firmware - ??)
 #define GPIO_PULL_ENABLE_REG 0x99300018 //RW
 #define GPIO_PULL_TYPE_REG 0x9930001C //RW
 #define GPIO_INT_ENABLE_REG 0x99300020 //RW
 //...
 
-#define PIN_LED 14
-#define PIN_RESET_BUTTON 16
+#define PIN_UNKNOWN_OUTPUT 13 //out //0x2000
+#define PIN_LED 14 //out //0x4000
+#define PIN_RESET_BUTTON 16 //in 0x10000
 
 static uint32_t data=(1<<PIN_RESET_BUTTON);
 static uint32_t pindir=0;
@@ -66,27 +67,34 @@ bool gpio_read(PERIPH_CB_READ_ARGUMENTS)
 {
 	(void)sz;
 	
-	MSG(MSG_PERIPH_GPIO, "GPIO: reading from %x\n", addr);
-	
 	switch(addr)
 	{
 		case GPIO_DATA_OUT_REG:
 			(*val)=data;
+			MSG(MSG_PERIPH_GPIO, "GPIO: reading from %x: 0x%x\n", addr, *val);
 			return true;
 			break;
 		
 		case GPIO_DATA_INP_REG:
 			(*val)=data;
+			MSG(MSG_PERIPH_GPIO, "GPIO: reading from %x: 0x%x\n", addr, *val);
 			return true;
 			break;
 		
 		case GPIO_PINDIR_REG:
 			(*val)=pindir;
+			MSG(MSG_PERIPH_GPIO, "GPIO: reading from %x: 0x%x\n", addr, *val);
 			return true;
 			break;
 		
 		//this is not readable according to doc
 		case GPIO_DATA_CLR_REG:
+			(*val)=0;
+			return true;
+			break;
+		
+		//this is not readable according to doc
+		case GPIO_DATA_SET_REG:
 			(*val)=0;
 			return true;
 			break;

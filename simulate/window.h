@@ -20,7 +20,7 @@ THIS PROGRAM COMES WITHOUT ANY WARRANTY!
 #define CMD_XFCE4_TERMINAL "xfce4-terminal -T \"%s\" --hide-toolbar --hide-menubar --hide-scrollbar --minimize -x" //do not change
 #define CMD_X_TERMINAL_SIMULATOR "x-terminal-emulator -T \"%s\" -e" //do not change
 
-#define CMD_TERMINAL CMD_X_TERMINAL_SIMULATOR //select here
+#define CMD_TERMINAL CMD_XFCE4_TERMINAL //select here
 
 #define EV_SCROLL_UP 252 //\033[A
 #define EV_SCROLL_DOWN 253 //\033[B

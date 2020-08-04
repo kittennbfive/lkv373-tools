@@ -39,6 +39,8 @@ THIS PROGRAM COMES WITHOUT ANY WARRANTY!
 #include "sspc.h"
 #include "mac.h"
 #include "connector_serial.h"
+#include "i2c.h"
+#include "periph_unknown.h"
 
 /*
 little-endian
@@ -46,8 +48,6 @@ little-endian
 todo: disassm-view needs work
 
 todo: mem_view for periph-mem does not work properly, only shows 1 byte of 4
-
-todo: RE MAC
 
 todo: add more peripherals
 
@@ -64,11 +64,10 @@ void stop(PROTOTYPE_ARGS_HANDLER)
 
 #define SZ_INP_BUFFER 50
 
+//#define FILENAME "test.bin"
 #define FILENAME "lkv373.bin"
-//#define FILENAME "lkv373_mod.bin"
-//#define FILENAME "output_full.bin"
-//#define FILENAME "more_verbose.bin"
-//#define FILENAME "bootloader.bin"
+//#define FILENAME "full_2mod1_2.bin"
+//#define FILENAME "full_2mod1_2_i2c.bin"
 
 int main(void)
 {	
@@ -88,64 +87,41 @@ int main(void)
 	init_cpe();
 	init_sspc(FILENAME);
 	init_mac();
+	init_i2c_it();
 		
 #ifdef CONNECT_TO_REAL
 	init_connector();
 #endif
 	
-	
 	//unknown periph(s) - values read from device with connector serial
-	memory_set_word(0xffff, 0x99c00000, NULL, true);
-	memory_set_word(0x00, 0x99c00004, NULL, true);
-	memory_set_word(0x00, 0x99c00008, NULL, true);
-	memory_set_word(0x00, 0x99c0000c, NULL, true);
-	memory_set_word(0x00, 0x99c00010, NULL, true);
-	memory_set_word(0x00, 0x99c00014, NULL, true);
-	memory_set_word(0xfe, 0x99c00018, NULL, true);
-	memory_set_word(0x07, 0x99c0001c, NULL, true);
-	memory_set_word(0x00, 0x99c00020, NULL, true);
-	memory_set_word(0x00, 0x99c00024, NULL, true);
-	memory_set_word(0x00, 0x99c00028, NULL, true);
-	memory_set_word(0x00, 0x99c0002c, NULL, true);
-	memory_set_word(0x00, 0x99c00030, NULL, true);
-	memory_set_word(0x0a, 0x99c00034, NULL, true);
-	memory_set_word(0x00, 0x99c00038, NULL, true);
-	memory_set_word(0x14, 0x99c0003c, NULL, true);
-	memory_set_word(0xffff, 0x99c00040, NULL, true);
+
+	//probably DDC-interface, don't care for the moment, not really important/interesting
 	memory_set_word(0x00, 0x99c00044, NULL, true);
 	memory_set_word(0x00, 0x99c00048, NULL, true);
 	memory_set_word(0x00, 0x99c0004c, NULL, true);
 	memory_set_word(0x00, 0x99c00050, NULL, true);
 	memory_set_word(0x00, 0x99c00054, NULL, true);
-	memory_set_word(0x60, 0x99c00058, NULL, true);
-	memory_set_word(0x00, 0x99c0005c, NULL, true);
-	memory_set_word(0x00, 0x99c00060, NULL, true);
-	memory_set_word(0x00, 0x99c00064, NULL, true);
-	memory_set_word(0x00, 0x99c00068, NULL, true);
-	memory_set_word(0x00, 0x99c0006c, NULL, true);
-	memory_set_word(0x00, 0x99c00070, NULL, true);
-	memory_set_word(0x0a, 0x99c00074, NULL, true);
-	memory_set_word(0x00, 0x99c00078, NULL, true);
-	memory_set_word(0x52, 0x99c0007c, NULL, true);
-	memory_set_word(0xee, 0x99c00080, NULL, true);
+
+	unknown_init();
+
+	/*
+	//unknown, some adresses are probably from the encoder
 	memory_set_word(0x191a, 0x9090a800, NULL, true);
 	memory_set_word(0xc2, 0x9090a80c, NULL, true);
 	memory_set_word(0, 0x9090c408, NULL, true);
 	memory_set_word(0, 0x9090c40c, NULL, true);
+	memory_set_word(0, 0x9090b050, NULL, true);
+	*/
+	
 	memory_set_word(0x92, 0x90907070, NULL, true);
 	memory_set_word(0x92, 0x90907074, NULL, true);
 	memory_set_word(0x00, 0x90907078, NULL, true);
 	memory_set_word(0, 0x9090707c, NULL, true);
 	memory_set_word(0, 0x90907204, NULL, true);
-	memory_set_word(0, 0x9090b050, NULL, true);
-	
-	//is this correct?
+
 	uint32_t a;
 	for(a=0; a<PAGE_SIZE; a+=4)
-	{
 		memory_set_word(0, a+0x10000000, NULL, true);
-		memory_set_word(0, a+0x20000000, NULL, true);
-	}
 	
 	redraw_all();
 	

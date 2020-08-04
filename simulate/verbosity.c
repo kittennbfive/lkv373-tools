@@ -49,10 +49,14 @@ static const msg_type_t msg_types[]=
 	{ MSG_PERIPH_SSPC, "PER_SSPC" },
 	{ MSG_PERIPH_MAC, "PER_MAC" },
 	{ MSG_PERIPH_GPIO, "PER_GPIO" },
+	{ MSG_PERIPH_I2C, "PER_I2C" },
+	{ MSG_PERIPH_UNKNOWN, "PER_UNK" },
 	{ MSG_CONNECTOR, "CONNECTOR" },
 	{ MSG_MEM, "MEM" },
 	{ MSG_VARIOUS, "VARIOUS" },
-	{ MSG_OS_CALLS, "OS_CALLS"},
+	{ MSG_OS_CALLS, "OS_CALLS" },
+	{ MSG_HOOKS, "HOOKS" },
+
 	
 	{ 0, NULL }
 };

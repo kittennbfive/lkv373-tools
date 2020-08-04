@@ -12,6 +12,7 @@ THIS PROGRAM COMES WITHOUT ANY WARRANTY!
 #include <stdio.h>
 #include <stdint.h>
 #include <string.h>
+#include <stdbool.h>
 
 #include "instruction.h"
 #include "decode_disassm.h"
@@ -66,7 +67,7 @@ int init_disassembly_view(void)
 	index_addr_list=0;
 	uint32_t addr=addr_start;
 	instr_t instr;
-	while(decode_instr(&instr, addr)==0)
+	while(decode_instr(&instr, addr, false)==0)
 	{
 		push_addr(addr);
 		if(instr.was_16bit_instr)
@@ -98,7 +99,7 @@ void print_disassembly(void)
 	
 	for(i=0; i<rows; i++)
 	{
-		if(decode_instr(&instr, addr))
+		if(decode_instr(&instr, addr, false))
 		{
 			win_printf(w_disassembly, COLOR(RED,"(error in decode_instr, invalid addr?)"));
 			break;
