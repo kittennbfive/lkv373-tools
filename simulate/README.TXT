@@ -8,9 +8,9 @@ THIS PROGRAM IS PROVIDED WITHOUT ANY WARRANTY!
 
 This is an attempt to implement a simulator for the LKV373 to help with reverse engineering and eventually the development of a FOSS-firmware.
 
-This simulator is currently really incomplete, a lot of the peripherals are not or only partially simulated (we don't have a lot of informations and reversing is hard and prone to errors) and only a fraction of the instruction set of the Andes N10 is implemented. However you can get to the serial console and type some commands.
+This simulator is still incomplete but usable. A lot of the peripherals are not or only partially simulated as we don't have a lot of informations and reversing is hard and prone to errors. Only a fraction of the instruction set of the Andes N10 is implemented, but enough to run the stock firmware read from the FLASH of the real 373.
 
-THIS SIMULATOR IS EXPERIMENTAL AND PROBABLY BUGGY! Feedback and help with debugging / improvements (see main.c) would be really appreciated!
+THIS SIMULATOR IS EXPERIMENTAL AND MAYBE BUGGY! Feedback and help with debugging / improvements (see main.c) would be really appreciated!
 
 THIS SIMULATOR WILL COMPILE/WORK ON LINUX ONLY! Tested on Debian 10.
 
