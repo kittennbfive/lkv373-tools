@@ -25,7 +25,7 @@ THIS PROGRAM COMES WITHOUT ANY WARRANTY!
 #include "my_err.h"
 
 #define ADDR_TX_BUFFER 0x90900004 //bytes
-#define ADDR_SZ_TX_DATA 0x90900002 //halfword
+#define TX_DSP_VAL 0x9090711c //4 bytes: 0x40000 | (length-4)
 
 #define ADDR_RX_BUFFER 0x909003f4 //bytes
 
@@ -60,9 +60,9 @@ static int32_t search(const uint32_t addr)
 
 static void save(const uint32_t addr, const uint32_t val)
 {
-	if(addr==ADDR_SZ_TX_DATA)
+	if(addr==TX_DSP_VAL)
 	{
-		sz_data_tx_buffer=val;
+		sz_data_tx_buffer=(val&0xffff)-4;
 		return;
 	}
 	else if(addr>=ADDR_TX_BUFFER && addr<ADDR_TX_BUFFER+SZ_TX_RX_BUFFER)
@@ -84,9 +84,9 @@ static void save(const uint32_t addr, const uint32_t val)
 
 static bool load(const uint32_t addr, uint32_t * const val)
 {
-	if(addr==ADDR_SZ_TX_DATA)
+	if(addr==TX_DSP_VAL)
 	{
-		(*val)=sz_data_tx_buffer;
+		(*val)=0x40000|(sz_data_tx_buffer+4);
 		return true;
 	}
 	else if(addr>=ADDR_RX_BUFFER && addr<ADDR_RX_BUFFER+SZ_TX_RX_BUFFER)
@@ -266,6 +266,7 @@ void check_for_mac_rx(void)
 			save(0x90907010, 0x3f40004+nb_bytes_read);
 			switch(proto)
 			{
+				//TODO: FIXME
 				//this must be improved, for the heartbeat-packets the value is 282
 				//what are the meanings of these values exactly?
 				case 0x608:	save(0x9090700c, 0x382); break; //ARP

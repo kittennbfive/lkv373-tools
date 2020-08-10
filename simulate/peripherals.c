@@ -41,11 +41,14 @@ static peripheral_t per[]=
 	{"UART", 0x99600000, 0x9960001c, &uart_write, &uart_read},
 	{"SSPC", 0x98b00000, 0x98b00020, &sspc_write, &sspc_read}, //synchronous serial port controller - SPI connected to FLASH
 	{"GPIO", 0x99300000, 0x99300044, &gpio_write, &gpio_read}, //LED and reset button
-	{"MAC", 0x90900000, 0x90907118, &mac_write, &mac_read}, //ethernet - UPPER ADDR????
+	{"MAC", 0x90900000, 0x909007f4, &mac_write, &mac_read}, //ethernet
+	{"MAC", 0x90907118, 0x9090711c, &mac_write, &mac_read}, //ethernet
+	{"MAC", 0x9090700c, 0x9090700c, &mac_write, &mac_read}, //ethernet
+	{"MAC", 0x90907010, 0x90907010, &mac_write, &mac_read}, //ethernet
 	{"I2C", 0x99c00000, 0x99c00014, &i2c_write, &i2c_read}, //I2C interface to IT6604
 
 
-	{"UNK", 0x90907120, 0x9090ffff, &unknown_write, &unknown_read },
+	//{"UNK", 0x90907120, 0x9090ffff, &unknown_write, &unknown_read },
 	
 //???? 0x90908050-0x9090807c
 //???? 0x90909008

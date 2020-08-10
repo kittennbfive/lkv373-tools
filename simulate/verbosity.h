@@ -42,8 +42,10 @@ THIS PROGRAM COMES WITHOUT ANY WARRANTY!
 
 void cmd_set_verbosity(PROTOTYPE_ARGS_HANDLER);
 
-void message_printf(const uint32_t msg_type, char const * const fmt, ...);
+void message_printf(const bool print_always, const uint32_t msg_type, char const * const fmt, ...);
 
-#define MSG(msg, fmt, ...) message_printf(msg, fmt, ##__VA_ARGS__)
+#define MSG(msg, fmt, ...) message_printf(false, msg, fmt, ##__VA_ARGS__)
+
+#define MSG_NO_DEDUP(msg, fmt, ...) message_printf(true, msg, fmt, ##__VA_ARGS__)
 
 #endif

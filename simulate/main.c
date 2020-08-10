@@ -64,8 +64,8 @@ void stop(PROTOTYPE_ARGS_HANDLER)
 
 #define SZ_INP_BUFFER 50
 
-//#define FILENAME "test.bin"
-#define FILENAME "lkv373.bin"
+#define FILENAME "full_fixed.bin"
+//#define FILENAME "lkv373.bin"
 //#define FILENAME "full_2mod1_2.bin"
 //#define FILENAME "full_2mod1_2_i2c.bin"
 
@@ -104,14 +104,14 @@ int main(void)
 
 	unknown_init();
 
-	/*
+	
 	//unknown, some adresses are probably from the encoder
 	memory_set_word(0x191a, 0x9090a800, NULL, true);
 	memory_set_word(0xc2, 0x9090a80c, NULL, true);
 	memory_set_word(0, 0x9090c408, NULL, true);
 	memory_set_word(0, 0x9090c40c, NULL, true);
 	memory_set_word(0, 0x9090b050, NULL, true);
-	*/
+	
 	
 	memory_set_word(0x92, 0x90907070, NULL, true);
 	memory_set_word(0x92, 0x90907074, NULL, true);

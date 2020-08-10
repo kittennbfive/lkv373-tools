@@ -170,7 +170,7 @@ void cmd_set_verbosity(PROTOTYPE_ARGS_HANDLER) //min 2 args guaranteed by cmd_pa
 		printf("unknown action %s\n", action);
 }
 
-void message_printf(const uint32_t msg_type, char const * const fmt, ...)
+void message_printf(const bool print_always, const uint32_t msg_type, char const * const fmt, ...)
 {
 	if(!show_this(msg_type))
 		return;
@@ -183,7 +183,7 @@ void message_printf(const uint32_t msg_type, char const * const fmt, ...)
 	vsprintf(buf, fmt, ap);
 	va_end(ap);
 	
-	if(!strcmp(buf, last_msg))
+	if(!strcmp(buf, last_msg) && !print_always)
 		return;
 	
 	strcpy(last_msg, buf);

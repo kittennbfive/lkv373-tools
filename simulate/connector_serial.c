@@ -52,7 +52,7 @@ void con_setval(const uint8_t sz, const uint32_t addr, const uint32_t val)
 	char buf[10];
 	char buf2[10];
 	
-	MSG(MSG_CONNECTOR, "con_setval: set 0x%x to 0x%x\n", addr, val);
+	MSG_NO_DEDUP(MSG_CONNECTOR, "con_setval: (%u) set 0x%x to 0x%x\n", sz, addr, val);
 	
 	if(addr==0x9090a80c)
 	{
@@ -120,7 +120,7 @@ uint32_t con_getval(const uint8_t sz, const uint32_t addr)
 	else
 		ERRX(1, "read returned -1");
 	
-	MSG(MSG_CONNECTOR, "con_getval: 0x%x == 0x%x\n", addr, val);
+	MSG(MSG_CONNECTOR, "con_getval: (%u) 0x%x == 0x%x\n", sz, addr, val);
 	
 	return val;
 }
