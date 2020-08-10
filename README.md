@@ -1,11 +1,14 @@
 # lkv373-tools
 some random tools made while trying to reverse the lkv373-firmware
 
-Main work: An (incomplete) simulator, see simulate/README. Based on a custom disassembler written from scratch.
+Main work: An (incomplete but quite usable) simulator, see simulate/README. Based on a custom disassembler written from scratch.
 
 To learn how to execute C-Code with newlib on the device see custom_firmware for instructions and "Hello World".
 
-NEW: codeflow/ for making graphical representations of a function.
+NEW: <br>
+-codeflow/ for making graphical representations of a function.<br>
+-a patch to fix the invalid lengths problems Wireshark is complaining about<br>
+-an experimental receiver for the video (with patched firmware)<br>
 
 -------------------------------------------------------------------------------
 other stuff:
