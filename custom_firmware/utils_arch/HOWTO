@@ -6,6 +6,8 @@ licence: AGPL v3+
 
 Filipe Laíns "FFY00" provides packages for binutils, GCC and newlib for NDS32 for Arch Linux (Thank you for your help!). However these are compiled for a more modern processor version than we have on the TF-680 so we need to recompile everything.
 
+Daniel Kucera made some Docker-stuff based on the compiled binaries i released. Check it out here: https://github.com/danielkucera/lkv373-tools/tree/dockerbuild/dockerbuild
+
 THESE INSTRUCTIONS ARE PROVIDED WITHOUT WARRANTY! YOU MAY BRICK YOUR DEVICE!
 
 Howto:
