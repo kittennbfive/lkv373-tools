@@ -9,6 +9,16 @@ VERSION OF OS-II: probably 2.86 (x100=0x11e)
 
 ------------------------------------------------------------------------
 
+GUESSED COMPILE-TIME CONSTANTS:
+
+OS_PRIO == 1 byte
+OS_EVENT_TBL_SIZE == 8
+OS_MAX_EVENTS == 60 (?)
+OS_EVENT_NAME_SIZE == 17 (?)
+
+
+------------------------------------------------------------------------
+
 KNOWN TASKS:
 
 VALUES COPIED FROM SIMULATOR - MIGHT BE WRONG
@@ -107,6 +117,7 @@ OSTmrTaskStk @cff04 size 4*128dez == 512dez
 
 VARIABLES FROM OS AND CUSTOM CODE:
 
+892b9 - flag "OtoM TFVEP is connected"
 892e4 - OSTmrFree
 892e6 - OSTmrUsed
 89334 - OSCtxSwCtr
@@ -128,7 +139,7 @@ VARIABLES FROM OS AND CUSTOM CODE:
 89374 - OSTmrFreeList
 89394 - addr of ECB sembh_AvData (index 3)
 89398 - addr of ECB sembh_WaitForConnection (index 4)
-893f8 - start of kernel (??) mem
+893f8 - start of kernel mem
 893fc - end of kernel mem
 89400 - size of kernel mem
 89404 - size in kB
