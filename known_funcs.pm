@@ -64,9 +64,7 @@ our %known_funcs_bl2=(
 	'7fc'=>'flush_some_cache()',
 	'4dc'=>'copy_ISR_code()',
 	'd34'=>'flush_some_cache_copy_ISR_code()',
-	'1814c'=>'strcmp()?',
 	'3f6a0'=>'TFEth_Init()',
-	'1a980'=>'copy_some_stuff()?',
 	'324e4'=>'uart_getchar()',
 	'81c4'=>'some hardware-writes (PMU, unknown)',
 	'8134'=>'INTC_setup()',
@@ -133,7 +131,25 @@ our %known_funcs_bl2=(
 	'19ff0'=>'putchar()',
 	'19f8c'=>'putchar_int()',
 	'598c'=>'ISR_Timer',
-	'103c'=>'OSIntExit()?'
+	'103c'=>'OSIntExit()?',
+	'16bf0'=>'capPolaritySet()',
+	'16c54'=>'print_VGA_Timing()',
+	'17054'=>'capInit()',
+	'16b88'=>'capSrcSet()',
+	'16bbc'=>'capEncModeSet()',
+	'11944'=>'send_some_Eth_Packet()',	
+	'ce3c'=>'parse_console_input_dispatch()',
+	'168c4'=>'video TX on/off (r0)',
+	'c1ec'=>'console_av_command()',
+	
+	'1a798'=>'memcmp()??',
+	'1a980'=>'memcpy()??',
+	'1aa64'=>'memset()??',
+	'1ab08'=>'strcmp()??',
+	'1ad10'=>'strlen()??',
+
+	
+	
 );
 
 1;
