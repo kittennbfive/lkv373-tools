@@ -1,5 +1,7 @@
 /*
-This is EXPERIMENTAL CODE for receiving video data from the 373 WITH PATCHED FIRMWARE.
+This is EXPERIMENTAL CODE for receiving video data from the 373 WITH PATCHED FIRMWARE and show some informations.
+
+This is not intended as a real receiver but for fuzzing around in the config of the 373 and observe any effects.
 
 (c) 2020 by kitten_nb_five
 freenode #lkv373a
@@ -8,7 +10,7 @@ licence: AGPL v3 or later
 
 THIS PROGRAM COMES WITHOUT ANY WARRANTY!
 
-Version 0.01 - early release for testing purposes - feedback welcome
+Version 0.02
 
 You need to run this code as root.
 */
@@ -24,11 +26,86 @@ You need to run this code as root.
 #include <signal.h>
 #include <sys/ioctl.h>
 #include <net/if.h>
-       
+
 #include "my_err.h"
+
+#define SKIP_DAMAGED
 
 #define SZ_BUF 1024*1024
 
+#define SZ_FRAME_MAX 1024*1024
+
+
+void parse_dqt(unsigned char const * const data, const unsigned int sz)
+{
+	unsigned int i, j;
+	for(i=0; i<sz-64;)
+	{
+		fprintf(stderr, "DQT: dst %u:\n", data[i]&0x0f);
+		i++;
+		for(j=0; j<64; j++)
+			fprintf(stderr, "%3u, ", data[i+j]);
+		fprintf(stderr, "\n");
+		i+=64;	
+	}
+}
+
+void parse_sof0(unsigned char const * const data, const unsigned int sz)
+{
+	(void)sz;
+	
+	unsigned short sz_y=data[1]*256+data[2];
+	unsigned short sz_x=data[3]*256+data[4];
+	
+	unsigned char nb_images_comp=data[5];
+	
+	fprintf(stderr, "picture is %u x %u - %u components\n", sz_x, sz_y, nb_images_comp);
+}
+
+void parse(unsigned char const * const data, const unsigned int fsz)
+{
+		
+	unsigned int i;
+	bool stop=false;
+	
+	for(i=2;i<fsz-4;)
+	{
+		unsigned short segment=data[i]<<8|data[i+1];
+		unsigned int sz=data[i+2]*256+data[i+3];
+		
+		if(sz==0)
+			ERRX(1, "sz==0");
+		
+		//fprintf(stderr, "0x%x: 0x%x sz %u\n", i, segment, sz);
+		
+		switch(segment)
+		{
+			case 0xffe0: //APP0 - JFIF tag
+				break;
+			case 0xffdb: //DQT - definition of quantification tables
+				parse_dqt(&data[i+4], sz);
+				break;
+			case 0xffc0: //SOF0 - baseline DCT - non differential, Huffman coding
+				parse_sof0(&data[i+4], sz);
+				break;
+			case 0xffc4: //DHT - definition of Huffman tables
+				break;
+			case 0xffda: //SOS - start of scan
+				stop=true;
+				break;
+			
+			default:
+				fprintf(stderr, "unknown segment 0x%x", segment);
+				//ERRX(1, "unknown segment 0x%x", segment);
+				break;
+		}
+		
+		if(stop)
+			break;
+		
+		i+=sz+2;
+	}
+}
 volatile int run=1;
 
 void sigint(int sig)
@@ -86,6 +163,10 @@ int main(int argc, char *argv[])
 	unsigned short frame_previous=0;
 	unsigned short block_previous=0;
 	
+	unsigned char framedata[SZ_FRAME_MAX];
+	unsigned int sz_frame=0;
+	
+	
 	signal(SIGINT, &sigint);
 	
 	while(run)
@@ -118,6 +199,7 @@ int main(int argc, char *argv[])
 			start_of_frame=true;
 			end_of_frame=false;
 			write_output=true;
+			sz_frame=0;
 		}
 		else
 		{
@@ -135,15 +217,27 @@ int main(int argc, char *argv[])
 			fprintf(stderr, "discontinuity: last frame was %u, next is %u\n", frame_previous, frame);
 		
 		if(!start_of_frame && !end_of_frame && block!=block_previous+1)
+		{
 			fprintf(stderr, "discontinuity: frame %u last block was %u, next is %u\n", frame, block_previous, block);
+#ifdef SKIP_DAMAGED
+			write_output=false;
+#endif
+		}
 		
 		frame_previous=frame;
 		block_previous=block;
 		
 		marker_sof_received=false;
 		
-		if(write_output)
-			fwrite(buf+28+4, 1020, 1, stdout);
+		memcpy(&framedata[sz_frame], buf+28+4, 1020);
+		sz_frame+=1020;
+		
+		if(end_of_frame && write_output)
+		{
+			parse(framedata, sz_frame);
+
+			fwrite(framedata, sz_frame, 1, stdout);
+		}
 	}
 	
 	close(sock);
