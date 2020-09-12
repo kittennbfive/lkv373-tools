@@ -1,21 +1,22 @@
 # lkv373-tools
+
+**A BEGINNING OF AN OPEN SOURCE FIRMWARE HERE: https://github.com/kittennbfive/free-373**
+
 some random tools made while trying to reverse the lkv373-firmware
 
 Main work: An (incomplete but quite usable) simulator, see simulate/README. Based on a custom disassembler written from scratch.
 
-To learn how to execute C-Code with newlib on the device see custom_firmware for instructions and "Hello World".
+custom_firmware/ for instructions and "Hello World" using newlib
 
-NEW: <br>
--codeflow/ for making graphical representations of a function.<br>
--a patch to fix the invalid lengths problems Wireshark is complaining about<br>
--an experimental receiver for the video (with patched firmware)<br>
+codeflow/ for making graphical representations of a function
 
--------------------------------------------------------------------------------
-other stuff:
+a patch to fix the invalid lengths problems Wireshark is complaining about
 
-binfind is usefull for searching a binary file inside another one. It supports partial matches (with a configurable amount of different bytes).
+an experimental receiver for the video (with patched firmware)
 
-bindiff is a really simple diff tool that outputs hexdumps like xxd and makes the differences visible in red. It does not have any fancy algorithms, just byte-to-byte comparison.
+binfind/ for searching a binary file inside another one. It supports partial matches (with a configurable amount of different bytes).
+
+bindiff/ is a really simple diff tool that outputs hexdumps like xxd and makes the differences visible in red. It does not have any fancy algorithms, just byte-to-byte comparison.
 
 For more info just look at the code or execute without arguments.
 compile with `gcc -std=c99 file.c`.
