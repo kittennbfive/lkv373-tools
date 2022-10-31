@@ -1,6 +1,5 @@
 //(c) 2019 by kitten_nb_five
-//freenode #lkv373a
-//licence: APGL v3 or later
+//licence: AGPL v3 or later
 
 #include <stdlib.h>
 #include <stdio.h>
