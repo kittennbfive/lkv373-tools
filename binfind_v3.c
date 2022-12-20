@@ -1,6 +1,5 @@
-//(c) 2019 by kitten_nb_five
-//freenode #lkv373a
-//licence: APGL v3 or later
+//(c) 2019 by kittennbfive
+//licence: AGPL v3 or later
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -10,7 +9,7 @@
 
 void print_usage(void)
 {
-	printf("bindiff [-p n] [-m n] [-r] file1 file2 for searching file2 inside file1\n-p n for showing partial matches from n bytes\n-m n to allow up to n different bytes\nwarning: for some arguments output can be huge!");
+	printf("binfind [-p n] [-m n] [-r] file1 file2 for searching file2 inside file1\n-p n for showing partial matches from n bytes\n-m n to allow up to n different bytes\nwarning: for some arguments output can be huge!");
 }
 
 void error(char const * const msg)
@@ -21,7 +20,7 @@ void error(char const * const msg)
 
 int main(int argc, char **argv)
 {
-	printf("This is binfind version %u (c) 2019 by kitten_nb_five.\n", VERSION);
+	printf("This is binfind version %u (c) 2019 by kittennbfive.\n", VERSION);
 	printf("This programm comes without any warranty.\n");
 	if(argc<3)
 	{
